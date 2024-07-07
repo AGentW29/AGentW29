@@ -3,261 +3,277 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interdimensional Cable TV</title>
+  <title>Desktop with Interdimensional Cable</title>
   <style>
-    body {
-      font-family: 'Courier New', monospace;
-      color: #0F0;
+    body, html {
       margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
       overflow: hidden;
-      background-image: url('https://static1.srcdn.com/wordpress/wp-content/uploads/2020/07/Rick-and-Morty-Interdimensional-Cable.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      height: 100vh;
+      background-color: #001f3f; /* Dark blue background */
+      font-family: Arial, sans-serif;
     }
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    .desktop {
+      height: 100%;
+      width: 100%;
       position: relative;
     }
-    .tv-screen {
-      position: absolute;
-      top: 41%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 45%; /* Adjusted width */
-      height: 50%;
-      overflow: hidden;
-      border-radius: 10px;
-    }
-    .static {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 0/2500px 2500px,
-        repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 50%/2500px 2500px;
-      background-blend-mode: difference;
-      opacity: 0.05;
-      pointer-events: none;
-    }
-    .video-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-    iframe {
-      position: absolute;
-      top: -10%; /* Adjust to hide the title */
-      left: -5%; /* Adjust to center the video */
-      width: 110%; /* Adjust to zoom in */
-      height: 120%; /* Adjust to zoom in */
-      border: none;
-    }
-    .controls {
-      display: flex;
-      justify-content: space-around;
-      padding: 20px;
-      background-color: rgba(17, 17, 17, 0.8);
+    .taskbar {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 1000;
     }
-    button {
-      background-color: #0F0;
-      color: #000;
+    .start-button {
+      background-color: rgba(255, 255, 255, 0.1);
       border: none;
-      padding: 10px 20px;
-      font-size: 1.2em;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 3px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: #0F0;
-      box-shadow: 0 0 10px #0F0;
+    .start-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
     }
-    .channel-display {
-      font-size: 2em;
+    .clock {
+      margin-left: auto;
+      color: white;
+      font-size: 14px;
+    }
+    .app-icon {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: move;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    .app-icon:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .app-icon img {
+      width: 48px;
+      height: 48px;
+      pointer-events: none;
+    }
+    .app-icon span {
+      color: white;
+      font-size: 12px;
       text-align: center;
-      padding: 10px;
-      background-color: rgba(17, 17, 17, 0.8);
+      margin-top: 5px;
+      max-width: 80px;
+      word-wrap: break-word;
+      pointer-events: none;
+    }
+    .window {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-    }
-    @keyframes glitch1 {
-      0% {
-        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
-      }
-      15% {
-        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
-      }
-      16% {
-        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
-      }
-      49% {
-        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
-      }
-      50% {
-        text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff, 0 -0.04em 0 #fffc00;
-      }
-      99% {
-        text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff, 0 -0.04em 0 #fffc00;
-      }
-      100% {
-        text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff, -0.04em -0.025em 0 #fffc00;
-      }
-    }
-    @keyframes glitch2 {
-      0% {
-        text-shadow: 0.05em 0.02em 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
-      }
-      15% {
-        text-shadow: 0.05em 0.02em 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
-      }
-      16% {
-        text-shadow: -0.05em -0.025em 0 #00fffc, 0.035em 0.05em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
-      }
-      49% {
-        text-shadow: -0.05em -0.025em 0 #00fffc, 0.035em 0.05em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
-      }
-      50% {
-        text-shadow: 0.05em 0.045em 0 #00fffc, 0.03em 0.05em 0 #fc00ff, 0 -0.04em 0 #fffc00;
-      }
-      99% {
-        text-shadow: 0.05em 0.045em 0 #00fffc, 0.03em 0.05em 0 #fc00ff, 0 -0.04em 0 #fffc00;
-      }
-      100% {
-        text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff, -0.04em -0.025em 0 #fffc00;
-      }
-    }
-    .glitch {
-      animation: glitch1 1s linear infinite, glitch2 1.5s linear infinite;
-    }
-    .loader {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      min-width: 300px;
+      min-height: 200px;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       display: none;
+      flex-direction: column;
+      resize: both;
+      overflow: auto;
+    }
+    .window-header {
+      background-color: #333;
+      color: white;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      cursor: move;
+    }
+    .close-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .window-content {
+      flex-grow: 1;
       overflow: hidden;
     }
-    .loader::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
+    .window-content iframe {
       width: 100%;
       height: 100%;
-      background-image: 
-        linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0) 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          rgba(255, 255, 255, 0) 100%
-        );
-      background-size: 100% 3px;
-      animation: static-animation 50ms steps(100) infinite;
+      border: none;
     }
-    @keyframes static-animation {
-      0% {
-        background-position: 0 0;
-      }
-      100% {
-        background-position: 0 100%;
-      }
+    .resize-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #333;
+      right: 0;
+      bottom: 0;
+      cursor: se-resize;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <div class="channel-display">
-    <span id="channel-number" class="glitch">Channel 1</span>
-  </div>
-  
-  <div class="tv-screen">
-    <div class="static"></div>
-    <div class="video-container">
-      <iframe id="video-frame" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      <div id="loader" class="loader"></div>
+  <div class="desktop">
+    <div class="app-icon" id="appIconHome">
+      <img src="https://websim.ai/favicon.ico" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="app-icon" id="appIconAbout" style="top: 120px;">
+      <img src="https://websim.ai/favicon.ico" alt="About">
+      <span>About</span>
+    </div>
+    <div class="app-icon" id="appIconContact" style="top: 220px;">
+      <img src="https://websim.ai/favicon.ico" alt="Contact">
+      <span>Contact</span>
+    </div>
+    
+    <div class="window" id="appWindow">
+      <div class="window-header" id="windowHeader">
+        <span>Interdimensional Cable</span>
+        <button class="close-button" onclick="closeApp()">&times;</button>
+      </div>
+      <div class="window-content" id="appContent">
+        <!-- The iframe will be added here when the app is opened -->
+      </div>
+      <div class="resize-handle" id="resizeHandle"></div>
+    </div>
+    
+    <div class="taskbar">
+      <button class="start-button">Start</button>
+      <div class="clock" id="clock"></div>
     </div>
   </div>
 
-  <div class="controls">
-    <button onclick="prevChannel()">Previous Channel</button>
-    <button onclick="nextChannel()">Next Channel</button>
-    <button onclick="randomChannel()">Random Channel</button>
-    <select id="channel-select" onchange="selectChannel()">
-      <option value="0">Channel 1</option>
-      <option value="1">Channel 2</option>
-    </select>
-  </div>
-</div>
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
 
-<script>
-  const channels = [
-    { src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1', label: 'Channel 1' }, // Rickroll
-    //{ src: 'https://www.youtube.com/embed/hl1U0bxTHbY?autoplay=1', label: 'Channel 2' }  // Rick and Morty Clip 2
-    { src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1', label: 'Channel 2' }
-  ];
+    updateClock();
+    setInterval(updateClock, 60000);
 
-  let currentChannelIndex = 0;
+    function openApp(url) {
+      const appWindow = document.getElementById('appWindow');
+      const appContent = document.getElementById('appContent');
+      
+      if (appWindow.style.display !== 'flex') {
+        appWindow.style.display = 'flex';
+        // Create and add the iframe only when opening the app
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        appContent.appendChild(iframe);
+      }
+    }
+    
+    function closeApp() {
+      const appWindow = document.getElementById('appWindow');
+      const appContent = document.getElementById('appContent');
+      
+      appWindow.style.display = 'none';
+      // Remove the iframe when closing the app
+      appContent.innerHTML = '';
+    }
 
-  function changeChannel(index) {
-    const videoFrame = document.getElementById('video-frame');
-    const loader = document.getElementById('loader');
-    const channelDisplay = document.getElementById('channel-number');
+    // Make the app icons clickable
+    document.getElementById('appIconHome').addEventListener('click', () => openApp('index.html'));
+    document.getElementById('appIconAbout').addEventListener('click', () => openApp('about.html'));
+    document.getElementById('appIconContact').addEventListener('click', () => openApp('contact.html'));
 
-    // Pause the current video
-    videoFrame.src = '';
+    // Make the app icons draggable
+    const appIcons = document.querySelectorAll('.app-icon');
+    appIcons.forEach(appIcon => {
+      let isDraggingIcon = false;
+      let iconOffsetX, iconOffsetY;
 
-    currentChannelIndex = index;
-    loader.style.display = 'block';
-    channelDisplay.textContent = channels[currentChannelIndex].label;
+      appIcon.addEventListener('mousedown', (e) => {
+        isDraggingIcon = true;
+        iconOffsetX = e.clientX - appIcon.offsetLeft;
+        iconOffsetY = e.clientY - appIcon.offsetTop;
+      });
 
-    // Add a delay before changing the video source to allow for glitch animation
-    setTimeout(() => {
-      videoFrame.src = channels[currentChannelIndex].src;
-      loader.style.display = 'none';
-    }, 2000); // Simulating load time and delay for glitch animation
-  }
+      document.addEventListener('mousemove', (e) => {
+        if (isDraggingIcon) {
+          appIcon.style.left = (e.clientX - iconOffsetX) + 'px';
+          appIcon.style.top = (e.clientY - iconOffsetY) + 'px';
+        }
+      });
 
-  function nextChannel() {
-    currentChannelIndex = (currentChannelIndex + 1) % channels.length;
-    changeChannel(currentChannelIndex);
-  }
+      document.addEventListener('mouseup', () => {
+        isDraggingIcon = false;
+      });
+    });
 
-  function prevChannel() {
-    currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
-    changeChannel(currentChannelIndex);
-  }
+    // Make the window draggable
+    const windowHeader = document.getElementById('windowHeader');
+    const appWindow = document.getElementById('appWindow');
+    let isDraggingWindow = false;
+    let windowOffsetX, windowOffsetY;
 
-  function randomChannel() {
-    let randomIndex;
-    do {
-      randomIndex = Math.floor(Math.random() * channels.length);
-    } while (randomIndex === currentChannelIndex);
-    changeChannel(randomIndex);
-  }
+    windowHeader.addEventListener('mousedown', (e) => {
+      isDraggingWindow = true;
+      windowOffsetX = e.clientX - appWindow.offsetLeft;
+      windowOffsetY = e.clientY - appWindow.offsetTop;
+    });
 
-  function selectChannel() {
-    const select = document.getElementById('channel-select');
-    changeChannel(parseInt(select.value));
-  }
+    document.addEventListener('mousemove', (e) => {
+      if (isDraggingWindow) {
+        appWindow.style.left = (e.clientX - windowOffsetX) + 'px';
+        appWindow.style.top = (e.clientY - windowOffsetY) + 'px';
+      }
+    });
 
-  window.onload = () => {
-    changeChannel(currentChannelIndex);
-  };
-</script>
+    document.addEventListener('mouseup', () => {
+      isDraggingWindow = false;
+    });
+
+    // Make the window resizable
+    const resizeHandle = document.getElementById('resizeHandle');
+    let isResizing = false;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isResizing) {
+        const newWidth = e.clientX - appWindow.offsetLeft;
+        const newHeight = e.clientY - appWindow.offsetTop;
+        appWindow.style.width = newWidth + 'px';
+        appWindow.style.height = newHeight + 'px';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+    });
+  </script>
 </body>
 </html>
