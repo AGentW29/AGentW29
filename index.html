@@ -1,283 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Desktop with Interdimensional Cable</title>
-  <style>
-    body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230720/pngtree-blue-and-purple-neon-star-3d-art-background-with-a-cool-image_3705286.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+<html><head><base href="https://websim.ai">
+<title>Desktop Homepage</title>
+<style>
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Times New Roman, sans-serif;
+    overflow: hidden;
 }
-    }
-    .desktop {
-      height: 100%;
-      width: 100%;
-      position: relative;
-    }
-    .taskbar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 40px;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      z-index: 1000;
-    }
-    .start-button {
-      background-color: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .start-button:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    .clock {
-      margin-left: auto;
-      color: white;
-      font-size: 14px;
-    }
-    .app-icon {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 80px;
-      height: 80px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: move;
-      transition: background-color 0.3s;
-      user-select: none;
-    }
-    .app-icon:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    .app-icon img {
-      width: 48px;
-      height: 48px;
-      pointer-events: none;
-    }
-    .app-icon span {
-      color: white;
-      font-size: 12px;
-      text-align: center;
-      margin-top: 5px;
-      max-width: 80px;
-      word-wrap: break-word;
-      pointer-events: none;
-    }
-    .window {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 80%;
-      min-width: 300px;
-      min-height: 200px;
-      background-color: white;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      display: none;
-      flex-direction: column;
-      resize: both;
-      overflow: auto;
-    }
-    .window-header {
-      background-color: #333;
-      color: white;
-      padding: 5px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-      cursor: move;
-    }
-    .close-button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .window-content {
-      flex-grow: 1;
-      overflow: hidden;
-    }
-    .window-content iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    .resize-handle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background-color: #333;
-      right: 0;
-      bottom: 0;
-      cursor: se-resize;
-    }
-  </style>
+.desktop {
+    background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230720/pngtree-blue-and-purple-neon-star-3d-art-background-with-a-cool-image_3705286.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.app-icon {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.app-icon:hover {
+    transform: scale(1.05);
+}
+.app-icon img {
+    width: 50px;
+    height: 50px;
+}
+.app-name {
+    margin-top: 5px;
+    font-size: 12px;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+}
+.taskbar {
+    background-color: rgba(0, 0, 0, 0.7);
+    height: 40px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+.start-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.clock {
+    color: white;
+    margin-left: auto;
+}
+</style>
 </head>
 <body>
-  <div class="desktop">
-    <div class="app-icon" id="appIconHome">
-      <img src="https://websim.ai/favicon.ico" alt="Home">
-      <span>Home</span>
-    </div>
-    <div class="app-icon" id="appIconAbout" style="top: 120px;">
-      <img src="https://websim.ai/favicon.ico" alt="About">
-      <span>About</span>
-    </div>
-    <div class="app-icon" id="appIconContact" style="top: 220px;">
-      <img src="https://websim.ai/favicon.ico" alt="Contact">
-      <span>Contact</span>
-    </div>
-    
-    <div class="window" id="appWindow">
-      <div class="window-header" id="windowHeader">
-        <span>Interdimensional Cable</span>
-        <button class="close-button" onclick="closeApp()">&times;</button>
-      </div>
-      <div class="window-content" id="appContent">
-        <!-- The iframe will be added here when the app is opened -->
-      </div>
-      <div class="resize-handle" id="resizeHandle"></div>
-    </div>
-    
-    <div class="taskbar">
-      <button class="start-button">Start</button>
-      <div class="clock" id="clock"></div>
-    </div>
-  </div>
+<div class="desktop">
+    <a href="https://websim.ai/quantum-explorer" class="app-icon">
+        <img src="https://websim.ai/icons/quantum-explorer.png" alt="Quantum Explorer icon">
+        <span class="app-name">Hase und Igel</span>
+    </a>
+</div>
+<div class="taskbar">
+    <button class="start-button">Start</button>
+    <div class="clock" id="clock"></div>
+</div>
 
-  <script>
-    function updateClock() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${hours}:${minutes}`;
-    }
+<script>
+function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('clock').textContent = timeString;
+}
 
-    updateClock();
-    setInterval(updateClock, 60000);
-
-    function openApp(url) {
-      const appWindow = document.getElementById('appWindow');
-      const appContent = document.getElementById('appContent');
-      
-      if (appWindow.style.display !== 'flex') {
-        appWindow.style.display = 'flex';
-        // Create and add the iframe only when opening the app
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        appContent.appendChild(iframe);
-      }
-    }
-    
-    function closeApp() {
-      const appWindow = document.getElementById('appWindow');
-      const appContent = document.getElementById('appContent');
-      
-      appWindow.style.display = 'none';
-      // Remove the iframe when closing the app
-      appContent.innerHTML = '';
-    }
-
-    // Make the app icons clickable
-    document.getElementById('appIconHome').addEventListener('click', () => openApp('index.html'));
-    document.getElementById('appIconAbout').addEventListener('click', () => openApp('about.html'));
-    document.getElementById('appIconContact').addEventListener('click', () => openApp('contact.html'));
-
-    // Make the app icons draggable
-    const appIcons = document.querySelectorAll('.app-icon');
-    appIcons.forEach(appIcon => {
-      let isDraggingIcon = false;
-      let iconOffsetX, iconOffsetY;
-
-      appIcon.addEventListener('mousedown', (e) => {
-        isDraggingIcon = true;
-        iconOffsetX = e.clientX - appIcon.offsetLeft;
-        iconOffsetY = e.clientY - appIcon.offsetTop;
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (isDraggingIcon) {
-          appIcon.style.left = (e.clientX - iconOffsetX) + 'px';
-          appIcon.style.top = (e.clientY - iconOffsetY) + 'px';
-        }
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDraggingIcon = false;
-      });
-    });
-
-    // Make the window draggable
-    const windowHeader = document.getElementById('windowHeader');
-    const appWindow = document.getElementById('appWindow');
-    let isDraggingWindow = false;
-    let windowOffsetX, windowOffsetY;
-
-    windowHeader.addEventListener('mousedown', (e) => {
-      isDraggingWindow = true;
-      windowOffsetX = e.clientX - appWindow.offsetLeft;
-      windowOffsetY = e.clientY - appWindow.offsetTop;
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (isDraggingWindow) {
-        appWindow.style.left = (e.clientX - windowOffsetX) + 'px';
-        appWindow.style.top = (e.clientY - windowOffsetY) + 'px';
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDraggingWindow = false;
-    });
-
-    // Make the window resizable
-    const resizeHandle = document.getElementById('resizeHandle');
-    let isResizing = false;
-
-    resizeHandle.addEventListener('mousedown', (e) => {
-      isResizing = true;
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (isResizing) {
-        const newWidth = e.clientX - appWindow.offsetLeft;
-        const newHeight = e.clientY - appWindow.offsetTop;
-        appWindow.style.width = newWidth + 'px';
-        appWindow.style.height = newHeight + 'px';
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      isResizing = false;
-    });
-  </script>
-</body>
-</html>
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body></html>
