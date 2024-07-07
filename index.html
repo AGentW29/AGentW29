@@ -3,17 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My GitHub Page</title>
+  <title>Interdimensional Cable TV</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Courier New', monospace;
+      color: #0F0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-image: url('https://static1.srcdn.com/wordpress/wp-content/uploads/2020/07/Rick-and-Morty-Interdimensional-Cable.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative;
+    }
+    .tv-screen {
+      position: absolute;
+      top: 41%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 45%; /* Adjusted width */
+      height: 50%;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    .static {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 0/2500px 2500px,
+        repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 50%/2500px 2500px;
+      background-blend-mode: difference;
+      opacity: 0.05;
+      pointer-events: none;
+    }
+    .video-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    iframe {
+      position: absolute;
+      top: -10%; /* Adjust to hide the title */
+      left: -5%; /* Adjust to center the video */
+      width: 110%; /* Adjust to zoom in */
+      height: 120%; /* Adjust to zoom in */
+      border: none;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      background-color: rgba(17, 17, 17, 0.8);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    button {
+      background-color: #0F0;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: #0F0;
+      box-shadow: 0 0 10px #0F0;
+    }
+    .channel-display {
+      font-size: 2em;
       text-align: center;
-      padding: 50px;
+      padding: 10px;
+      background-color: rgba(17, 17, 17, 0.8);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+    @keyframes glitch1 {
+      0% {
+        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
+      }
+      15% {
+        text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
+      }
+      16% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
+      }
+      49% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
+      }
+      50% {
+        text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff, 0 -0.04em 0 #fffc00;
+      }
+      99% {
+        text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff, 0 -0.04em 0 #fffc00;
+      }
+      100% {
+        text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff, -0.04em -0.025em 0 #fffc00;
+      }
+    }
+    @keyframes glitch2 {
+      0% {
+        text-shadow: 0.05em 0.02em 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
+      }
+      15% {
+        text-shadow: 0.05em 0.02em 0 #00fffc, -0.03em -0.04em 0 #fc00ff, 0.025em 0.04em 0 #fffc00;
+      }
+      16% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.035em 0.05em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
+      }
+      49% {
+        text-shadow: -0.05em -0.025em 0 #00fffc, 0.035em 0.05em 0 #fc00ff, -0.05em -0.05em 0 #fffc00;
+      }
+      50% {
+        text-shadow: 0.05em 0.045em 0 #00fffc, 0.03em 0.05em 0 #fc00ff, 0 -0.04em 0 #fffc00;
+      }
+      99% {
+        text-shadow: 0.05em 0.045em 0 #00fffc, 0.03em 0.05em 0 #fc00ff, 0 -0.04em 0 #fffc00;
+      }
+      100% {
+        text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff, -0.04em -0.025em 0 #fffc00;
+      }
+    }
+    .glitch {
+      animation: glitch1 1s linear infinite, glitch2 1.5s linear infinite;
+    }
+    .loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: none;
+      overflow: hidden;
+    }
+    .loader::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.3) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+      background-size: 100% 3px;
+      animation: static-animation 50ms steps(100) infinite;
+    }
+    @keyframes static-animation {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 0 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Welcome to My GitHub Page</h1>
-  <p>This is a simple website hosted on GitHub Pages.</p>
+<div class="container">
+  <div class="channel-display">
+    <span id="channel-number" class="glitch">Channel 1</span>
+  </div>
+  
+  <div class="tv-screen">
+    <div class="static"></div>
+    <div class="video-container">
+      <iframe id="video-frame" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <div id="loader" class="loader"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prevChannel()">Previous Channel</button>
+    <button onclick="nextChannel()">Next Channel</button>
+    <button onclick="randomChannel()">Random Channel</button>
+    <select id="channel-select" onchange="selectChannel()">
+      <option value="0">Channel 1</option>
+      <option value="1">Channel 2</option>
+    </select>
+  </div>
+</div>
+
+<script>
+  const channels = [
+    { src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1', label: 'Channel 1' }, // Rickroll
+    { src: 'https://www.youtube.com/embed/hl1U0bxTHbY?autoplay=1', label: 'Channel 2' }  // Rick and Morty Clip 2
+  ];
+
+  let currentChannelIndex = 0;
+
+  function changeChannel(index) {
+    const videoFrame = document.getElementById('video-frame');
+    const loader = document.getElementById('loader');
+    const channelDisplay = document.getElementById('channel-number');
+
+    // Pause the current video
+    videoFrame.src = '';
+
+    currentChannelIndex = index;
+    loader.style.display = 'block';
+    channelDisplay.textContent = channels[currentChannelIndex].label;
+
+    // Add a delay before changing the video source to allow for glitch animation
+    setTimeout(() => {
+      videoFrame.src = channels[currentChannelIndex].src;
+      loader.style.display = 'none';
+    }, 2000); // Simulating load time and delay for glitch animation
+  }
+
+  function nextChannel() {
+    currentChannelIndex = (currentChannelIndex + 1) % channels.length;
+    changeChannel(currentChannelIndex);
+  }
+
+  function prevChannel() {
+    currentChannelIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
+    changeChannel(currentChannelIndex);
+  }
+
+  function randomChannel() {
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * channels.length);
+    } while (randomIndex === currentChannelIndex);
+    changeChannel(randomIndex);
+  }
+
+  function selectChannel() {
+    const select = document.getElementById('channel-select');
+    changeChannel(parseInt(select.value));
+  }
+
+  window.onload = () => {
+    changeChannel(currentChannelIndex);
+  };
+</script>
 </body>
 </html>
