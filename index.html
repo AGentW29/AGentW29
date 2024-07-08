@@ -1,105 +1,14 @@
 <html>
 <head>
-<base href="https://turtleearth.com" />
-<title>Turtle Earth - Embracing Slow Living in a Fast-Paced World</title>
+<base>
+<title>Desktop Homepage</title>
 <style>
 body, html {
     height: 100%;
     margin: 0;
     font-family: Times New Roman, sans-serif;
     overflow: hidden;
-    background-color: #f0f4f0;
-    color: #2c3e50;
-    line-height: 1.6;
-    padding: 0;
 }
-
-header {
-    background-color: #34495e;
-    color: #ecf0f1;
-    text-align: center;
-    padding: 2em 0;
-}
-
-h1 {
-    margin: 0;
-    font-size: 2.5em;
-}
-
-nav {
-    background-color: #2c3e50;
-    padding: 1em 0;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-}
-
-nav ul li {
-    margin: 0 1em;
-}
-
-nav ul li a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-main {
-    max-width: 800px;
-    margin: 2em auto;
-    padding: 0 2em;
-}
-
-.turtle-animation {
-    width: 100px;
-    height: 100px;
-    background-color: #27ae60;
-    border-radius: 50%;
-    position: relative;
-    margin: 2em auto;
-    animation: move 20s linear infinite;
-}
-
-.turtle-animation::before {
-    content: "🐢";
-    font-size: 50px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-@keyframes move {
-    0% { transform: translateX(-350px); }
-    100% { transform: translateX(350px); }
-}
-
-.cta-button {
-    display: inline-block;
-    background-color: #27ae60;
-    color: white;
-    padding: 0.5em 1em;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    margin-top: 1em;
-}
-
-footer {
-    background-color: #34495e;
-    color: #ecf0f1;
-    text-align: center;
-    padding: 1em 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-}
-
 .desktop {
     background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230720/pngtree-blue-and-purple-neon-star-3d-art-background-with-a-cool-image_3705286.jpg');
     background-size: cover;
@@ -110,7 +19,6 @@ footer {
     padding: 20px;
     box-sizing: border-box;
 }
-
 .app-icon {
     width: 80px;
     height: 80px;
@@ -123,23 +31,19 @@ footer {
     cursor: pointer;
     transition: transform 0.2s;
 }
-
 .app-icon:hover {
     transform: scale(1.05);
 }
-
 .app-icon img {
     width: 50px;
     height: 50px;
 }
-
 .app-name {
     margin-top: 5px;
     font-size: 12px;
     color: white;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
-
 .taskbar {
     background-color: rgba(0, 0, 0, 0.7);
     height: 40px;
@@ -151,7 +55,6 @@ footer {
     align-items: center;
     padding: 0 20px;
 }
-
 .start-button {
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
@@ -160,7 +63,6 @@ footer {
     border-radius: 5px;
     cursor: pointer;
 }
-
 .clock {
     color: white;
     margin-left: auto;
@@ -168,73 +70,16 @@ footer {
 </style>
 </head>
 <body>
-<header>
-    <h1>🐢 Turtle Earth 🌍</h1>
-    <p>Embracing Slow Living in a Fast-Paced World</p>
-</header>
-
-<nav>
-    <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#philosophy">Philosophy</a></li>
-        <li><a href="#practices">Practices</a></li>
-        <li><a href="#community">Community</a></li>
-    </ul>
-</nav>
-
-<main>
-    <section id="about">
-        <h2>About Turtle Earth</h2>
-        <p>Welcome to Turtle Earth, a global movement dedicated to embracing the wisdom of slowness in our fast-paced world. Just as the turtle carries its home on its back, we believe in carrying mindfulness and intention with us wherever we go.</p>
-    </section>
-
-    <div class="turtle-animation"></div>
-
-    <section id="philosophy">
-        <h2>Our Philosophy</h2>
-        <p>At Turtle Earth, we believe that by slowing down, we can actually move forward more meaningfully. Our philosophy is rooted in:</p>
-        <ul>
-            <li>Mindful living</li>
-            <li>Sustainable practices</li>
-            <li>Deep connections with nature and community</li>
-            <li>Appreciation for life's simple pleasures</li>
-        </ul>
-    </section>
-
-    <section id="practices">
-        <h2>Turtle Practices</h2>
-        <p>Incorporate these turtle-inspired practices into your daily life:</p>
-        <ol>
-            <li>Start your day with a slow, mindful morning routine</li>
-            <li>Practice "turtle walking" - slow, deliberate steps in nature</li>
-            <li>Embrace the art of deep listening in conversations</li>
-            <li>Cultivate patience through slow-growth hobbies like gardening</li>
-        </ol>
-        <a href="https://turtleearth.com/practices" class="cta-button">Explore More Practices</a>
-    </section>
-
-    <section id="community">
-        <h2>Join Our Shell-ter</h2>
-        <p>Connect with like-minded individuals around the world who are committed to living life at a turtle's pace. Share experiences, learn from others, and find support in your slow living journey.</p>
-        <a href="https://turtleearth.com/community" class="cta-button">Join Our Community</a>
-    </section>
-</main>
-
 <div class="desktop">
     <a href="#" class="app-icon">
         <img src="#" alt="App icon">
         <span class="app-name">App Name</span>
     </a>
 </div>
-
 <div class="taskbar">
     <button class="start-button">Start</button>
     <div class="clock" id="clock"></div>
 </div>
-
-<footer>
-    <p>&copy; 2023 Turtle Earth. All rights reserved. | <a href="https://turtleearth.com/privacy">Privacy Policy</a> | <a href="https://turtleearth.com/terms">Terms of Service</a></p>
-</footer>
 
 <script>
 function updateClock() {
