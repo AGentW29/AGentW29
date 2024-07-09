@@ -92,6 +92,25 @@
             font-weight: bold;
             z-index: 1000;
         }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            nav {
+                font-size: 1.5em;
+            }
+            .turtle-animation {
+                width: 80px;
+                height: 80px;
+            }
+            .turtle-animation::before {
+                font-size: 40px;
+            }
+            @keyframes move {
+                0% { transform: translateX(-150px); }
+                100% { transform: translateX(150px); }
+            }
+        }
     </style>
 </head>
 <body>
