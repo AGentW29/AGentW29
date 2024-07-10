@@ -1,5 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Turtle Earth - Members</title>
 <style>
   body {
@@ -101,9 +104,9 @@
   }
   
   /* Media query for mobile devices */
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 480px) {
     body {
-      font-size: 18px;
+      font-size: 16px;
     }
     main p {
       font-size: 1.2em;
@@ -112,15 +115,22 @@
       font-size: 1.1em;
     }
     .home-button {
-      font-size: 1.5em;
-      top: 20px;
-      left: 20px;
+      font-size: 1.2em;
+      top: 10px;
+      left: 10px;
+      padding: 0.3em 0.6em;
     }
     h1 {
-      font-size: 3em;
+      font-size: 2.5em;
     }
     nav {
-      font-size: 1.5em;
+      font-size: 1.2em;
+    }
+    .members-grid {
+      grid-template-columns: 1fr;
+    }
+    .member-card {
+      padding: 0.8em;
     }
   }
 </style>
@@ -196,7 +206,6 @@
         <div class="member-role">Slow Journalism Advocate</div>
         <div class="member-bio">April's thoughtful reporting on Turtle Earth's blog helps spread our message of intentional living to a wider audience.</div>
       </div>
-      
     </div>
   </main>
 </body>
