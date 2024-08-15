@@ -88,14 +88,16 @@
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-            // Game over if snake hits the wall or itself
-            if (
-                head.x < 0 || head.x >= tileCount ||
-                head.y < 0 || head.y >= tileCount ||
-                snake.some(segment => segment.x === head.x && segment.y === head.y)
-            ) {
-                gameOver = true;
-                return;
+            if (dx !== 0 || dy !== 0) { // Only check for game over if the snake has started moving
+                // Game over if snake hits the wall or itself
+                if (
+                    head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)
+                ) {
+                    gameOver = true;
+                    return;
+                }
             }
 
             snake.unshift(head);
@@ -197,5 +199,3 @@
     </script>
 </body>
 </html>
-
-
