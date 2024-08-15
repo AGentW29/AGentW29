@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: #000;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{x: 10, y: 10}];
+        let apple = {x: 5, y: 5};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+
+        function drawSnakePart(snakePart) {
+            ctx.fillStyle = 'lime';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
+            ctx.strokeStyle = 'darkgreen';
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
+        }
+
+        function drawSnake() {
+            snake.forEach(drawSnakePart);
+        }
+
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            // Snake wraps around the screen
+            head.x = (head.x + tileCount) % tileCount;
+            head.y = (head.y + tileCount) % tileCount;
+
+            snake.unshift(head);
+
+            if (head.x === apple.x && head.y === apple.y) {
+                score += 1;
+                generateApple();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function drawApple() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
+        }
+
+        function generateApple() {
+            apple.x = Math.floor(Math.random() * tileCount);
+            apple.y = Math.floor(Math.random() * tileCount);
+
+            // Prevent the apple from spawning on the snake
+            snake.forEach(part => {
+                if (part.x === apple.x && part.y === apple.y) {
+                    generateApple();
+                }
+            });
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            moveSnake();
+            drawSnake();
+            drawApple();
+        }
+
+        function changeDirection(event) {
+            const keyPressed = event.keyCode;
+            const LEFT = 37;
+            const UP = 38;
+            const RIGHT = 39;
+            const DOWN = 40;
+
+            if (keyPressed === LEFT && dx === 0) {
+                dx = -1;
+                dy = 0;
+            } else if (keyPressed === UP && dy === 0) {
+                dx = 0;
+                dy = -1;
+            } else if (keyPressed === RIGHT && dx === 0) {
+                dx = 1;
+                dy = 0;
+            } else if (keyPressed === DOWN && dy === 0) {
+                dx = 0;
+                dy = 1;
+            }
+        }
+
+        document.addEventListener('keydown', changeDirection);
+
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+</html>
