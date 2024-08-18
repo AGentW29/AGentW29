@@ -8,9 +8,9 @@
         body {
             margin: 0;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             background-color: #333;
             color: white;
@@ -20,14 +20,12 @@
         canvas {
             background-color: #000;
             display: block;
-            margin-bottom: 20px;
         }
         #scoreboard {
-            margin-bottom: 20px;
-        }
-        #highscores {
-            margin-bottom: 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
+            margin-bottom: 10px;
         }
         #controls {
             position: fixed;
@@ -37,7 +35,6 @@
             grid-template-columns: repeat(3, 50px);
             grid-gap: 5px;
             justify-content: center;
-            margin: 0 auto;
         }
         .control-button {
             width: 50px;
@@ -57,24 +54,25 @@
         #leftBtn { grid-column: 1 / 2; }
         #rightBtn { grid-column: 3 / 4; }
         #restartBtn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #f00;
+            position: fixed;
+            bottom: 100px;
+            background-color: red;
             color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div id="scoreboard">Score: 0</div>
-    <div id="highscores">
-        <h3>Highscores</h3>
-        <ul id="highscoreList"></ul>
+    <div id="scoreboard">
+        <div id="score">Score: 0</div>
+        <div id="highscore">Highscores</div>
     </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <button id="restartBtn">Restart</button>
 
     <!-- On-Screen Controls -->
     <div id="controls">
@@ -84,31 +82,23 @@
         <button class="control-button" id="rightBtn">→</button>
     </div>
 
-    <button id="restartBtn">Restart</button>
-
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreboard = document.getElementById('scoreboard');
-        const highscoreList = document.getElementById('highscoreList');
-        const restartBtn = document.getElementById('restartBtn');
 
         const gridSize = 20;
         const tileCount = canvas.width / gridSize;
 
-        let snake, apple, dx, dy, score, gameOver;
-        let highscores = [];
+        let snake = [{x: 10, y: 10}];
+        let apple = {x: 5, y: 5};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameOver = false;
 
-        function initializeGame() {
-            snake = [{x: 10, y: 10}];
-            apple = {x: 5, y: 5};
-            dx = 0;
-            dy = 0;
-            score = 0;
-            gameOver = false;
-            scoreboard.textContent = `Score: ${score}`;
-            drawHighscores();
-        }
+        const highscoreList = [];
+        const maxHighscores = 5;
+        const playerName = "Alexander"; // This could be dynamic if needed
 
         function drawSnakePart(snakePart) {
             ctx.fillStyle = 'lime';
@@ -125,14 +115,13 @@
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
             if (dx !== 0 || dy !== 0) { // Only check for game over if the snake has started moving
-                // Game over if snake hits the wall or itself
                 if (
                     head.x < 0 || head.x >= tileCount ||
                     head.y < 0 || head.y >= tileCount ||
                     snake.some(segment => segment.x === head.x && segment.y === head.y)
                 ) {
                     gameOver = true;
-                    handleGameOver();
+                    updateHighscores();
                     return;
                 }
             }
@@ -141,7 +130,7 @@
 
             if (head.x === apple.x && head.y === apple.y) {
                 score += 1;
-                scoreboard.textContent = `Score: ${score}`;
+                document.getElementById('score').textContent = `Score: ${score}`;
                 generateApple();
             } else {
                 snake.pop();
@@ -157,7 +146,6 @@
             apple.x = Math.floor(Math.random() * tileCount);
             apple.y = Math.floor(Math.random() * tileCount);
 
-            // Prevent the apple from spawning on the snake
             snake.forEach(part => {
                 if (part.x === apple.x && part.y === apple.y) {
                     generateApple();
@@ -165,18 +153,19 @@
             });
         }
 
-        function handleGameOver() {
-            const playerName = prompt('Game Over! Enter your name:');
-            if (playerName) {
-                highscores.push({name: playerName, score: score});
-                highscores.sort((a, b) => b.score - a.score);
-                if (highscores.length > 5) highscores.pop();
-            }
-            drawHighscores();
-        }
+        function updateHighscores() {
+            highscoreList.push({ name: playerName, score: score });
+            highscoreList.sort((a, b) => b.score - a.score);
 
-        function drawHighscores() {
-            highscoreList.innerHTML = highscores.map(({name, score}) => `<li>${name}: ${score}</li>`).join('');
+            if (highscoreList.length > maxHighscores) {
+                highscoreList.pop();
+            }
+
+            const highscoreDiv = document.getElementById('highscore');
+            highscoreDiv.innerHTML = "Highscores";
+            highscoreList.forEach(entry => {
+                highscoreDiv.innerHTML += `<br> ${entry.name} : ${entry.score}`;
+            });
         }
 
         function gameLoop() {
@@ -247,16 +236,18 @@
             }
         });
 
-        restartBtn.addEventListener('click', () => {
-            initializeGame();
-            setInterval(gameLoop, 100); // Restart the game loop
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            gameOver = false;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            gameLoop(); // Start the game loop again
         });
 
-        initializeGame();
         setInterval(gameLoop, 100);
     </script>
 </body>
 </html>
-
-
-
