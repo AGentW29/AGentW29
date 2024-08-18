@@ -47,21 +47,9 @@
         #downBtn { grid-column: 2 / 3; }
         #leftBtn { grid-column: 1 / 2; }
         #rightBtn { grid-column: 3 / 4; }
-        #scoreboard {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-    <div id="scoreboard">
-        <div>Score: <span id="score">0</span></div>
-        <div>High Score: <span id="highScore">0</span></div>
-    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
 
     <!-- On-Screen Controls -->
@@ -84,42 +72,13 @@
         let dx = 0;
         let dy = 0;
         let score = 0;
-        let highScore = localStorage.getItem('highScore') || 0;
         let gameOver = false;
 
-        document.getElementById('highScore').textContent = highScore;
-
-        // Customizable Images
-        const backgroundImageURL ='nothing';
-        const snakeImageURL = 'Turtle.PNG';
-         const foodImageURL = 'DeLorean.JPG';
-
-        const backgroundImage = new Image();
-        const snakeImage = new Image();
-        const foodImage = new Image();
-
-        backgroundImage.src = backgroundImageURL || '';
-        snakeImage.src = snakeImageURL || '';
-        foodImage.src = foodImageURL || '';
-
-        function drawBackground() {
-            if (backgroundImage.src) {
-                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
         function drawSnakePart(snakePart) {
-            if (snakeImage.src) {
-                ctx.drawImage(snakeImage, snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
-            } else {
-                ctx.fillStyle = 'lime';
-                ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
-                ctx.strokeStyle = 'darkgreen';
-                ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
-            }
+            ctx.fillStyle = 'lime';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
+            ctx.strokeStyle = 'darkgreen';
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
         }
 
         function drawSnake() {
@@ -137,11 +96,6 @@
                     snake.some(segment => segment.x === head.x && segment.y === head.y)
                 ) {
                     gameOver = true;
-                    if (score > highScore) {
-                        highScore = score;
-                        localStorage.setItem('highScore', highScore);
-                        document.getElementById('highScore').textContent = highScore;
-                    }
                     return;
                 }
             }
@@ -150,7 +104,6 @@
 
             if (head.x === apple.x && head.y === apple.y) {
                 score += 1;
-                document.getElementById('score').textContent = score;
                 generateApple();
             } else {
                 snake.pop();
@@ -158,12 +111,8 @@
         }
 
         function drawApple() {
-            if (foodImage.src) {
-                ctx.drawImage(foodImage, apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
-            } else {
-                ctx.fillStyle = 'red';
-                ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
-            }
+            ctx.fillStyle = 'red';
+            ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
         }
 
         function generateApple() {
@@ -187,7 +136,7 @@
                 return;
             }
 
-            drawBackground();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             moveSnake();
             drawSnake();
             drawApple();
@@ -250,4 +199,5 @@
     </script>
 </body>
 </html>
+
 
