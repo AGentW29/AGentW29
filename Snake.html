@@ -8,6 +8,7 @@
         body {
             margin: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -19,6 +20,14 @@
         canvas {
             background-color: #000;
             display: block;
+            margin-bottom: 20px;
+        }
+        #scoreboard {
+            margin-bottom: 20px;
+        }
+        #highscores {
+            margin-bottom: 20px;
+            text-align: center;
         }
         #controls {
             position: fixed;
@@ -47,9 +56,24 @@
         #downBtn { grid-column: 2 / 3; }
         #leftBtn { grid-column: 1 / 2; }
         #rightBtn { grid-column: 3 / 4; }
+        #restartBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #f00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div id="scoreboard">Score: 0</div>
+    <div id="highscores">
+        <h3>Highscores</h3>
+        <ul id="highscoreList"></ul>
+    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
 
     <!-- On-Screen Controls -->
@@ -60,19 +84,31 @@
         <button class="control-button" id="rightBtn">→</button>
     </div>
 
+    <button id="restartBtn">Restart</button>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const scoreboard = document.getElementById('scoreboard');
+        const highscoreList = document.getElementById('highscoreList');
+        const restartBtn = document.getElementById('restartBtn');
 
         const gridSize = 20;
         const tileCount = canvas.width / gridSize;
 
-        let snake = [{x: 10, y: 10}];
-        let apple = {x: 5, y: 5};
-        let dx = 0;
-        let dy = 0;
-        let score = 0;
-        let gameOver = false;
+        let snake, apple, dx, dy, score, gameOver;
+        let highscores = [];
+
+        function initializeGame() {
+            snake = [{x: 10, y: 10}];
+            apple = {x: 5, y: 5};
+            dx = 0;
+            dy = 0;
+            score = 0;
+            gameOver = false;
+            scoreboard.textContent = `Score: ${score}`;
+            drawHighscores();
+        }
 
         function drawSnakePart(snakePart) {
             ctx.fillStyle = 'lime';
@@ -96,6 +132,7 @@
                     snake.some(segment => segment.x === head.x && segment.y === head.y)
                 ) {
                     gameOver = true;
+                    handleGameOver();
                     return;
                 }
             }
@@ -104,6 +141,7 @@
 
             if (head.x === apple.x && head.y === apple.y) {
                 score += 1;
+                scoreboard.textContent = `Score: ${score}`;
                 generateApple();
             } else {
                 snake.pop();
@@ -125,6 +163,20 @@
                     generateApple();
                 }
             });
+        }
+
+        function handleGameOver() {
+            const playerName = prompt('Game Over! Enter your name:');
+            if (playerName) {
+                highscores.push({name: playerName, score: score});
+                highscores.sort((a, b) => b.score - a.score);
+                if (highscores.length > 5) highscores.pop();
+            }
+            drawHighscores();
+        }
+
+        function drawHighscores() {
+            highscoreList.innerHTML = highscores.map(({name, score}) => `<li>${name}: ${score}</li>`).join('');
         }
 
         function gameLoop() {
@@ -195,9 +247,16 @@
             }
         });
 
+        restartBtn.addEventListener('click', () => {
+            initializeGame();
+            setInterval(gameLoop, 100); // Restart the game loop
+        });
+
+        initializeGame();
         setInterval(gameLoop, 100);
     </script>
 </body>
 </html>
+
 
 
