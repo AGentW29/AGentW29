@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Improved Snake Game</title>
     <style>
         body {
             margin: 0;
@@ -12,42 +12,47 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            background-color: #333;
-            color: white;
-            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Arial', sans-serif;
             touch-action: none;
         }
         canvas {
-            background-color: #000;
-            display: block;
+            background-color: #34495e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
         #scoreboard {
             text-align: center;
             width: 100%;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin: 20px 0;
+            font-size: 1.2em;
         }
         #controls {
             position: fixed;
             bottom: 20px;
-            width: 150px;
+            width: 180px;
             display: grid;
-            grid-template-columns: repeat(3, 50px);
-            grid-gap: 5px;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px;
             justify-content: center;
         }
         .control-button {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.2);
+            width: 60px;
+            height: 60px;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 20px;
+            border-radius: 50%;
+            font-size: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .control-button:active {
+            background-color: #2980b9;
         }
         #upBtn { grid-column: 2 / 3; }
         #downBtn { grid-column: 2 / 3; }
@@ -57,23 +62,41 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: red;
+            background-color: #e74c3c;
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        #restartBtn:hover {
+            background-color: #c0392b;
         }
         #nameInput {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: none;
             background-color: #fff;
             color: #000;
-            border: 2px solid #000;
-            padding: 5px;
+            border: 2px solid #3498db;
+            padding: 10px;
             border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+        }
+        #nameSubmit {
+            margin-top: 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -85,9 +108,11 @@
     <canvas id="gameCanvas" width="400" height="400"></canvas>
 
     <button id="restartBtn">Restart</button>
-    <input type="text" id="nameInput" placeholder="Enter your name">
+    <div id="nameInput">
+        <input type="text" id="nameField" placeholder="Enter your name">
+        <button id="nameSubmit">Submit</button>
+    </div>
 
-    <!-- On-Screen Controls -->
     <div id="controls">
         <button class="control-button" id="upBtn">↑</button>
         <button class="control-button" id="leftBtn">←</button>
@@ -113,10 +138,10 @@
         const maxHighscores = 5;
 
         function drawSnakePart(snakePart) {
-            ctx.fillStyle = 'lime';
-            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
-            ctx.strokeStyle = 'darkgreen';
-            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+            ctx.strokeStyle = '#27ae60';
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
         }
 
         function drawSnake() {
@@ -126,7 +151,7 @@
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-            if (dx !== 0 || dy !== 0) { // Only check for game over if the snake has started moving
+            if (dx !== 0 || dy !== 0) {
                 if (
                     head.x < 0 || head.x >= tileCount ||
                     head.y < 0 || head.y >= tileCount ||
@@ -150,8 +175,10 @@
         }
 
         function drawApple() {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
+            ctx.fill();
         }
 
         function generateApple() {
@@ -174,16 +201,18 @@
             }
 
             const highscoreDiv = document.getElementById('highscore');
-            highscoreDiv.innerHTML = "Highscores";
-            highscoreList.forEach(entry => {
-                highscoreDiv.innerHTML += `<br> ${entry.name} : ${entry.score}`;
+            highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+            highscoreList.forEach((entry, index) => {
+                highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
             });
         }
 
         function gameLoop() {
             if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'white';
-                ctx.font = '30px Arial';
+                ctx.font = 'bold 30px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
                 return;
@@ -248,7 +277,9 @@
             }
         });
 
-        document.getElementById('restartBtn').addEventListener('click', () => {
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+
+        function restartGame() {
             snake = [{x: 10, y: 10}];
             dx = 0;
             dy = 0;
@@ -257,23 +288,26 @@
             document.getElementById('score').textContent = `Score: ${score}`;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             document.getElementById('nameInput').style.display = "none";
-            gameLoop(); // Start the game loop again
-        });
+            gameLoop();
+        }
 
         function promptForName() {
             const nameInput = document.getElementById('nameInput');
+            const nameField = document.getElementById('nameField');
             nameInput.style.display = "block";
-            nameInput.focus();
-            nameInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    const playerName = nameInput.value.trim();
-                    if (playerName) {
-                        updateHighscores(playerName);
-                    }
-                    nameInput.style.display = "none";
-                    nameInput.value = "";
-                }
-            });
+            nameField.focus();
+        }
+
+        document.getElementById('nameSubmit').addEventListener('click', submitName);
+
+        function submitName() {
+            const nameField = document.getElementById('nameField');
+            const playerName = nameField.value.trim();
+            if (playerName) {
+                updateHighscores(playerName);
+            }
+            document.getElementById('nameInput').style.display = "none";
+            nameField.value = "";
         }
 
         setInterval(gameLoop, 100);
