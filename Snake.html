@@ -147,9 +147,9 @@
         const maxHighscores = 5;
 
         function drawSnakePart(snakePart) {
-            ctx.fillStyle = '#2ecc71';
+            ctx.fillStyle = '#2eee71';
             ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-            ctx.strokeStyle = '#27ae60';
+            ctx.strokeStyle = '#27aed0';
             ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
         }
 
@@ -184,7 +184,7 @@
         }
 
         function drawApple() {
-            ctx.fillStyle = '#e74c3c';
+            ctx.fillStyle = '#ff4c3c';
             ctx.beginPath();
             ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
             ctx.fill();
