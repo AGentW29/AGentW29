@@ -223,6 +223,8 @@
         }
 
         function loadHighscores() {
+            highscoreList.length = 0; // Clear the current highscores
+
             const storedHighscores = localStorage.getItem('highscores');
             if (storedHighscores) {
                 highscoreList.push(...JSON.parse(storedHighscores));
@@ -273,41 +275,38 @@
             }
         }
 
-        function promptForName() {
-            const nameInputContainer = document.getElementById('nameInputContainer');
-            nameInputContainer.style.display = 'block';
-        }
-
-        function handleNameSubmit() {
-            const playerName = document.getElementById('nameField').value;
-            if (playerName) {
-                updateHighscores(playerName);
-                document.getElementById('nameInputContainer').style.display = 'none';
-            }
-        }
-
-        function restartGame() {
+        function resetGame() {
             snake = [{x: 10, y: 10}];
             dx = 0;
             dy = 0;
             score = 0;
             gameOver = false;
-            document.getElementById('score').textContent = `Score: ${score}`;
-            document.getElementById('nameField').value = '';
-            loadHighscores();
+            document.getElementById('score').textContent = 'Score: 0';
+            generateApple();
+            gameLoop();
         }
 
-        document.addEventListener('keydown', changeDirection);
-        document.getElementById('nameSubmit').addEventListener('click', handleNameSubmit);
-        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        function promptForName() {
+            const nameInputContainer = document.getElementById('nameInputContainer');
+            nameInputContainer.style.display = 'block';
+        }
 
-        document.getElementById('upBtn').addEventListener('click', () => changeDirection({ keyCode: 38 }));
-        document.getElementById('downBtn').addEventListener('click', () => changeDirection({ keyCode: 40 }));
-        document.getElementById('leftBtn').addEventListener('click', () => changeDirection({ keyCode: 37 }));
-        document.getElementById('rightBtn').addEventListener('click', () => changeDirection({ keyCode: 39 }));
+        document.getElementById('nameSubmit').addEventListener('click', function () {
+            const playerName = document.getElementById('nameField').value || 'Anonymous';
+            updateHighscores(playerName);
+            document.getElementById('nameInputContainer').style.display = 'none';
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', resetGame);
+        document.addEventListener('keydown', changeDirection);
+
+        // Mobile controls
+        document.getElementById('upBtn').addEventListener('click', () => { if (dy === 0) { dx = 0; dy = -1; } });
+        document.getElementById('downBtn').addEventListener('click', () => { if (dy === 0) { dx = 0; dy = 1; } });
+        document.getElementById('leftBtn').addEventListener('click', () => { if (dx === 0) { dx = -1; dy = 0; } });
+        document.getElementById('rightBtn').addEventListener('click', () => { if (dx === 0) { dx = 1; dy = 0; } });
 
         loadHighscores();
-
         setInterval(gameLoop, 100);
     </script>
 </body>
