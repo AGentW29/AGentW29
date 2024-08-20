@@ -266,15 +266,27 @@
             score = 0;
             gameOver = false;
             document.getElementById('score').textContent = '0';
+
+            // Hide name input container if visible
+            document.getElementById('nameInputContainer').style.display = 'none';
+
             gameLoop();
         }
 
         document.getElementById('restartBtn').addEventListener('click', resetGame);
 
-        document.getElementById('upBtn').addEventListener('click', () => { dx = 0; dy = -1; });
-        document.getElementById('downBtn').addEventListener('click', () => { dx = 0; dy = 1; });
-        document.getElementById('leftBtn').addEventListener('click', () => { dx = -1; dy = 0; });
-        document.getElementById('rightBtn').addEventListener('click', () => { dx = 1; dy = 0; });
+        document.getElementById('upBtn').addEventListener('click', () => { 
+            if (dy === 0) { dx = 0; dy = -1; }
+        });
+        document.getElementById('downBtn').addEventListener('click', () => { 
+            if (dy === 0) { dx = 0; dy = 1; }
+        });
+        document.getElementById('leftBtn').addEventListener('click', () => { 
+            if (dx === 0) { dx = -1; dy = 0; }
+        });
+        document.getElementById('rightBtn').addEventListener('click', () => { 
+            if (dx === 0) { dx = 1; dy = 0; }
+        });
 
         function promptForName() {
             const nameInputContainer = document.getElementById('nameInputContainer');
