@@ -168,19 +168,24 @@
         }
 
         function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-            if (dx !== 0 || dy !== 0) {
-                if (
-                    head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount ||
-                    snake.some(segment => segment.x === head.x && segment.y === head.y)
-                ) {
-                    gameOver = true;
-                    promptForName();
-                    return;
-                }
+    if (dx !== 0 || dy !== 0) {
+        if (
+            head.x < 0 || head.x >= tileCount ||
+            head.y < 0 || head.y >= tileCount ||
+            snake.some(segment => segment.x === head.x && segment.y === head.y)
+        ) {
+            // Check if the score is a new highscore before prompting
+            const currentHighscore = highscoreList.length > 0 ? highscoreList[0].score : 0;
+            if (score > currentHighscore) {
+                promptForName();
+            } else {
+                gameOver = true;
             }
+            return;
+        }
+    }
 
             snake.unshift(head);
 
