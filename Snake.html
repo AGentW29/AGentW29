@@ -24,15 +24,20 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
         #scoreboard {
-            width: 100%;
-            margin-bottom: 10px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
             font-size: 1em;
-            text-align: center;
+            text-align: left;
         }
         #score {
             font-size: 2em;
             margin-bottom: 10px;
             text-align: center;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
         }
         #controls {
             position: fixed;
@@ -248,11 +253,9 @@
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            drawApple();
             moveSnake();
             drawSnake();
-            drawApple();
-
             setTimeout(gameLoop, 100);
         }
 
