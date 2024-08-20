@@ -2,136 +2,244 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snake Game</title>
     <style>
         body {
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-        }
-
-        #header {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 10px;
-        }
-
-        #highscoreContainer {
-            text-align: left;
-            margin-left: 20px;
-        }
-
-        #score {
-            font-size: 48px;
-            text-align: center;
-            margin: 0 auto;
-        }
-
-        #gameContainer {
-            display: flex;
             flex-direction: column;
-            align-items: center;
+            height: 100vh;
+            background-color: #000069;
+            color: #ecf0f1;
+            font-family: 'Times New Roman', sans-serif;
+            touch-action: manipulation;
+            overflow: hidden;
         }
-
         canvas {
-            background-color: #000;
-            display: block;
-            margin-top: 20px;
+            background-color: #000000;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
-
+        #scoreboard {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 1em;
+            text-align: center;
+        }
+        #score {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
         #controls {
-            margin-top: 20px;
+            position: fixed;
+            bottom: 20px;
+            width: 180px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px;
+            justify-content: center;
         }
-
         .control-button {
-            background-color: #cda434;
+            width: 60px;
+            height: 60px;
+            background-color: #b48800;
+            color: white;
             border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 20px;
-            color: #fff;
             border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
-
+        .control-button:active {
+            background-color: #b48800;
+        }
+        #upBtn { grid-column: 2 / 3; }
+        #downBtn { grid-column: 2 / 3; }
+        #leftBtn { grid-column: 1 / 2; }
+        #rightBtn { grid-column: 3 / 4; }
         #restartBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
             background-color: #e74c3c;
-            color: #fff;
+            color: white;
             border: none;
             padding: 10px 20px;
-            margin: 20px;
-            font-size: 20px;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        #restartBtn:hover {
+            background-color: #c0392b;
+        }
+        #nameInputContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #nameField {
+            background-color: #fff;
+            color: #000;
+            border: 2px solid #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+        #nameSubmit {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div id="header">
-        <div id="highscoreContainer">
-            <h2>Highscores</h2>
-            <ol id="highscoreList"></ol>
-        </div>
-        <div id="score">0</div>
+    <div id="scoreboard">
+        <div id="highscore"><strong>Highscores</strong></div>
     </div>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="300" height="300"></canvas>
-        <div id="controls">
-            <button id="upBtn" class="control-button">↑</button>
-            <br>
-            <button id="leftBtn" class="control-button">←</button>
-            <button id="downBtn" class="control-button">↓</button>
-            <button id="rightBtn" class="control-button">→</button>
-        </div>
-        <button id="restartBtn">Restart</button>
+    <div id="score">0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <button id="restartBtn">Restart</button>
+    <div id="nameInputContainer">
+        <input type="text" id="nameField" placeholder="Enter your name">
+        <button id="nameSubmit">Submit</button>
+    </div>
+
+    <div id="controls">
+        <button class="control-button" id="upBtn">↑</button>
+        <button class="control-button" id="leftBtn">←</button>
+        <button class="control-button" id="downBtn">↓</button>
+        <button class="control-button" id="rightBtn">→</button>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let snake = [{ x: 10, y: 10 }];
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{x: 10, y: 10}];
+        let apple = {x: 5, y: 5};
         let dx = 0;
         let dy = 0;
-        let apple = { x: 5, y: 5 };
         let score = 0;
         let gameOver = false;
 
-        function drawSnake() {
-            ctx.fillStyle = 'lime';
-            snake.forEach(part => ctx.fillRect(part.x * 10, part.y * 10, 10, 10));
+        const highscoreList = [];
+        const maxHighscores = 5;
+
+        function drawSnakePart(snakePart) {
+            ctx.fillStyle = '#49ff00';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+            ctx.strokeStyle = '#49ff69';
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
         }
 
-        function drawApple() {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(apple.x * 10, apple.y * 10, 10, 10);
+        function drawSnake() {
+            snake.forEach(drawSnakePart);
         }
 
         function moveSnake() {
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            if (dx !== 0 || dy !== 0) {
+                if (
+                    head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)
+                ) {
+                    gameOver = true;
+                    promptForName();
+                    return;
+                }
+            }
+
             snake.unshift(head);
 
             if (head.x === apple.x && head.y === apple.y) {
-                score++;
-                document.getElementById('score').textContent = score;
-                apple = { x: Math.floor(Math.random() * 30), y: Math.floor(Math.random() * 30) };
+                score += 1;
+                document.getElementById('score').textContent = `${score}`;
+                generateApple();
             } else {
                 snake.pop();
             }
+        }
 
-            if (head.x < 0 || head.x >= 30 || head.y < 0 || head.y >= 30 || snake.some(part => part.x === head.x && part.y === head.y)) {
-                gameOver = true;
+        function drawApple() {
+            ctx.fillStyle = '#ff2900';
+            ctx.beginPath();
+            ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function generateApple() {
+            apple.x = Math.floor(Math.random() * tileCount);
+            apple.y = Math.floor(Math.random() * tileCount);
+
+            snake.forEach(part => {
+                if (part.x === apple.x && part.y === apple.y) {
+                    generateApple();
+                }
+            });
+        }
+
+        function updateHighscores(playerName) {
+            highscoreList.push({ name: playerName, score: score });
+            highscoreList.sort((a, b) => b.score - a.score);
+
+            if (highscoreList.length > maxHighscores) {
+                highscoreList.pop();
+            }
+
+            // Save highscores to localStorage
+            localStorage.setItem('highscores', JSON.stringify(highscoreList));
+
+            const highscoreDiv = document.getElementById('highscore');
+            highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+            highscoreList.forEach((entry, index) => {
+                highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+            });
+        }
+
+        function loadHighscores() {
+            const storedHighscores = localStorage.getItem('highscores');
+            if (storedHighscores) {
+                highscoreList.push(...JSON.parse(storedHighscores));
+                const highscoreDiv = document.getElementById('highscore');
+                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+                highscoreList.forEach((entry, index) => {
+                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+                });
             }
         }
 
         function gameLoop() {
             if (gameOver) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#ecf0f1';
                 ctx.font = '48px serif';
                 ctx.textAlign = 'center';
@@ -149,7 +257,7 @@
         }
 
         function resetGame() {
-            snake = [{ x: 10, y: 10 }];
+            snake = [{x: 10, y: 10}];
             dx = 0;
             dy = 0;
             score = 0;
