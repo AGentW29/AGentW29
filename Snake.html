@@ -24,10 +24,13 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
         #scoreboard {
-            text-align: center;
-            width: 100%;
-            margin: 20px 0;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            margin: 0;
             font-size: 1em;
+            text-align: left;
         }
         #controls {
             position: fixed;
@@ -112,7 +115,7 @@
 <body>
     <div id="scoreboard">
         <div id="score">Score: 0</div>
-        <div id="highscore">Highscores</div>
+        <div id="highscore"><strong>Highscores</strong></div>
     </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
 
@@ -209,11 +212,26 @@
                 highscoreList.pop();
             }
 
+            // Save highscores to localStorage
+            localStorage.setItem('highscores', JSON.stringify(highscoreList));
+
             const highscoreDiv = document.getElementById('highscore');
             highscoreDiv.innerHTML = "<strong>Highscores</strong>";
             highscoreList.forEach((entry, index) => {
                 highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
             });
+        }
+
+        function loadHighscores() {
+            const storedHighscores = localStorage.getItem('highscores');
+            if (storedHighscores) {
+                highscoreList.push(...JSON.parse(storedHighscores));
+                const highscoreDiv = document.getElementById('highscore');
+                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+                highscoreList.forEach((entry, index) => {
+                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+                });
+            }
         }
 
         function gameLoop() {
@@ -255,42 +273,18 @@
             }
         }
 
-        document.addEventListener('keydown', changeDirection);
+        function promptForName() {
+            const nameInputContainer = document.getElementById('nameInputContainer');
+            nameInputContainer.style.display = 'block';
+        }
 
-        // Touch Controls
-        document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (dx === 0) {
-                dx = -1;
-                dy = 0;
+        function handleNameSubmit() {
+            const playerName = document.getElementById('nameField').value;
+            if (playerName) {
+                updateHighscores(playerName);
+                document.getElementById('nameInputContainer').style.display = 'none';
             }
-        });
-
-        document.getElementById('upBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (dy === 0) {
-                dx = 0;
-                dy = -1;
-            }
-        });
-
-        document.getElementById('downBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (dy === 0) {
-                dx = 0;
-                dy = 1;
-            }
-        });
-
-        document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (dx === 0) {
-                dx = 1;
-                dy = 0;
-            }
-        });
-
-        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        }
 
         function restartGame() {
             snake = [{x: 10, y: 10}];
@@ -299,47 +293,23 @@
             score = 0;
             gameOver = false;
             document.getElementById('score').textContent = `Score: ${score}`;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById('nameInputContainer').style.display = "none";
-            gameLoop();
+            document.getElementById('nameField').value = '';
+            loadHighscores();
         }
 
-        function promptForName() {
-            const nameInputContainer = document.getElementById('nameInputContainer');
-            const nameField = document.getElementById('nameField');
-            nameInputContainer.style.display = "block";
-            nameField.focus();
-        }
+        document.addEventListener('keydown', changeDirection);
+        document.getElementById('nameSubmit').addEventListener('click', handleNameSubmit);
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
 
-        document.getElementById('nameSubmit').addEventListener('click', submitName);
+        document.getElementById('upBtn').addEventListener('click', () => changeDirection({ keyCode: 38 }));
+        document.getElementById('downBtn').addEventListener('click', () => changeDirection({ keyCode: 40 }));
+        document.getElementById('leftBtn').addEventListener('click', () => changeDirection({ keyCode: 37 }));
+        document.getElementById('rightBtn').addEventListener('click', () => changeDirection({ keyCode: 39 }));
 
-        function submitName() {
-            const nameField = document.getElementById('nameField');
-            const playerName = nameField.value.trim();
-            if (playerName) {
-                updateHighscores(playerName);
-            }
-            document.getElementById('nameInputContainer').style.display = "none";
-            nameField.value = "";
-        }
-
-        // Prevent zooming on double-tap
-        document.addEventListener('touchstart', function(event) {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
+        loadHighscores();
 
         setInterval(gameLoop, 100);
     </script>
 </body>
 </html>
+
