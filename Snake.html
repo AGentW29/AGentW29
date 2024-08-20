@@ -2,219 +2,219 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game</title>
     <style>
         body {
-            margin: 0;
+            font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
-            align-items: center;
             flex-direction: column;
-            height: 100vh;
-            background-color: #000069;
-            color: #ecf0f1;
-            font-family: 'Times New Roman', sans-serif;
-            touch-action: manipulation;
-            overflow: hidden;
-        }
-        canvas {
-            background-color: #000000;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-        #scoreboard {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: auto;
-            margin: 0;
-            font-size: 1em;
-            text-align: left;
-        }
-        #controls {
-            position: fixed;
-            bottom: 20px;
-            width: 180px;
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-gap: 10px;
+            align-items: center;
             justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
-        .control-button {
-            width: 60px;
-            height: 60px;
-            background-color: #b48800;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 24px;
+
+        canvas {
+            border: 1px solid black;
+            background-color: white;
+        }
+
+        #controls {
+            margin-top: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            -webkit-tap-highlight-color: transparent;
         }
-        .control-button:active {
-            background-color: #b48800;
-        }
-        #upBtn { grid-column: 2 / 3; }
-        #downBtn { grid-column: 2 / 3; }
-        #leftBtn { grid-column: 1 / 2; }
-        #rightBtn { grid-column: 3 / 4; }
-        #restartBtn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.2s;
-        }
-        #restartBtn:hover {
-            background-color: #c0392b;
-        }
-        #nameInputContainer {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        #nameField {
-            background-color: #fff;
-            color: #000;
-            border: 2px solid #3498db;
+
+        button {
             padding: 10px;
-            border-radius: 5px;
+            margin: 5px;
             font-size: 16px;
-            text-align: center;
-            width: 200px;
-            margin-bottom: 10px;
         }
-        #nameSubmit {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+
+        #scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
+            margin-top: 20px;
+        }
+
+        #score, #highscore {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #nameField {
+            margin-top: 20px;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        #nameSubmit, #restartBtn {
+            padding: 10px;
+            margin-top: 10px;
             font-size: 16px;
         }
     </style>
 </head>
 <body>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+
     <div id="scoreboard">
         <div id="score">Score: 0</div>
         <div id="highscore"><strong>Highscores</strong></div>
     </div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-
-    <button id="restartBtn">Restart</button>
-    <div id="nameInputContainer">
-        <input type="text" id="nameField" placeholder="Enter your name">
-        <button id="nameSubmit">Submit</button>
-    </div>
 
     <div id="controls">
-        <button class="control-button" id="upBtn">↑</button>
-        <button class="control-button" id="leftBtn">←</button>
-        <button class="control-button" id="downBtn">↓</button>
-        <button class="control-button" id="rightBtn">→</button>
+        <button id="upBtn">Up</button>
+        <button id="downBtn">Down</button>
+        <button id="leftBtn">Left</button>
+        <button id="rightBtn">Right</button>
     </div>
+
+    <input type="text" id="nameField" placeholder="Enter your name">
+    <button id="nameSubmit">Submit Score</button>
+    <button id="restartBtn">Restart Game</button>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
         const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
-
-        let snake = [{x: 10, y: 10}];
-        let apple = {x: 5, y: 5};
+        const maxHighscores = 5;
+        let snake = [{ x: 10, y: 10 }];
         let dx = 0;
         let dy = 0;
+        let food = generateFood();
         let score = 0;
         let gameOver = false;
-
-        const highscoreList = [];
-        const maxHighscores = 5;
+        let highscoreList = [];
 
         function drawSnakePart(snakePart) {
-            ctx.fillStyle = '#2eee71';
-            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-            ctx.strokeStyle = '#27aed0';
-            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+            ctx.fillStyle = 'green';
+            ctx.strokestyle = 'darkgreen';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize, gridSize);
         }
 
         function drawSnake() {
             snake.forEach(drawSnakePart);
         }
 
+        function generateFood() {
+            return {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                y: Math.floor(Math.random() * (canvas.height / gridSize))
+            };
+        }
+
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
         function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-
-            if (dx !== 0 || dy !== 0) {
-                if (
-                    head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount ||
-                    snake.some(segment => segment.x === head.x && segment.y === head.y)
-                ) {
-                    gameOver = true;
-                    promptForName();
-                    return;
-                }
-            }
-
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
             snake.unshift(head);
 
-            if (head.x === apple.x && head.y === apple.y) {
-                score += 1;
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
                 document.getElementById('score').textContent = `Score: ${score}`;
-                generateApple();
+                food = generateFood();
             } else {
                 snake.pop();
             }
         }
 
-        function drawApple() {
-            ctx.fillStyle = '#ff4c3c';
-            ctx.beginPath();
-            ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
-            ctx.fill();
+        function checkCollision() {
+            const head = snake[0];
+
+            if (
+                head.x < 0 || head.x >= canvas.width / gridSize ||
+                head.y < 0 || head.y >= canvas.height / gridSize
+            ) {
+                gameOver = true;
+            }
+
+            for (let i = 4; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver = true;
+                }
+            }
+
+            if (gameOver) {
+                alert('Game Over!');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                updateHighscores(document.getElementById('nameField').value || 'Anonymous');
+            }
         }
 
-        function generateApple() {
-            apple.x = Math.floor(Math.random() * tileCount);
-            apple.y = Math.floor(Math.random() * tileCount);
+        function gameLoop() {
+            if (!gameOver) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                moveSnake();
+                drawSnake();
+                drawFood();
+                checkCollision();
+            }
+        }
 
-            snake.forEach(part => {
-                if (part.x === apple.x && part.y === apple.y) {
-                    generateApple();
-                }
-            });
+        function changeDirection(event) {
+            const keyPressed = event.keyCode;
+            const LEFT_KEY = 37;
+            const RIGHT_KEY = 39;
+            const UP_KEY = 38;
+            const DOWN_KEY = 40;
+
+            const goingUp = dy === -1;
+            const goingDown = dy === 1;
+            const goingRight = dx === 1;
+            const goingLeft = dx === -1;
+
+            if (keyPressed === LEFT_KEY && !goingRight) {
+                dx = -1;
+                dy = 0;
+            }
+
+            if (keyPressed === UP_KEY && !goingDown) {
+                dx = 0;
+                dy = -1;
+            }
+
+            if (keyPressed === RIGHT_KEY && !goingLeft) {
+                dx = 1;
+                dy = 0;
+            }
+
+            if (keyPressed === DOWN_KEY && !goingUp) {
+                dx = 0;
+                dy = 1;
+            }
         }
 
         function updateHighscores(playerName) {
-            highscoreList.push({ name: playerName, score: score });
-            highscoreList.sort((a, b) => b.score - a.score);
+            // Clear the highscore list to avoid duplication
+            highscoreList.length = 0;
+            
+            // Load current highscores from localStorage
+            const storedHighscores = JSON.parse(localStorage.getItem('highscores')) || [];
+            
+            // Add the new score to the highscores list
+            storedHighscores.push({ name: playerName, score: score });
 
-            if (highscoreList.length > maxHighscores) {
-                highscoreList.pop();
-            }
+            // Sort the list by score in descending order
+            storedHighscores.sort((a, b) => b.score - a.score);
 
-            // Save highscores to localStorage
-            localStorage.setItem('highscores', JSON.stringify(highscoreList));
+            // Keep only the top 5 highscores
+            const topFiveHighscores = storedHighscores.slice(0, maxHighscores);
+            
+            // Save the updated top 5 highscores back to localStorage
+            localStorage.setItem('highscores', JSON.stringify(topFiveHighscores));
 
+            // Update the global highscoreList to reflect these changes
+            highscoreList.splice(0, highscoreList.length, ...topFiveHighscores);
+
+            // Update the highscore display
             const highscoreDiv = document.getElementById('highscore');
             highscoreDiv.innerHTML = "<strong>Highscores</strong>";
             highscoreList.forEach((entry, index) => {
@@ -223,77 +223,34 @@
         }
 
         function loadHighscores() {
-            const storedHighscores = localStorage.getItem('highscores');
-            if (storedHighscores) {
-                highscoreList.push(...JSON.parse(storedHighscores));
-                const highscoreDiv = document.getElementById('highscore');
-                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                highscoreList.forEach((entry, index) => {
-                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-                });
-            }
-        }
+            // Clear the highscore list to avoid duplication
+            highscoreList.length = 0;
 
-        function gameLoop() {
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 30px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-                return;
-            }
+            // Load the highscores from localStorage
+            const storedHighscores = JSON.parse(localStorage.getItem('highscores')) || [];
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            moveSnake();
-            drawSnake();
-            drawApple();
-        }
+            // Update the global highscoreList to reflect the stored highscores
+            highscoreList.push(...storedHighscores);
 
-        function changeDirection(event) {
-            const keyPressed = event.keyCode;
-            const LEFT = 37;
-            const UP = 38;
-            const RIGHT = 39;
-            const DOWN = 40;
-
-            if (keyPressed === LEFT && dx === 0) {
-                dx = -1;
-                dy = 0;
-            } else if (keyPressed === UP && dy === 0) {
-                dx = 0;
-                dy = -1;
-            } else if (keyPressed === RIGHT && dx === 0) {
-                dx = 1;
-                dy = 0;
-            } else if (keyPressed === DOWN && dy === 0) {
-                dx = 0;
-                dy = 1;
-            }
-        }
-
-        function promptForName() {
-            const nameInputContainer = document.getElementById('nameInputContainer');
-            nameInputContainer.style.display = 'block';
-        }
-
-        function handleNameSubmit() {
-            const playerName = document.getElementById('nameField').value;
-            if (playerName) {
-                updateHighscores(playerName);
-                document.getElementById('nameInputContainer').style.display = 'none';
-            }
+            // Update the highscore display
+            const highscoreDiv = document.getElementById('highscore');
+            highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+            highscoreList.forEach((entry, index) => {
+                highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+            });
         }
 
         function restartGame() {
-            snake = [{x: 10, y: 10}];
+            // Reset the game state
+            snake = [{ x: 10, y: 10 }];
             dx = 0;
             dy = 0;
             score = 0;
             gameOver = false;
             document.getElementById('score').textContent = `Score: ${score}`;
             document.getElementById('nameField').value = '';
+
+            // Reload highscores without duplicating them
             loadHighscores();
         }
 
