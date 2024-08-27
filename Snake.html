@@ -140,8 +140,6 @@
     </div>
 
     <script>
-        localStorage.removeItem('highscores');
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -185,6 +183,7 @@
 
 if (score > lowestHighscore || highscoreList.length < maxHighscores) {
     promptForName();
+    gameOver = true;
 } else {
     gameOver = true;
 }
