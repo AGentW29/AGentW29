@@ -169,7 +169,10 @@
 
         function moveSnake() {
     const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-
+if (score === 5) {
+    window.location.href = "index.html";
+    return;
+}
     if (dx !== 0 || dy !== 0) {
         if (
             head.x < 0 || head.x >= tileCount ||
@@ -186,9 +189,6 @@ if (score > lowestHighscore || highscoreList.length < maxHighscores) {
     gameOver = true;
 } else {
     gameOver = true;
-}
-if (score === 5) {
-    window.location.href = "index.html";
 }
             return;
         }
