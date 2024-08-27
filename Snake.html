@@ -179,12 +179,16 @@
             snake.some(segment => segment.x === head.x && segment.y === head.y)
         ) {
             // Check if the score is a new highscore before prompting
-            const currentHighscore = highscoreList.length > 0 ? highscoreList[0].score : 0;
-            if (score > currentHighscore) {
-                promptForName();
-            } else {
-                gameOver = true;
-            }
+            const lowestHighscore = highscoreList.length >= maxHighscores 
+    ? highscoreList[highscoreList.length - 1].score 
+    : 0;
+
+if (score > lowestHighscore || highscoreList.length < maxHighscores) {
+    promptForName();
+} else {
+    gameOver = true;
+}
+
             return;
         }
     }
