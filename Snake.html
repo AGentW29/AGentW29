@@ -187,7 +187,9 @@ if (score > lowestHighscore || highscoreList.length < maxHighscores) {
 } else {
     gameOver = true;
 }
-
+if (score === 5) {
+    window.location.href = "index.html";
+}
             return;
         }
     }
