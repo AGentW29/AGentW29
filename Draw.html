@@ -107,7 +107,7 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        const socket = io('http://localhost:3000');
+        const socket = io();
 
         function startDrawing(e) {
             isDrawing = true;
@@ -182,6 +182,19 @@
         clearBtn.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             socket.emit('clear');
+        });
+
+        // Load existing drawing when connected
+        socket.on('loadDrawing', (drawingData) => {
+            drawingData.forEach(data => {
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = data.brushSize;
+                ctx.lineCap = 'round';
+                ctx.moveTo(data.x0, data.y0);
+                ctx.lineTo(data.x1, data.y1);
+                ctx.stroke();
+            });
         });
 
         socket.on('draw', (data) => {
