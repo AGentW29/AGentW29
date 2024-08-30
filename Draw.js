@@ -6,7 +6,7 @@ const io = require('socket.io')(http);
 let drawingData = []; // Array to store drawing commands
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/Draw.html');
 });
 
 io.on('connection', (socket) => {
