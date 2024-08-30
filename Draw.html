@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw and Scroll</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      overflow: auto;
+    }
+    canvas {
+      border: 1px solid #000;
+      touch-action: none; /* Prevent default behavior on touch */
+    }
+  </style>
+</head>
+<body>
+  <canvas id="drawingCanvas" width="800" height="600"></canvas>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    const socket = io();
+
+    let drawing = false;
+
+    canvas.addEventListener('touchstart', (event) => {
+      if (event.touches.length === 1) {
+        drawing = true;
+        const touch = event.touches[0];
+        ctx.beginPath();
+        ctx.moveTo(touch.pageX - canvas.offsetLeft, touch.pageY - canvas.offsetTop);
+        event.preventDefault(); // Prevent default only when a single touch is detected
+      }
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+      if (drawing && event.touches.length === 1) {
+        const touch = event.touches[0];
+        ctx.lineTo(touch.pageX - canvas.offsetLeft, touch.pageY - canvas.offsetTop);
+        ctx.stroke();
+        socket.emit('draw', {
+          x: touch.pageX - canvas.offsetLeft,
+          y: touch.pageY - canvas.offsetTop,
+        });
+        event.preventDefault(); // Prevent default only when a single touch is detected
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      drawing = false;
+    });
+
+    // Listen for drawing events from others
+    socket.on('draw', (data) => {
+      ctx.lineTo(data.x, data.y);
+      ctx.stroke();
+    });
+
+    // Listen for clear events
+    socket.on('clear', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  </script>
+</body>
+</html>
