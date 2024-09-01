@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw board</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <script src="Draw.js"></script>
     <style>
-       body {
+        body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
@@ -110,16 +109,9 @@
 
         const socket = io();
 
-        alert('Attempting to connect to the socket...');
-
-        socket.on('connect', () => {
-            alert('Socket connected!');
-        });
-
         function startDrawing(e) {
             isDrawing = true;
             [lastX, lastY] = getCoordinates(e);
-            alert('Started drawing at coordinates: ' + lastX + ', ' + lastY);
         }
 
         function draw(e) {
@@ -132,9 +124,6 @@
             ctx.moveTo(lastX, lastY);
             ctx.lineTo(x, y);
             ctx.stroke();
-            [lastX, lastY] = [x, y];
-
-            alert('Drawing line to coordinates: ' + x + ', ' + y);
 
             socket.emit('draw', {
                 x0: lastX,
@@ -144,11 +133,12 @@
                 color: currentColor,
                 brushSize: currentBrushSize
             });
+
+            [lastX, lastY] = [x, y];
         }
 
         function stopDrawing() {
             isDrawing = false;
-            alert('Stopped drawing');
         }
 
         function getCoordinates(e) {
