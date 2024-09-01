@@ -1,3 +1,4 @@
+alert('Draw.js is loaded');
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
