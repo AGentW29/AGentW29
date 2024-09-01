@@ -1,21 +1,11 @@
-alert('Draw.js is loaded again');
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-const socket = io();
-alert('Attempting to connect to the socket...');
-
-socket.on('connect', () => {
-    alert('Socket connected!');
-});
-
-socket.on('connect_error', (err) => {
-    alert('Connection Error: ' + err.message);
-});
-
 let drawingData = []; // Array to store drawing commands
+
+app.use(express.static(__dirname)); // Serve static files from the current directory
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/Draw.html');
@@ -23,7 +13,7 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('A user connected');
-
+  
   // Send existing drawing data to the new client
   socket.emit('loadDrawing', drawingData);
 
