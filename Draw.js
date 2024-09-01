@@ -4,6 +4,17 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
+const socket = io();
+alert('Attempting to connect to the socket...');
+
+socket.on('connect', () => {
+    alert('Socket connected!');
+});
+
+socket.on('connect_error', (err) => {
+    alert('Connection Error: ' + err.message);
+});
+
 let drawingData = []; // Array to store drawing commands
 
 app.get('/', (req, res) => {
