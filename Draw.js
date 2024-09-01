@@ -1,4 +1,4 @@
-alert('Draw.js is loaded');
+alert('Draw.js is loaded again');
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
