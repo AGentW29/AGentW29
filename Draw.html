@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="Draw.js"></script>
     <style>
-        body {
+       body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
@@ -109,17 +109,17 @@
         window.addEventListener('resize', resizeCanvas);
 
         const socket = io();
-        socket.on('connect', () => {
-    alert('Socket connected!');
-});
 
-socket.on('connect_error', (err) => {
-    alert('Connection Error: ' + err.message);
-});
+        alert('Attempting to connect to the socket...');
+
+        socket.on('connect', () => {
+            alert('Socket connected!');
+        });
 
         function startDrawing(e) {
             isDrawing = true;
             [lastX, lastY] = getCoordinates(e);
+            alert('Started drawing at coordinates: ' + lastX + ', ' + lastY);
         }
 
         function draw(e) {
@@ -134,6 +134,8 @@ socket.on('connect_error', (err) => {
             ctx.stroke();
             [lastX, lastY] = [x, y];
 
+            alert('Drawing line to coordinates: ' + x + ', ' + y);
+
             socket.emit('draw', {
                 x0: lastX,
                 y0: lastY,
@@ -146,6 +148,7 @@ socket.on('connect_error', (err) => {
 
         function stopDrawing() {
             isDrawing = false;
+            alert('Stopped drawing');
         }
 
         function getCoordinates(e) {
