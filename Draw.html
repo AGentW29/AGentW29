@@ -109,6 +109,13 @@
         window.addEventListener('resize', resizeCanvas);
 
         const socket = io();
+        socket.on('connect', () => {
+    alert('Socket connected!');
+});
+
+socket.on('connect_error', (err) => {
+    alert('Connection Error: ' + err.message);
+});
 
         function startDrawing(e) {
             isDrawing = true;
