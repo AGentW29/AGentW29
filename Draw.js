@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Define PORT once
 
 let drawingData = []; // Array to store drawing commands
 
@@ -33,7 +33,6 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
+http.listen(PORT, () => { // Use the defined PORT variable
   console.log(`Server running on port ${PORT}`);
 });
