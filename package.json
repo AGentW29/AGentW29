@@ -4,7 +4,7 @@
   "description": "Turtlearth project",
   "main": "Draw.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node Draw.js"
   },
   "dependencies": {
     "express": "^4.18.2",
