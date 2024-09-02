@@ -1,12 +1,13 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const PORT = process.env.PORT || 3000; // Define PORT once
+const server = http.createServer(app);
+const io = socketIo(server);
 
 let drawingData = []; // Array to store drawing commands
 
-app.use(express.static(__dirname)); // Serve static files from the current directory
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/Draw.html');
@@ -14,17 +15,17 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('A user connected');
-  
+
   // Send existing drawing data to the new client
   socket.emit('loadDrawing', drawingData);
 
   socket.on('draw', (data) => {
-    drawingData.push(data); // Save the drawing command
-    socket.broadcast.emit('draw', data);
+    drawingData.push(data);
+    io.emit('draw', data); // Broadcast to all clients
   });
 
   socket.on('clear', () => {
-    drawingData = []; // Clear the saved drawing data
+    drawingData = [];
     io.emit('clear');
   });
 
@@ -33,6 +34,7 @@ io.on('connection', (socket) => {
   });
 });
 
-http.listen(PORT, () => { // Use the defined PORT variable
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
