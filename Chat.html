@@ -9,12 +9,12 @@
             font-family: Times New Roman, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #000000; /* Blue background color */
+            background-color: #000000;
         }
         .chat-container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #005F76; /* Blue background color */
+            background-color: #005F76;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -35,17 +35,17 @@
             color: white;
         }
         .message.sent {
-            background-color: #7C2C11; /* Dark gray for sent messages */
+            background-color: #7C2C11;
             align-self: flex-end;
             margin-left: auto;
         }
         .message.received {
-            background-color: #080808; /* Darker gray for received messages */
+            background-color: #080808;
         }
         .message .sender {
             font-weight: bold;
             margin-bottom: 5px;
-            color: #74B237; /* Light red for sender names */
+            color: #74B237;
         }
         .message .timestamp {
             font-size: 0.8em;
@@ -55,7 +55,7 @@
         .chat-input {
             display: flex;
             padding: 10px;
-            background-color: #00A09B; /* Blue background color */
+            background-color: #00A09B;
         }
         #message-input {
             flex-grow: 1;
@@ -63,12 +63,12 @@
             border: none;
             border-radius: 20px;
             margin-right: 10px;
-            background-color: #3E4042; /* Dark gray input field */
+            background-color: #3E4042;
             color: white;
         }
         #send-button {
             padding: 10px 20px;
-            background-color: #7DD418; /* Dark gray send button */
+            background-color: #7DD418;
             color: white;
             border: none;
             border-radius: 20px;
@@ -90,25 +90,12 @@
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
 
-        const users = ['Ariane', 'Filip', 'Sascha', 'Dennis', 'You'];
+        const ws = new WebSocket('ws://localhost:8080'); // Connect to the WebSocket server
 
-        const randomResponses = [
-            "Nein.",
-            "Ok",
-            "Wer möchte noch spielen morgen? Filip hat sich schon dafür gemeldet.",
-            "Würd auch gerne spielen...",
-            "Ich auch 👍",
-            "Supi, einer noch für heute Abend?",
-            "Das klingt gut!",
-            "Wann treffen wir uns?",
-            "Können wir das Spiel auf morgen verschieben?",
-            "Hat jemand Lust auf ein Brettspiel stattdessen?",
-            "Ich bring Snacks mit!",
-            "Sollen wir online oder offline spielen?",
-            "Wer hat die letzte Runde gewonnen?",
-            "Neues Spiel, neues Glück!",
-            "Ich muss leider absagen, viel Spaß euch!"
-        ];
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            addMessage(data.sender, data.message, data.isSent);
+        };
 
         function addMessage(sender, message, isSent = false) {
             const messageElement = document.createElement('div');
@@ -137,15 +124,14 @@
         function sendMessage() {
             const message = messageInput.value.trim();
             if (message) {
-                addMessage('You', message, true);
+                const data = {
+                    sender: 'You',
+                    message: message,
+                    isSent: true
+                };
+                ws.send(JSON.stringify(data)); // Send message to WebSocket server
+                addMessage(data.sender, data.message, data.isSent);
                 messageInput.value = '';
-                
-                // Simulate a response
-                setTimeout(() => {
-                    const randomUser = users[Math.floor(Math.random() * (users.length - 1))];
-                    const randomResponse = randomResponses[Math.floor(Math.random() * randomResponses.length)];
-                    addMessage(randomUser, randomResponse);
-                }, 1000);
             }
         }
 
@@ -155,14 +141,6 @@
                 sendMessage();
             }
         });
-
-        // Add some initial messages
-        addMessage('Ariane', 'Nein.');
-        addMessage('Filip', 'Ok');
-        addMessage('Sascha', 'Wer möchte noch spielen morgen? Filip hat sich schon dafür gemeldet.');
-        addMessage('Dennis', 'Würd auch gerne spielen...');
-        addMessage('You', 'Ich auch 👍', true);
-        addMessage('Sascha', 'Supi, einer noch für heute Abend?');
     </script>
 </body>
 </html>
