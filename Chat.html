@@ -94,7 +94,16 @@
 
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
-            addMessage(data.sender, data.message, data.isSent);
+
+            if (data.type === 'history') {
+                // Load and display the chat history
+                data.data.forEach(msg => {
+                    addMessage(msg.sender, msg.message, msg.isSent);
+                });
+            } else {
+                // Display the new message
+                addMessage(data.sender, data.message, data.isSent);
+            }
         };
 
         function addMessage(sender, message, isSent = false) {
