@@ -2,28 +2,20 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const fs = require('fs');
+const path = require('path');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-let drawingData = [];
+const drawingDataPath = path.join(__dirname, 'drawingData.json');
 
-// Load existing drawing data from file
-const loadDrawingData = () => {
-    try {
-        const data = fs.readFileSync('drawingData.json');
-        drawingData = JSON.parse(data);
-    } catch (err) {
-        console.error('Error reading drawing data:', err);
-    }
-};
+// Ensure the JSON file exists
+if (!fs.existsSync(drawingDataPath)) {
+  fs.writeFileSync(drawingDataPath, JSON.stringify([]));
+}
 
-// Save drawing data to file
-const saveDrawingData = () => {
-    fs.writeFileSync('drawingData.json', JSON.stringify(drawingData));
-};
-
-loadDrawingData();
+let drawingData = JSON.parse(fs.readFileSync(drawingDataPath, 'utf-8'));
 
 app.use(express.static(__dirname));
 
@@ -39,13 +31,13 @@ io.on('connection', (socket) => {
 
   socket.on('draw', (data) => {
     drawingData.push(data);
-    saveDrawingData();
+    fs.writeFileSync(drawingDataPath, JSON.stringify(drawingData));
     io.emit('draw', data); // Broadcast to all clients
   });
 
   socket.on('clear', () => {
     drawingData = [];
-    saveDrawingData();
+    fs.writeFileSync(drawingDataPath, JSON.stringify(drawingData));
     io.emit('clear');
   });
 
