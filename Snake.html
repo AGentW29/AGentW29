@@ -105,7 +105,6 @@
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
-
             background-color: #29c5e1;
             color: black;
             border: none;
@@ -119,7 +118,7 @@
         <div id="highscore"><strong>Highscores</strong></div>
     </div>
     <div id="score">0</div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
     <button id="restartBtn">Restart</button>
     <div id="nameInputContainer">
@@ -154,8 +153,17 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Set canvas size to 90% of the smaller dimension (width or height)
+        function resizeCanvas() {
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            canvas.width = size;
+            canvas.height = size;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
         const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
+        let tileCount = canvas.width / gridSize;
 
         let snake = [{x: 10, y: 10}];
         let apple = {x: 5, y: 5};
@@ -163,6 +171,7 @@
         let dy = 0;
         let score = 0;
         let gameOver = false;
+        let isPaused = false; // Add a pause state for the special popup
 
         const maxHighscores = 5;
 
@@ -184,10 +193,11 @@
         }
 
         function moveSnake() {
+            if (isPaused) return; // Don't move the snake if the game is paused
+
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             if (score === 2) {
-                dx = 0;
-                dy = 0;
+                isPaused = true; // Pause the game
                 document.getElementById('specialPopup').style.display = 'block';
                 return;
             }
@@ -334,29 +344,11 @@
         document.addEventListener('touchstart', handleTouchStart);
         document.addEventListener('touchend', handleTouchEnd);
 
-        document.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            if (dy === 0) { dx = 0; dy = -1; }
-            break;
-        case 'ArrowDown':
-            if (dy === 0) { dx = 0; dy = 1; }
-            break;
-        case 'ArrowLeft':
-            if (dx === 0) { dx = -1; dy = 0; }
-            break;
-        case 'ArrowRight':
-            if (dx === 0) { dx = 1; dy = 0; }
-            break;
-    }
-});
-
-
         document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none';
+            isPaused = false; // Unpause the game
             dx = 1; // Resume movement
             dy = 0;
-            gameLoop();
         });
 
         document.getElementById('secretBtn').addEventListener('click', () => {
@@ -369,8 +361,10 @@
             dy = 0;
             score = 0;
             gameOver = false;
+            isPaused = false;
             document.getElementById('score').textContent = '0';
             document.getElementById('nameInputContainer').style.display = 'none';
+            document.getElementById('specialPopup').style.display = 'none';
             gameLoop();
         }
 
