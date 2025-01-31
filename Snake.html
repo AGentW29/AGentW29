@@ -195,17 +195,8 @@
                     head.y < 0 || head.y >= tileCount ||
                     snake.some(segment => segment.x === head.x && segment.y === head.y)
                 ) {
-                    // Check if the score is a new highscore before prompting
-                    const lowestHighscore = highscoreList.length >= maxHighscores 
-                        ? highscoreList[highscoreList.length - 1].score 
-                        : 0;
-
-                    if (score > lowestHighscore || highscoreList.length < maxHighscores) {
-                        promptForName();
-                        gameOver = true;
-                    } else {
-                        gameOver = true;
-                    }
+                    gameOver = true;
+                    promptForName();
                     return;
                 }
             }
