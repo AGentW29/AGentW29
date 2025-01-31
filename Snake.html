@@ -153,33 +153,42 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Set canvas size to 90% of the smaller dimension (width or height)
+        // Dynamic canvas sizing
+        const gridSize = 20; // Size of each grid square in pixels
+        let tileCount; // Will be calculated based on canvas size
+
         function resizeCanvas() {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            const maxSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            const size = Math.floor(maxSize / gridSize) * gridSize; // Ensure grid alignment
             canvas.width = size;
             canvas.height = size;
+            tileCount = size / gridSize; // Update tile count when resizing
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        const gridSize = 20;
-        let tileCount = canvas.width / gridSize;
-
-        let snake = [{x: 10, y: 10}];
-        let apple = {x: 5, y: 5};
+        // Game state
+        let snake = [];
+        let apple = {};
         let dx = 0;
         let dy = 0;
         let score = 0;
         let gameOver = false;
-        let isPaused = false; // Add a pause state for the special popup
+        let isPaused = false;
 
-        const maxHighscores = 5;
-
-        // Swipe gesture variables
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
+        // Initialize game
+        function resetGame() {
+            snake = [{ x: Math.floor(tileCount / 2), y: Math.floor(tileCount / 2) }]; // Start snake in the center
+            generateApple();
+            dx = 0;
+            dy = 0;
+            score = 0;
+            gameOver = false;
+            isPaused = false;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('nameInputContainer').style.display = 'none';
+            document.getElementById('specialPopup').style.display = 'none';
+        }
 
         function drawSnakePart(snakePart) {
             ctx.fillStyle = '#49ff00';
@@ -192,39 +201,6 @@
             snake.forEach(drawSnakePart);
         }
 
-        function moveSnake() {
-            if (isPaused) return; // Don't move the snake if the game is paused
-
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            if (score === 2) {
-                isPaused = true; // Pause the game
-                document.getElementById('specialPopup').style.display = 'block';
-                return;
-            }
-
-            if (dx !== 0 || dy !== 0) {
-                if (
-                    head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount ||
-                    snake.some(segment => segment.x === head.x && segment.y === head.y)
-                ) {
-                    gameOver = true;
-                    promptForName();
-                    return;
-                }
-            }
-
-            snake.unshift(head);
-
-            if (head.x === apple.x && head.y === apple.y) {
-                score += 1;
-                document.getElementById('score').textContent = `${score}`;
-                generateApple();
-            } else {
-                snake.pop();
-            }
-        }
-
         function drawApple() {
             ctx.fillStyle = '#ff2900';
             ctx.beginPath();
@@ -233,55 +209,51 @@
         }
 
         function generateApple() {
-            apple.x = Math.floor(Math.random() * tileCount);
-            apple.y = Math.floor(Math.random() * tileCount);
-
-            snake.forEach(part => {
-                if (part.x === apple.x && part.y === apple.y) {
-                    generateApple();
-                }
-            });
-        }
-
-        async function updateHighscores(playerName) {
-            const highscoreRef = doc(db, 'highscores', 'global');
-            try {
-                const docSnap = await getDoc(highscoreRef);
-                const highscores = docSnap.exists() ? docSnap.data().highscores : [];
-
-                highscores.push({ name: playerName, score: score });
-                highscores.sort((a, b) => b.score - a.score);
-
-                if (highscores.length > maxHighscores) {
-                    highscores.pop();
-                }
-
-                await setDoc(highscoreRef, { highscores });
-
-                const highscoreDiv = document.getElementById('highscore');
-                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                highscores.forEach((entry, index) => {
-                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-                });
-            } catch (error) {
-                console.error("Error updating highscores:", error);
+            apple = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            // Ensure apple doesn't spawn on the snake
+            while (snake.some(segment => segment.x === apple.x && segment.y === apple.y)) {
+                apple = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
             }
         }
 
-        async function loadHighscores() {
-            const highscoreRef = doc(db, 'highscores', 'global');
-            try {
-                const docSnap = await getDoc(highscoreRef);
-                if (docSnap.exists()) {
-                    const highscores = docSnap.data().highscores;
-                    const highscoreDiv = document.getElementById('highscore');
-                    highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                    highscores.forEach((entry, index) => {
-                        highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading highscores:", error);
+        function moveSnake() {
+            if (isPaused || gameOver) return;
+
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+            // Special condition check
+            if (score === 29) {
+                isPaused = true;
+                document.getElementById('specialPopup').style.display = 'block';
+                return;
+            }
+
+            // Collision detection
+            if (
+                head.x < 0 || head.x >= tileCount ||
+                head.y < 0 || head.y >= tileCount ||
+                snake.some(segment => segment.x === head.x && segment.y === head.y)
+            ) {
+                gameOver = true;
+                promptForName();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Apple eating logic
+            if (head.x === apple.x && head.y === apple.y) {
+                score += 1;
+                document.getElementById('score').textContent = score;
+                generateApple();
+            } else {
+                snake.pop();
             }
         }
 
@@ -303,19 +275,36 @@
             setTimeout(gameLoop, 100);
         }
 
+        // Input handling
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (dy === 0) { dx = 0; dy = -1; }
+                    break;
+                case 'ArrowDown':
+                    if (dy === 0) { dx = 0; dy = 1; }
+                    break;
+                case 'ArrowLeft':
+                    if (dx === 0) { dx = -1; dy = 0; }
+                    break;
+                case 'ArrowRight':
+                    if (dx === 0) { dx = 1; dy = 0; }
+                    break;
+            }
+        });
+
         // Swipe gesture logic
+        let touchStartX = 0;
+        let touchStartY = 0;
+
         function handleTouchStart(event) {
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
         }
 
         function handleTouchEnd(event) {
-            touchEndX = event.changedTouches[0].clientX;
-            touchEndY = event.changedTouches[0].clientY;
-            handleSwipe();
-        }
-
-        function handleSwipe() {
+            const touchEndX = event.changedTouches[0].clientX;
+            const touchEndY = event.changedTouches[0].clientY;
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
 
@@ -340,33 +329,18 @@
             }
         }
 
-        // Add touch event listeners
         document.addEventListener('touchstart', handleTouchStart);
         document.addEventListener('touchend', handleTouchEnd);
 
+        // Continue button fix
         document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none';
-            isPaused = false; // Unpause the game
-            dx = 1; // Resume movement
-            dy = 0;
+            isPaused = false; // Resume the game
         });
 
         document.getElementById('secretBtn').addEventListener('click', () => {
             window.location.href = "Turtleearth.html";
         });
-
-        function resetGame() {
-            snake = [{x: 10, y: 10}];
-            dx = 0;
-            dy = 0;
-            score = 0;
-            gameOver = false;
-            isPaused = false;
-            document.getElementById('score').textContent = '0';
-            document.getElementById('nameInputContainer').style.display = 'none';
-            document.getElementById('specialPopup').style.display = 'none';
-            gameLoop();
-        }
 
         document.getElementById('restartBtn').addEventListener('click', resetGame);
 
@@ -381,6 +355,8 @@
             document.getElementById('nameInputContainer').style.display = 'none';
         });
 
+        // Initialize game
+        resetGame();
         loadHighscores();
         gameLoop();
     </script>
