@@ -187,6 +187,9 @@
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             if (score === 2) {
                // window.location.href = "index.html";
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '48px serif';
+                ctx.textAlign = 'center';
                 ctx.fillText('Nice 29!', canvas.width / 2, canvas.height / 2);
                 return;
             }
