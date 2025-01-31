@@ -39,37 +39,6 @@
             left: 50%;
             transform: translateX(-50%);
         }
-        #controls {
-            position: fixed;
-            bottom: 20px;
-            width: 180px;
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-gap: 10px;
-            justify-content: center;
-        }
-        .control-button {
-            width: 60px;
-            height: 60px;
-            background-color: #b48800;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .control-button:active {
-            background-color: #b48800;
-        }
-        #upBtn { grid-column: 2 / 3; }
-        #downBtn { grid-column: 2 / 3; }
-        #leftBtn { grid-column: 1 / 2; }
-        #rightBtn { grid-column: 3 / 4; }
         #restartBtn {
             position: fixed;
             top: 20px;
@@ -117,7 +86,7 @@
             cursor: pointer;
             font-size: 16px;
         }
-         #specialPopup {
+        #specialPopup {
             display: none;
             position: fixed;
             top: 50%;
@@ -130,15 +99,13 @@
             color: white;
             font-size: 50px;
             z-index: 10;
-}
-
+        }
         #specialPopup button {
             margin: 10px;
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
-}
-
+        }
     </style>
 </head>
 <body>
@@ -154,18 +121,11 @@
         <button id="nameSubmit">Submit</button>
     </div>
 
-    <div id="controls">
-        <button class="control-button" id="upBtn">↑</button>
-        <button class="control-button" id="leftBtn">←</button>
-        <button class="control-button" id="downBtn">↓</button>
-        <button class="control-button" id="rightBtn">→</button>
-    </div>
-        <div id="specialPopup">
+    <div id="specialPopup">
         <p>Nice 29!</p>
         <button id="continueBtn">Continue</button>
         <button id="secretBtn">Secret</button>
     </div>
-
 
     <script type="module">
         // Firebase configuration
@@ -200,6 +160,12 @@
 
         const maxHighscores = 5;
 
+        // Swipe gesture variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
         function drawSnakePart(snakePart) {
             ctx.fillStyle = '#49ff00';
             ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
@@ -213,12 +179,12 @@
 
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-           if (score === 29) {
+            if (score === 29) {
                 dx = 0;
                 dy = 0;
                 document.getElementById('specialPopup').style.display = 'block';
                 return;
-}
+            }
 
             if (dx !== 0 || dy !== 0) {
                 if (
@@ -267,19 +233,15 @@
                 const docSnap = await getDoc(highscoreRef);
                 const highscores = docSnap.exists() ? docSnap.data().highscores : [];
 
-                // Add the new score
                 highscores.push({ name: playerName, score: score });
                 highscores.sort((a, b) => b.score - a.score);
 
-                // Keep only the top 5 scores
                 if (highscores.length > maxHighscores) {
                     highscores.pop();
                 }
 
-                // Save to Firestore
                 await setDoc(highscoreRef, { highscores });
 
-                // Update the UI
                 const highscoreDiv = document.getElementById('highscore');
                 highscoreDiv.innerHTML = "<strong>Highscores</strong>";
                 highscores.forEach((entry, index) => {
@@ -325,17 +287,57 @@
             setTimeout(gameLoop, 100);
         }
 
-            document.getElementById('continueBtn').addEventListener('click', () => {
+        // Swipe gesture logic
+        function handleTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        }
+
+        function handleTouchEnd(event) {
+            touchEndX = event.changedTouches[0].clientX;
+            touchEndY = event.changedTouches[0].clientY;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (deltaX > 0 && dx === 0) {
+                    dx = 1; // Swipe right
+                    dy = 0;
+                } else if (deltaX < 0 && dx === 0) {
+                    dx = -1; // Swipe left
+                    dy = 0;
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > 0 && dy === 0) {
+                    dy = 1; // Swipe down
+                    dx = 0;
+                } else if (deltaY < 0 && dy === 0) {
+                    dy = -1; // Swipe up
+                    dx = 0;
+                }
+            }
+        }
+
+        // Add touch event listeners
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
+
+        document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none';
-            dx = 1; // Resume movement (adjust if needed)
+            dx = 1; // Resume movement
             dy = 0;
             gameLoop();
         });
 
-            document.getElementById('secretBtn').addEventListener('click', () => {
-            window.location.href = "Turtleearth.html"; // Change to your secret page
+        document.getElementById('secretBtn').addEventListener('click', () => {
+            window.location.href = "Turtleearth.html";
         });
-
 
         function resetGame() {
             snake = [{x: 10, y: 10}];
@@ -344,45 +346,11 @@
             score = 0;
             gameOver = false;
             document.getElementById('score').textContent = '0';
-
-            // Hide name input container if visible
             document.getElementById('nameInputContainer').style.display = 'none';
-
             gameLoop();
         }
 
         document.getElementById('restartBtn').addEventListener('click', resetGame);
-
-        document.getElementById('upBtn').addEventListener('click', () => { 
-            if (dy === 0) { dx = 0; dy = -1; }
-        });
-        document.getElementById('downBtn').addEventListener('click', () => { 
-            if (dy === 0) { dx = 0; dy = 1; }
-        });
-        document.getElementById('leftBtn').addEventListener('click', () => { 
-            if (dx === 0) { dx = -1; dy = 0; }
-        });
-        document.getElementById('rightBtn').addEventListener('click', () => { 
-            if (dx === 0) { dx = 1; dy = 0; }
-        });
-
-        document.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            if (dy === 0) { dx = 0; dy = -1; }
-            break;
-        case 'ArrowDown':
-            if (dy === 0) { dx = 0; dy = 1; }
-            break;
-        case 'ArrowLeft':
-            if (dx === 0) { dx = -1; dy = 0; }
-            break;
-        case 'ArrowRight':
-            if (dx === 0) { dx = 1; dy = 0; }
-            break;
-    }
-});
-
 
         function promptForName() {
             const nameInputContainer = document.getElementById('nameInputContainer');
@@ -392,9 +360,7 @@
         document.getElementById('nameSubmit').addEventListener('click', () => {
             const playerName = document.getElementById('nameField').value || 'Anonymous';
             updateHighscores(playerName);
-
-            const nameInputContainer = document.getElementById('nameInputContainer');
-            nameInputContainer.style.display = 'none';
+            document.getElementById('nameInputContainer').style.display = 'none';
         });
 
         loadHighscores();
