@@ -139,7 +139,24 @@
         <button class="control-button" id="rightBtn">→</button>
     </div>
 
-    <script>
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+            authDomain: "turtlearth-6b0a6.firebaseapp.com",
+            projectId: "turtlearth-6b0a6",
+            storageBucket: "turtlearth-6b0a6.firebasestorage.app",
+            messagingSenderId: "90749703119",
+            appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+            measurementId: "G-WVYQDY75EG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -153,7 +170,6 @@
         let score = 0;
         let gameOver = false;
 
-        const highscoreList = [];
         const maxHighscores = 5;
 
         function drawSnakePart(snakePart) {
@@ -168,31 +184,31 @@
         }
 
         function moveSnake() {
-    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-if (score === 29) {
-    window.location.href = "index.html";
-    return;
-}
-    if (dx !== 0 || dy !== 0) {
-        if (
-            head.x < 0 || head.x >= tileCount ||
-            head.y < 0 || head.y >= tileCount ||
-            snake.some(segment => segment.x === head.x && segment.y === head.y)
-        ) {
-            // Check if the score is a new highscore before prompting
-            const lowestHighscore = highscoreList.length >= maxHighscores 
-    ? highscoreList[highscoreList.length - 1].score 
-    : 0;
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            if (score === 29) {
+                window.location.href = "index.html";
+                return;
+            }
+            if (dx !== 0 || dy !== 0) {
+                if (
+                    head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)
+                ) {
+                    // Check if the score is a new highscore before prompting
+                    const lowestHighscore = highscoreList.length >= maxHighscores 
+                        ? highscoreList[highscoreList.length - 1].score 
+                        : 0;
 
-if (score > lowestHighscore || highscoreList.length < maxHighscores) {
-    promptForName();
-    gameOver = true;
-} else {
-    gameOver = true;
-}
-            return;
-        }
-    }
+                    if (score > lowestHighscore || highscoreList.length < maxHighscores) {
+                        promptForName();
+                        gameOver = true;
+                    } else {
+                        gameOver = true;
+                    }
+                    return;
+                }
+            }
 
             snake.unshift(head);
 
@@ -223,33 +239,49 @@ if (score > lowestHighscore || highscoreList.length < maxHighscores) {
             });
         }
 
-        function updateHighscores(playerName) {
-            highscoreList.push({ name: playerName, score: score });
-            highscoreList.sort((a, b) => b.score - a.score);
+        async function updateHighscores(playerName) {
+            const highscoreRef = doc(db, 'highscores', 'global');
+            try {
+                const docSnap = await getDoc(highscoreRef);
+                const highscores = docSnap.exists() ? docSnap.data().highscores : [];
 
-            if (highscoreList.length > maxHighscores) {
-                highscoreList.pop();
-            }
+                // Add the new score
+                highscores.push({ name: playerName, score: score });
+                highscores.sort((a, b) => b.score - a.score);
 
-            // Save highscores to localStorage
-            localStorage.setItem('highscores', JSON.stringify(highscoreList));
+                // Keep only the top 5 scores
+                if (highscores.length > maxHighscores) {
+                    highscores.pop();
+                }
 
-            const highscoreDiv = document.getElementById('highscore');
-            highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-            highscoreList.forEach((entry, index) => {
-                highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-            });
-        }
+                // Save to Firestore
+                await setDoc(highscoreRef, { highscores });
 
-        function loadHighscores() {
-            const storedHighscores = localStorage.getItem('highscores');
-            if (storedHighscores) {
-                highscoreList.push(...JSON.parse(storedHighscores));
+                // Update the UI
                 const highscoreDiv = document.getElementById('highscore');
                 highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                highscoreList.forEach((entry, index) => {
+                highscores.forEach((entry, index) => {
                     highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
                 });
+            } catch (error) {
+                console.error("Error updating highscores:", error);
+            }
+        }
+
+        async function loadHighscores() {
+            const highscoreRef = doc(db, 'highscores', 'global');
+            try {
+                const docSnap = await getDoc(highscoreRef);
+                if (docSnap.exists()) {
+                    const highscores = docSnap.data().highscores;
+                    const highscoreDiv = document.getElementById('highscore');
+                    highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+                    highscores.forEach((entry, index) => {
+                        highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading highscores:", error);
             }
         }
 
