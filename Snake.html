@@ -1,4 +1,4 @@
-Could you please make canvas 90% of the screen width/height (whichever is smaller) instead of the fix 400 pixels. Also the continue button doesn't actually work. Please fix those things. Here is my updated code: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -105,7 +105,6 @@ Could you please make canvas 90% of the screen width/height (whichever is smalle
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
-
             background-color: #29c5e1;
             color: black;
             border: none;
@@ -163,6 +162,7 @@ Could you please make canvas 90% of the screen width/height (whichever is smalle
         let dy = 0;
         let score = 0;
         let gameOver = false;
+        let gamePaused = false;
 
         const maxHighscores = 5;
 
@@ -185,10 +185,14 @@ Could you please make canvas 90% of the screen width/height (whichever is smalle
 
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            if (score === 2) {
-                dx = 0;
-                dy = 0;
+            
+            if (score === 2 && !gamePaused) {
+                gamePaused = true;
                 document.getElementById('specialPopup').style.display = 'block';
+                return;
+            }
+
+            if (gamePaused) {
                 return;
             }
 
@@ -335,28 +339,31 @@ Could you please make canvas 90% of the screen width/height (whichever is smalle
         document.addEventListener('touchend', handleTouchEnd);
 
         document.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            if (dy === 0) { dx = 0; dy = -1; }
-            break;
-        case 'ArrowDown':
-            if (dy === 0) { dx = 0; dy = 1; }
-            break;
-        case 'ArrowLeft':
-            if (dx === 0) { dx = -1; dy = 0; }
-            break;
-        case 'ArrowRight':
-            if (dx === 0) { dx = 1; dy = 0; }
-            break;
-    }
-});
-
+            if (!gamePaused) {
+                switch (event.key) {
+                    case 'ArrowUp':
+                        if (dy === 0) { dx = 0; dy = -1; }
+                        break;
+                    case 'ArrowDown':
+                        if (dy === 0) { dx = 0; dy = 1; }
+                        break;
+                    case 'ArrowLeft':
+                        if (dx === 0) { dx = -1; dy = 0; }
+                        break;
+                    case 'ArrowRight':
+                        if (dx === 0) { dx = 1; dy = 0; }
+                        break;
+                }
+            }
+        });
 
         document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none';
-            dx = 1; // Resume movement
-            dy = 0;
-            gameLoop();
+            gamePaused = false;
+            if (dx === 0 && dy === 0) {
+                dx = 1; // Resume movement
+                dy = 0;
+            }
         });
 
         document.getElementById('secretBtn').addEventListener('click', () => {
@@ -369,8 +376,10 @@ Could you please make canvas 90% of the screen width/height (whichever is smalle
             dy = 0;
             score = 0;
             gameOver = false;
+            gamePaused = false;
             document.getElementById('score').textContent = '0';
             document.getElementById('nameInputContainer').style.display = 'none';
+            document.getElementById('specialPopup').style.display = 'none';
             gameLoop();
         }
 
