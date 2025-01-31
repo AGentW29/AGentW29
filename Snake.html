@@ -281,6 +281,8 @@
             }
         }
 
+        let gameLoopTimeout;
+
         function gameLoop() {
             if (gameOver) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -296,7 +298,7 @@
             drawApple();
             moveSnake();
             drawSnake();
-            setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
+            gameLoopTimeout = setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
         }
 
         // Swipe gesture logic
@@ -372,6 +374,10 @@
         });
 
         function resetGame() {
+            // Clear the existing game loop timeout
+            clearTimeout(gameLoopTimeout);
+
+            // Reset game state
             snake = [{x: 10, y: 10}];
             dx = 0;
             dy = 0;
@@ -379,10 +385,17 @@
             gameOver = false;
             gamePaused = false;
             gameSpeed = normalSpeed; // Reset speed to normal
+
+            // Update the UI
             document.getElementById('score').textContent = '0';
             document.getElementById('nameInputContainer').style.display = 'none';
             document.getElementById('specialPopup').style.display = 'none';
+
+            // Generate a new apple
             generateApple();
+
+            // Restart the game loop
+            gameLoop();
         }
 
         document.getElementById('restartBtn').addEventListener('click', resetGame);
