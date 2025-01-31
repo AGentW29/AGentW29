@@ -191,7 +191,7 @@
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-            if (score === 2 && !gamePaused) {
+            if (score === 29 && !gamePaused) {
                 gamePaused = true;
                 gameSpeed = pausedSpeed; // Slow down the game loop
                 document.getElementById('specialPopup').style.display = 'block';
