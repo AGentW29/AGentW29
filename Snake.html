@@ -117,6 +117,28 @@
             cursor: pointer;
             font-size: 16px;
         }
+         #specialPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            z-index: 10;
+}
+
+        #specialPopup button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -138,6 +160,12 @@
         <button class="control-button" id="downBtn">↓</button>
         <button class="control-button" id="rightBtn">→</button>
     </div>
+        <div id="specialPopup">
+        <p>Nice 29!</p>
+        <button id="continueBtn">Continue</button>
+        <button id="secretBtn">Secret</button>
+    </div>
+
 
     <script type="module">
         // Firebase configuration
@@ -185,14 +213,13 @@
 
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            if (score === 2) {
-               // window.location.href = "index.html";
-                ctx.fillStyle = '#ecf0f1';
-                ctx.font = '48px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Nice 29!', canvas.width / 2, canvas.height / 2);
+           if (score === 2) {
+                dx = 0;
+                dy = 0;
+                document.getElementById('specialPopup').style.display = 'block';
                 return;
-            }
+}
+
             if (dx !== 0 || dy !== 0) {
                 if (
                     head.x < 0 || head.x >= tileCount ||
@@ -297,6 +324,18 @@
             drawSnake();
             setTimeout(gameLoop, 100);
         }
+
+            document.getElementById('continueBtn').addEventListener('click', () => {
+            document.getElementById('specialPopup').style.display = 'none';
+            dx = 1; // Resume movement (adjust if needed)
+            dy = 0;
+            gameLoop();
+        });
+
+            document.getElementById('secretBtn').addEventListener('click', () => {
+            window.location.href = "secret.html"; // Change to your secret page
+        });
+
 
         function resetGame() {
             snake = [{x: 10, y: 10}];
