@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game Store</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particleFall 1s ease-out forwards;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at center, #FFD700, transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes particleFall {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .glow-effect {
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid #fdbb2d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .header h1 {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+            position: relative;
+        }
+
+        .coins {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .store-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid #4ecdc4;
+            transform-origin: center;
+            transition: transform 0.3s;
+        }
+
+        .store-section:hover {
+            transform: scale(1.01);
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            color: #1a2a6c;
+            font-size: 1.8em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #4ecdc4;
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            animation: borderSlide 2s infinite;
+        }
+
+        @keyframes borderSlide {
+            0% { width: 0; left: 0; }
+            50% { width: 100%; left: 0; }
+            100% { width: 0; left: 100%; }
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .item-card {
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+            font-size: 1.3em;
+            position: relative;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .item-price {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .buy-button {
+            background: linear-gradient(45deg, #4ecdc4, #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .buy-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: 0.5s;
+            opacity: 0;
+        }
+
+        .buy-button:hover::after {
+            opacity: 1;
+            transform: rotate(45deg) translateX(100%);
+        }
+
+        .buy-button:hover {
+            background: linear-gradient(45deg, #2ecc71, #4ecdc4);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .buy-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .owned {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+        }
+
+        .owned:hover {
+            background: linear-gradient(45deg, #ff8e8e, #ff6b6b);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Snake Game Store</h1>
+        <div class="coins">Coins: <span id="coinBalance">1000</span></div>
+    </div>
+
+    <div class="store-section">
+        <h2 class="section-title">Power-ups</h2>
+        <div class="items-grid">
+            <div class="item-card">
+                <div class="item-name">Speed Boost</div>
+                <div class="item-description">Move 25% faster for one game</div>
+                <div class="item-price">100 coins</div>
+                <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
+            </div>
+            <div class="item-card">
+                <div class="item-name">Double Points</div>
+                <div class="item-description">Earn twice the coins for each food item</div>
+                <div class="item-price">200 coins</div>
+                <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="store-section">
+        <h2 class="section-title">Snake Skins</h2>
+        <div class="items-grid">
+            <div class="item-card">
+                <div class="item-name">Rainbow Snake</div>
+                <div class="item-description">Make your snake colorful and fabulous</div>
+                <div class="item-price">500 coins</div>
+                <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
+            </div>
+            <div class="item-card">
+                <div class="item-name">Golden Snake</div>
+                <div class="item-description">Show off your wealth with a golden snake</div>
+                <div class="item-price">1000 coins</div>
+                <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="store-section">
+        <h2 class="section-title">Mini-games</h2>
+        <div class="items-grid">
+            <div class="item-card">
+                <div class="item-name">Maze Mode</div>
+                <div class="item-description">Navigate through challenging mazes</div>
+                <div class="item-price">300 coins</div>
+                <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
+            </div>
+            <div class="item-card">
+                <div class="item-name">Time Trial</div>
+                <div class="item-description">Race against the clock to score points</div>
+                <div class="item-price">400 coins</div>
+                <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coins = 1000;
+        const coinBalance = document.getElementById('coinBalance');
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random position variations
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = Math.random() * 200 + 100;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                document.body.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        }
+
+        function buyItem(price, button) {
+            if (coins >= price && !button.disabled) {
+                // Get button position for particle effect
+                const rect = button.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+
+                coins -= price;
+                coinBalance.textContent = coins;
+                
+                // Add multiple effects
+                button.textContent = 'Owned';
+                button.disabled = true;
+                button.classList.add('owned', 'pulse');
+                
+                // Create particle effect
+                createParticles(x, y);
+                
+                // Add glow effect to the card
+                const card = button.closest('.item-card');
+                card.classList.add('glow-effect');
+                setTimeout(() => {
+                    card.classList.remove('glow-effect');
+                }, 2000);
+                
+                // Pulse animation for coin balance
+                coinBalance.parentElement.classList.add('pulse');
+                setTimeout(() => {
+                    coinBalance.parentElement.classList.remove('pulse');
+                }, 500);
+                
+            } else if (!button.disabled) {
+                alert('Not enough coins!');
+            }
+        }
+    </script>
+</body>
+</html>
