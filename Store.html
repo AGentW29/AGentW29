@@ -508,65 +508,6 @@
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUser = user;
-        coins = 0;
-        purchasedItems = [];
-        fetchUserData(user.uid);
-    } else {
-        // Clear state on logout
-        currentUser = null;
-        coins = 0;
-        purchasedItems = [];
-        clearUI();
-    }
-});
-
-function clearUI() {
-    // Reset UI elements (e.g., item lists, coins display)
-    coinBalance.textContent = 0;
-    updateOwnedItemsUI();
-}
-
-        async function buyItem(itemName, cost) {
-    if (coins >= cost && !purchasedItems.includes(itemName)) {
-        try {
-            const userDocRef = doc(db, "users", currentUser.uid);
-
-            // Atomically update Firestore
-            await updateDoc(userDocRef, {
-                coins: coins - cost,
-                purchasedItems: arrayUnion(itemName),
-            });
-
-            // Fetch updated data after buying
-            fetchUserData(currentUser.uid);
-
-        } catch (error) {
-            console.error("Error buying item:", error);
-        }
-    }
-}
-
-async function fetchUserData(userId) {
-    const userDocRef = doc(db, "users", userId);
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        coins = data.coins;
-        purchasedItems = data.purchasedItems || [];
-
-        // Update the UI with fresh data
-        coinBalance.textContent = coins;
-        updateOwnedItemsUI();
-    } else {
-        console.error("User document does not exist.");
-    }
-}
-
-
         
 
         // Check if user is already logged in
