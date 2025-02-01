@@ -22,32 +22,6 @@
             overflow-x: hidden;
         }
 
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            animation: particleFall 2s ease-out forwards;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            filter: blur(1px);
-        }
-
-        @keyframes particleFall {
-            0% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
-                opacity: 1;
-            }
-            50% {
-                opacity: 1;
-                transform: translate(calc(var(--tx) * 0.5), calc(var(--ty) * 0.5)) scale(2) rotate(180deg);
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty)) scale(0) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
         .glow-effect {
             animation: glowPulse 2s infinite;
         }
@@ -388,57 +362,12 @@
         <button id="cancelBuy">No</button>
     </div>
 
-    <audio id="purchaseSound" src="purchase-sound.mp3"></audio>
-
     <script>
         let coins = 1000;
         const coinBalance = document.getElementById('coinBalance');
         let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || [];
         let currentPrice = 0;
         let currentButton = null;
-
-        function getRandomColor() {
-            const colors = [
-                '#FFD700', '#FF6B6B', '#4ECDC4', '#9B59B6', '#2ECC71',
-                '#F1C40F', '#E74C3C', '#3498DB', '#1ABC9C', '#E67E22'
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        function createParticles(x, y) {
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-
-                const tx = (Math.random() - 0.5) * 600;
-                const ty = (Math.random() - 0.5) * 600;
-
-                const color1 = getRandomColor();
-                const color2 = getRandomColor();
-
-                particle.style.setProperty('--tx', `${tx}px`);
-                particle.style.setProperty('--ty', `${ty}px`);
-
-                const size = Math.random() * 20 + 10;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-
-                particle.style.background = `radial-gradient(circle at center, ${color1}, ${color2})`;
-                particle.style.boxShadow = `0 0 10px ${color1}`;
-                particle.style.animationDelay = `${Math.random() * 0.2}s`;
-
-                particle.style.transform = `rotate(${Math.random() * 360}deg)`;
-
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-
-                document.body.appendChild(particle);
-
-                setTimeout(() => {
-                    particle.remove();
-                }, 2000);
-            }
-        }
 
         function buyItem(price, button) {
             if (button.disabled) return;
@@ -460,13 +389,6 @@
 
         document.getElementById('confirmBuy').addEventListener('click', () => {
             if (coins >= currentPrice) {
-                const purchaseSound = document.getElementById('purchaseSound');
-                purchaseSound.play();
-
-                const rect = currentButton.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.top + rect.height / 2;
-
                 coins -= currentPrice;
                 coinBalance.textContent = coins;
 
@@ -477,8 +399,6 @@
                 const itemName = currentButton.closest('.item-card').querySelector('.item-name').textContent;
                 purchasedItems.push(itemName);
                 localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
-
-                createParticles(x, y);
 
                 const popup = document.getElementById('confirmationPopup');
                 popup.style.display = 'none';
@@ -507,7 +427,7 @@
                         button.classList.add('owned');
                     }
                 });
-                            });
+            });
         });
 
         // Add glow effect to the header on load
