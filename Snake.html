@@ -405,6 +405,8 @@
         document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none'; // Hide the popup
             score += 1; // Award one extra point
+            document.getElementById('specialPopup2').style.display = 'none'; // Hide the popup
+            score += 1; // Award one extra point
             document.getElementById('score').textContent = `${score}`; // Update the score display
             gamePaused = false; // Unpause the game
             gameSpeed = normalSpeed; // Return to normal speed
