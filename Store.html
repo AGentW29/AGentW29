@@ -264,237 +264,257 @@
         .shake {
             animation: shake 0.5s;
         }
-
-        #confirmationPopup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        #confirmationPopup button {
-            background: #4ecdc4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            margin: 10px;
-            font-weight: bold;
-        }
-
-        #confirmationPopup button:hover {
-            background: #2ecc71;
-        }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>Snake Game Store</h1>
-        <div class="coins">Coins: <span id="coinBalance">1000</span></div>
-        <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
+
+  <body>
+    <!-- Login/Signup Form -->
+    <div id="authForm">
+        <h2>Login / Sign Up</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="loginButton">Login</button>
+        <button id="signupButton">Sign Up</button>
     </div>
 
-    <div class="store-section">
-        <h2 class="section-title">Power-ups</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Speed Boost</div>
-                <div class="item-description">Move 25% faster for one game</div>
-                <div class="item-price">100 coins</div>
-                <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
+    <!-- Store Content -->
+    <div id="storeContent" style="display: none;">
+        <div class="header">
+            <h1>Snake Game Store</h1>
+            <div class="coins">Coins: <span id="coinBalance">0</span></div>
+            <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
+            <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
+        </div>
+
+        <!-- Power-ups Section -->
+        <div class="store-section">
+            <h2 class="section-title">Power-ups</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Speed Boost</div>
+                    <div class="item-description">Move 25% faster for one game</div>
+                    <div class="item-price">100 coins</div>
+                    <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Double Points</div>
+                    <div class="item-description">Earn twice the coins for each food item</div>
+                    <div class="item-price">200 coins</div>
+                    <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
+                </div>
             </div>
-            <div class="item-card">
-                <div class="item-name">Double Points</div>
-                <div class="item-description">Earn twice the coins for each food item</div>
-                <div class="item-price">200 coins</div>
-                <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
+        </div>
+
+        <!-- Snake Skins Section -->
+        <div class="store-section">
+            <h2 class="section-title">Snake Skins</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Rainbow Snake</div>
+                    <div class="item-description">Make your snake colorful and fabulous</div>
+                    <div class="item-price">500 coins</div>
+                    <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Golden Snake</div>
+                    <div class="item-description">Show off your wealth with a golden snake</div>
+                    <div class="item-price">1000 coins</div>
+                    <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini-games Section -->
+        <div class="store-section">
+            <h2 class="section-title">Mini-games</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Maze Mode</div>
+                    <div class="item-description">Navigate through challenging mazes</div>
+                    <div class="item-price">300 coins</div>
+                    <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Time Trial</div>
+                    <div class="item-description">Race against the clock to score points</div>
+                    <div class="item-price">400 coins</div>
+                    <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="store-section">
-        <h2 class="section-title">Snake Skins</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Rainbow Snake</div>
-                <div class="item-description">Make your snake colorful and fabulous</div>
-                <div class="item-price">500 coins</div>
-                <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
-            </div>
-            <div class="item-card">
-                <div class="item-name">Golden Snake</div>
-                <div class="item-description">Show off your wealth with a golden snake</div>
-                <div class="item-price">1000 coins</div>
-                <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
-            </div>
-        </div>
-    </div>
+    <!-- Firebase and JavaScript -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-    <div class="store-section">
-        <h2 class="section-title">Mini-games</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Maze Mode</div>
-                <div class="item-description">Navigate through challenging mazes</div>
-                <div class="item-price">300 coins</div>
-                <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
-            </div>
-            <div class="item-card">
-                <div class="item-name">Time Trial</div>
-                <div class="item-description">Race against the clock to score points</div>
-                <div class="item-price">400 coins</div>
-                <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
-            </div>
-        </div>
-    </div>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+            authDomain: "turtlearth-6b0a6.firebaseapp.com",
+            projectId: "turtlearth-6b0a6",
+            storageBucket: "turtlearth-6b0a6.appspot.com",
+            messagingSenderId: "90749703119",
+            appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+            measurementId: "G-WVYQDY75EG"
+        };
 
-    <div id="confirmationPopup">
-        <p>Are you sure you want to buy this item?</p>
-        <button id="confirmBuy">Yes</button>
-        <button id="cancelBuy">No</button>
-    </div>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    <script>
-        let coins = 1000;
+        // DOM elements
+        const authForm = document.getElementById('authForm');
+        const storeContent = document.getElementById('storeContent');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const signupButton = document.getElementById('signupButton');
+        const logoutButton = document.getElementById('logoutButton');
         const coinBalance = document.getElementById('coinBalance');
-        let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || [];
-        let currentPrice = 0;
-        let currentButton = null;
 
-        function buyItem(price, button) {
-            if (button.disabled) return;
+        let currentUser = null;
+        let coins = 0;
+        let purchasedItems = [];
 
-            if (coins < price) {
-                coinBalance.parentElement.classList.add('shake');
-                setTimeout(() => {
-                    coinBalance.parentElement.classList.remove('shake');
-                }, 500);
+        // Show login/signup form by default
+        authForm.style.display = 'block';
+        storeContent.style.display = 'none';
+
+        // Sign Up
+        signupButton.addEventListener('click', async () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                alert('Please enter a username and password.');
                 return;
             }
 
-            currentPrice = price;
-            currentButton = button;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+                currentUser = userCredential.user;
 
-            const popup = document.getElementById('confirmationPopup');
-            popup.style.display = 'block';
-        }
+                // Save user data to Firestore
+                await setDoc(doc(db, 'users', currentUser.uid), {
+                    username,
+                    coins: 1000, // Starting coins
+                    purchasedItems: []
+                });
 
-        document.getElementById('confirmBuy').addEventListener('click', () => {
-            if (coins >= currentPrice) {
-                coins -= currentPrice;
-                coinBalance.textContent = coins;
-
-                currentButton.textContent = 'Owned';
-                currentButton.disabled = true;
-                currentButton.classList.add('owned', 'pulse');
-
-                const itemName = currentButton.closest('.item-card').querySelector('.item-name').textContent;
-                purchasedItems.push(itemName);
-                localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
-
-                const popup = document.getElementById('confirmationPopup');
-                popup.style.display = 'none';
-            } else {
-                alert('Not enough coins!');
+                alert('Sign up successful!');
+                loadUserData();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
             }
         });
 
-        document.getElementById('cancelBuy').addEventListener('click', () => {
-            const popup = document.getElementById('confirmationPopup');
-            popup.style.display = 'none';
+        // Login
+        loginButton.addEventListener('click', async () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                alert('Please enter a username and password.');
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+                currentUser = userCredential.user;
+                alert('Login successful!');
+                loadUserData();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
         });
 
-        document.getElementById('backToGame').addEventListener('click', () => {
-            window.location.href = 'game.html'; // Replace with your game's URL
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                authForm.style.display = 'block';
+                storeContent.style.display = 'none';
+                alert('Logged out successfully!');
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
         });
 
-        window.addEventListener('load', () => {
-            purchasedItems.forEach(itemName => {
-                const itemCards = document.querySelectorAll('.item-card');
-                itemCards.forEach(card => {
-                    if (card.querySelector('.item-name').textContent === itemName) {
-                        const button = card.querySelector('.buy-button');
-                        button.textContent = 'Owned';
-                        button.disabled = true;
-                        button.classList.add('owned');
-                    }
-                });
+        // Load user data from Firestore
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                coins = userData.coins;
+                purchasedItems = userData.purchasedItems || [];
+
+                // Update UI
+                coinBalance.textContent = coins;
+                updatePurchasedItems();
+
+                authForm.style.display = 'none';
+                storeContent.style.display = 'block';
+            }
+        }
+
+        // Update purchased items in the UI
+        function updatePurchasedItems() {
+            const itemCards = document.querySelectorAll('.item-card');
+            itemCards.forEach(card => {
+                const itemName = card.querySelector('.item-name').textContent;
+                const button = card.querySelector('.buy-button');
+
+                if (purchasedItems.includes(itemName)) {
+                    button.textContent = 'Owned';
+                    button.disabled = true;
+                    button.classList.add('owned');
+                }
             });
-        });
+        }
 
-        // Add glow effect to the header on load
-        document.querySelector('.header').classList.add('glow-effect');
+        // Buy item
+        async function buyItem(price, button) {
+            if (button.disabled) return;
 
-        // Add event listeners for item cards to show hover effects
-        const itemCards = document.querySelectorAll('.item-card');
-        itemCards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.classList.add('pulse');
-            });
+            if (coins < price) {
+                alert('Not enough coins!');
+                return;
+            }
 
-            card.addEventListener('mouseleave', () => {
-                card.classList.remove('pulse');
-            });
-        });
-
-        // Add a function to update the coin balance display
-        function updateCoinBalance() {
+            coins -= price;
             coinBalance.textContent = coins;
+
+            const itemName = button.closest('.item-card').querySelector('.item-name').textContent;
+            purchasedItems.push(itemName);
+
+            button.textContent = 'Owned';
+            button.disabled = true;
+            button.classList.add('owned');
+
+            // Update Firestore
+            if (currentUser) {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    coins,
+                    purchasedItems
+                });
+            }
         }
 
-        // Example of adding more items dynamically (optional)
-        function addNewItem(section, name, description, price) {
-            const newItem = document.createElement('div');
-            newItem.className = 'item-card';
-            newItem.innerHTML = `
-                <div class="item-name">${name}</div>
-                <div class="item-description">${description}</div>
-                <div class="item-price">${price} coins</div>
-                <button class="buy-button" onclick="buyItem(${price}, this)">Buy</button>
-            `;
-            section.querySelector('.items-grid').appendChild(newItem);
-        }
-
-        // Example usage of adding a new item (optional)
-        const powerUpsSection = document.querySelector('.store-section:nth-child(2)');
-        addNewItem(powerUpsSection, 'Shield', 'Protect your snake from collisions for one game', 150);
-
-        // Add a function to reset the store (optional)
-        function resetStore() {
-            coins = 1000;
-            updateCoinBalance();
-            purchasedItems = [];
-            localStorage.removeItem('purchasedItems');
-            const buttons = document.querySelectorAll('.buy-button');
-            buttons.forEach(button => {
-                button.textContent = 'Buy';
-                button.disabled = false;
-                button.classList.remove('owned', 'pulse');
-            });
-        }
-
-        // Add a reset button (optional)
-        const resetButton = document.createElement('button');
-        resetButton.textContent = 'Reset Store';
-        resetButton.style.position = 'fixed';
-        resetButton.style.bottom = '20px';
-        resetButton.style.right = '20px';
-        resetButton.style.background = '#ff6b6b';
-        resetButton.style.color = 'white';
-        resetButton.style.border = 'none';
-        resetButton.style.padding = '10px 20px';
-        resetButton.style.borderRadius = '25px';
-        resetButton.style.cursor = 'pointer';
-        resetButton.addEventListener('click', resetStore);
-        document.body.appendChild(resetButton);
+        // Check if user is already logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadUserData();
+            }
+        });
     </script>
 </body>
 </html>
