@@ -100,6 +100,22 @@
             font-size: 50px;
             z-index: 10;
         }
+
+          #specialPopup2 {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 50px;
+            z-index: 10;
+        }
+        
         #specialPopup button {
             margin: 10px;
             padding: 10px 20px;
@@ -128,6 +144,12 @@
 
     <div id="specialPopup">
         <p>Nice 29!</p>
+        <button id="continueBtn">Continue</button>
+        <button id="secretBtn">Secret</button>
+    </div>
+
+     <div id="specialPopup2">
+        <p>Magic!</p>
         <button id="continueBtn">Continue</button>
         <button id="secretBtn">Secret</button>
     </div>
@@ -195,6 +217,13 @@
                 gamePaused = true;
                 gameSpeed = pausedSpeed; // Slow down the game loop
                 document.getElementById('specialPopup').style.display = 'block';
+                return;
+            }
+
+               if (score === 2 && !gamePaused) {
+                gamePaused = true;
+                gameSpeed = pausedSpeed; // Slow down the game loop
+                document.getElementById('specialPopup2').style.display = 'block';
                 return;
             }
 
