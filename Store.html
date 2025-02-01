@@ -28,9 +28,9 @@
             animation: particleFall 1.5s ease-out forwards;
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            width: 5px; /* Small particles */
+            width: 5px;
             height: 5px;
-            background: rgba(255, 255, 255, 0.9); /* White bright particles */
+            background: rgba(255, 255, 255, 0.9);
         }
 
         @keyframes particleFall {
@@ -42,16 +42,6 @@
                 transform: translate(var(--tx), var(--ty)) scale(0);
                 opacity: 0;
             }
-        }
-
-        .glow-effect {
-            animation: glowPulse 2s infinite;
-        }
-
-        @keyframes glowPulse {
-            0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
-            50% { box-shadow: 0 0 15px rgba(0, 255, 0, 1); }
-            100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
         }
 
         .header {
@@ -141,15 +131,6 @@
             background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
-        }
     </style>
 </head>
 <body>
@@ -165,6 +146,27 @@
                 <div class="item-name">Speed Boost</div>
                 <div class="item-price">100 coins</div>
                 <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
+            </div>
+            <div class="item-card">
+                <div class="item-name">Invincibility</div>
+                <div class="item-price">300 coins</div>
+                <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="store-section">
+        <h2>Skins</h2>
+        <div class="items-grid">
+            <div class="item-card">
+                <div class="item-name">Golden Snake</div>
+                <div class="item-price">500 coins</div>
+                <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
+            </div>
+            <div class="item-card">
+                <div class="item-name">Cyber Blue</div>
+                <div class="item-price">700 coins</div>
+                <button class="buy-button" onclick="buyItem(700, this)">Buy</button>
             </div>
         </div>
     </div>
@@ -200,7 +202,7 @@
 
                 button.textContent = 'Owned';
                 button.disabled = true;
-                button.classList.add('owned', 'pulse');
+                button.classList.add('owned');
 
                 createParticles(x, y);
             } else {
