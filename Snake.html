@@ -267,7 +267,84 @@
     </style>
 </head>
 
-       <!-- Add Firebase SDK -->
+   <body>
+    <!-- Login/Signup Form -->
+    <div id="authForm">
+        <h2>Login / Sign Up</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="loginButton">Login</button>
+        <button id="signupButton">Sign Up</button>
+    </div>
+
+    <!-- Store Content -->
+    <div id="storeContent" style="display: none;">
+        <div class="header">
+            <h1>Snake Game Store</h1>
+            <div class="coins">Coins: <span id="coinBalance">0</span></div>
+            <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
+            <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
+        </div>
+
+        <!-- Power-ups Section -->
+        <div class="store-section">
+            <h2 class="section-title">Power-ups</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Speed Boost</div>
+                    <div class="item-description">Move 25% faster for one game</div>
+                    <div class="item-price">100 coins</div>
+                    <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Double Points</div>
+                    <div class="item-description">Earn twice the coins for each food item</div>
+                    <div class="item-price">200 coins</div>
+                    <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Snake Skins Section -->
+        <div class="store-section">
+            <h2 class="section-title">Snake Skins</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Rainbow Snake</div>
+                    <div class="item-description">Make your snake colorful and fabulous</div>
+                    <div class="item-price">500 coins</div>
+                    <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Golden Snake</div>
+                    <div class="item-description">Show off your wealth with a golden snake</div>
+                    <div class="item-price">1000 coins</div>
+                    <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini-games Section -->
+        <div class="store-section">
+            <h2 class="section-title">Mini-games</h2>
+            <div class="items-grid">
+                <div class="item-card">
+                    <div class="item-name">Maze Mode</div>
+                    <div class="item-description">Navigate through challenging mazes</div>
+                    <div class="item-price">300 coins</div>
+                    <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
+                </div>
+                <div class="item-card">
+                    <div class="item-name">Time Trial</div>
+                    <div class="item-description">Race against the clock to score points</div>
+                    <div class="item-price">400 coins</div>
+                    <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and JavaScript -->
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
@@ -439,79 +516,5 @@
             }
         });
     </script>
-</head>
-<body>
-    <!-- Login/Signup Form -->
-    <div id="authForm" style="display: none;">
-        <h2>Login / Sign Up</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="loginButton">Login</button>
-        <button id="signupButton">Sign Up</button>
-    </div>
-
-    <!-- Store Content -->
-    <div id="storeContent" style="display: none;">
-        <div class="header">
-            <h1>Snake Game Store</h1>
-            <div class="coins">Coins: <span id="coinBalance">0</span></div>
-            <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
-            <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
-        </div>
-
-    <div class="store-section">
-        <h2 class="section-title">Power-ups</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Speed Boost</div>
-                <div class="item-description">Move 25% faster for one game</div>
-                <div class="item-price">100 coins</div>
-                <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
-            </div>
-            <div class="item-card">
-                <div class="item-name">Double Points</div>
-                <div class="item-description">Earn twice the coins for each food item</div>
-                <div class="item-price">200 coins</div>
-                <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="store-section">
-        <h2 class="section-title">Snake Skins</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Rainbow Snake</div>
-                <div class="item-description">Make your snake colorful and fabulous</div>
-                <div class="item-price">500 coins</div>
-                <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
-            </div>
-            <div class="item-card">
-                <div class="item-name">Golden Snake</div>
-                <div class="item-description">Show off your wealth with a golden snake</div>
-                <div class="item-price">1000 coins</div>
-                <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="store-section">
-        <h2 class="section-title">Mini-games</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <div class="item-name">Maze Mode</div>
-                <div class="item-description">Navigate through challenging mazes</div>
-                <div class="item-price">300 coins</div>
-                <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
-            </div>
-            <div class="item-card">
-                <div class="item-name">Time Trial</div>
-                <div class="item-description">Race against the clock to score points</div>
-                <div class="item-price">400 coins</div>
-                <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
-            </div>
-        </div>
-    </div>
-    </div>
 </body>
 </html>
