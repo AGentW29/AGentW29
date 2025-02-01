@@ -25,24 +25,29 @@
         .particle {
             position: absolute;
             pointer-events: none;
-            animation: particleFall 1s ease-out forwards;
-            width: 10px;
-            height: 10px;
-            background: radial-gradient(circle at center, #FFD700, transparent);
+            animation: particleFall 2s ease-out forwards;
             border-radius: 50%;
             transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            filter: blur(1px);
         }
 
         @keyframes particleFall {
             0% {
-                transform: translate(0, 0) rotate(0deg);
+                transform: translate(0, 0) scale(1) rotate(0deg);
                 opacity: 1;
             }
+            50% {
+                opacity: 1;
+                transform: translate(calc(var(--tx) * 0.5), calc(var(--ty) * 0.5)) scale(2) rotate(180deg);
+            }
             100% {
-                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+                transform: translate(var(--tx), var(--ty)) scale(0) rotate(360deg);
                 opacity: 0;
             }
         }
+
 
         .glow-effect {
             animation: glowPulse 2s infinite;
@@ -337,21 +342,57 @@
     </div>
 
     <script>
-        let coins = 1000;
+        let coins = 10000;
         const coinBalance = document.getElementById('coinBalance');
 
+        function getRandomColor() {
+            const colors = [
+                '#FFD700', // Gold
+                '#FF6B6B', // Red
+                '#4ECDC4', // Turquoise
+                '#9B59B6', // Purple
+                '#2ECC71', // Green
+                '#F1C40F', // Yellow
+                '#E74C3C', // Dark Red
+                '#3498DB', // Blue
+                '#1ABC9C', // Sea Green
+                '#E67E22'  // Orange
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
         function createParticles(x, y) {
-            for (let i = 0; i < 20; i++) {
+            // Create many more particles
+            for (let i = 0; i < 50; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 
-                // Random position variations
-                const tx = (Math.random() - 0.5) * 200;
-                const ty = Math.random() * 200 + 100;
+                // Much larger spread
+                const tx = (Math.random() - 0.5) * 600; // Increased from 200
+                const ty = (Math.random() - 0.5) * 600; // Changed to allow upward movement
+                
+                // Random colors with gradient
+                const color1 = getRandomColor();
+                const color2 = getRandomColor();
                 
                 particle.style.setProperty('--tx', `${tx}px`);
                 particle.style.setProperty('--ty', `${ty}px`);
                 
+                // Randomize particle size
+                const size = Math.random() * 20 + 10; // 10-30px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Add gradient background
+                particle.style.background = `radial-gradient(circle at center, ${color1}, ${color2})`;
+                
+                // Add glow effect
+                particle.style.boxShadow = `0 0 10px ${color1}`;
+                
+                // Random delay for more natural effect
+                particle.style.animationDelay = `${Math.random() * 0.2}s`;
+                
+                // Position at click/purchase point
                 particle.style.left = `${x}px`;
                 particle.style.top = `${y}px`;
                 
@@ -360,8 +401,43 @@
                 // Remove particle after animation
                 setTimeout(() => {
                     particle.remove();
-                }, 1000);
+                }, 2000); // Increased from 1000 to match new animation duration
             }
+
+            // Add a burst effect
+            const burst = document.createElement('div');
+            burst.style.position = 'absolute';
+            burst.style.left = `${x}px`;
+            burst.style.top = `${y}px`;
+            burst.style.width = '10px';
+            burst.style.height = '10px';
+            burst.style.backgroundColor = 'white';
+            burst.style.borderRadius = '50%';
+            burst.style.transform = 'translate(-50%, -50%)';
+            burst.style.animation = 'burst 0.5s ease-out forwards';
+            document.body.appendChild(burst);
+
+            // Add burst animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes burst {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(100);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Remove burst after animation
+            setTimeout(() => {
+                burst.remove();
+                style.remove();
+            }, 500);
         }
 
         function buyItem(price, button) {
@@ -379,8 +455,12 @@
                 button.disabled = true;
                 button.classList.add('owned', 'pulse');
                 
-                // Create particle effect
+                // Create enhanced particle effect
                 createParticles(x, y);
+                
+                // Create multiple bursts for more dramatic effect
+                setTimeout(() => createParticles(x, y), 100);
+                setTimeout(() => createParticles(x, y), 200);
                 
                 // Add glow effect to the card
                 const card = button.closest('.item-card');
