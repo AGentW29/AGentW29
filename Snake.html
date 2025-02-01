@@ -162,8 +162,8 @@
 
      <div id="specialPopup2">
         <p>Magic!</p>
-        <button id="continueBtn">Continue</button>
-        <button id="secretBtn">Secret</button>
+        <button id="continueBtn2">Continue</button>
+        <button id="secretBtn2">Secret</button>
     </div>
 
     <script type="module">
@@ -405,6 +405,16 @@
         document.getElementById('continueBtn').addEventListener('click', () => {
             document.getElementById('specialPopup').style.display = 'none'; // Hide the popup
             score += 1; // Award one extra point
+            document.getElementById('score').textContent = `${score}`; // Update the score display
+            gamePaused = false; // Unpause the game
+            gameSpeed = normalSpeed; // Return to normal speed
+        });
+
+        document.getElementById('secretBtn').addEventListener('click', () => {
+            window.location.href = "Turtleearth.html";
+        });
+
+        document.getElementById('continueBtn2').addEventListener('click', () => {
             document.getElementById('specialPopup2').style.display = 'none'; // Hide the popup
             score += 1; // Award one extra point
             document.getElementById('score').textContent = `${score}`; // Update the score display
@@ -412,7 +422,7 @@
             gameSpeed = normalSpeed; // Return to normal speed
         });
 
-        document.getElementById('secretBtn').addEventListener('click', () => {
+        document.getElementById('secretBtn2').addEventListener('click', () => {
             window.location.href = "Turtleearth.html";
         });
 
