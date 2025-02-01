@@ -5,197 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game Store</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Courier New, Monospace;
             line-height: 1.6;
             padding: 20px;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background: linear-gradient(135deg, #00ff00, #00e6e6); /* Neon green to cyan */
             min-height: 100vh;
             color: #333;
+            position: relative;
             overflow-x: hidden;
         }
 
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particleFall 1.5s ease-out forwards;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            width: 5px; /* Small particles */
+            height: 5px;
+            background: rgba(255, 255, 255, 0.9); /* White bright particles */
+        }
+
+        @keyframes particleFall {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .glow-effect {
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 0, 1); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.5); }
+        }
+
         .header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px; background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px; margin-bottom: 20px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #fdbb2d;
+            border: 2px solid #00ff00;
         }
 
         .header h1 {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #00ff00, #00e6e6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 2.5em;
         }
 
-        .coins, #backToGame {
+        .coins {
             background: linear-gradient(45deg, #FFD700, #FFA500);
-            padding: 12px 20px; border-radius: 25px;
-            font-weight: bold; color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            cursor: pointer;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: white;
         }
-
-        #backToGame { margin-left: 20px; background: #4ecdc4; }
 
         .store-section {
             background: rgba(255, 255, 255, 0.95);
-            padding: 25px; border-radius: 15px; margin-bottom: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #4ecdc4;
+            border: 2px solid #00e6e6;
             transition: transform 0.3s;
         }
 
-        .store-section:hover { transform: scale(1.01); }
+        .store-section:hover {
+            transform: scale(1.01);
+        }
 
         .items-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
         }
 
         .item-card {
-            border-radius: 15px; padding: 20px; background: white;
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            background: white;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: all 0.3s;
+            position: relative;
         }
 
-        .item-card:hover { transform: translateY(-5px) scale(1.02); }
-
-        .item-name { font-weight: bold; font-size: 1.3em; color: #1a2a6c; }
-
-        .item-price { color: #ff6b6b; font-weight: bold; font-size: 1.2em; }
+        .item-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
 
         .buy-button {
-            background: linear-gradient(45deg, #4ecdc4, #2ecc71);
-            color: white; border: none; padding: 12px 20px;
-            border-radius: 25px; cursor: pointer; width: 100%;
-            font-weight: bold; text-transform: uppercase;
+            background: linear-gradient(45deg, #00e6e6, #00ff00);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
             transition: all 0.3s;
+            font-weight: bold;
         }
 
-        .buy-button:hover { background: linear-gradient(45deg, #2ecc71, #4ecdc4); }
-
-        .buy-button:disabled { background: #ccc; cursor: not-allowed; }
-
-        .owned { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
-
-        #confirmationPopup {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9);
-            color: white; padding: 20px; border-radius: 10px;
-            text-align: center; z-index: 1000;
+        .buy-button:hover {
+            background: linear-gradient(45deg, #00ff00, #00e6e6);
         }
 
-        #confirmationPopup button {
-            margin: 10px; padding: 10px 20px; border: none; cursor: pointer;
+        .buy-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
-        .particle {
-            position: absolute; pointer-events: none;
-            border-radius: 50%; transform: translate(-50%, -50%);
-            width: 20px; height: 20px; filter: blur(1px);
+        .owned {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
         }
     </style>
 </head>
 <body>
-
     <div class="header">
         <h1>Snake Game Store</h1>
         <div class="coins">Coins: <span id="coinBalance">1000</span></div>
-        <button id="backToGame">Back to Game</button>
     </div>
 
     <div class="store-section">
-        <h2 class="section-title">Power-ups</h2>
+        <h2>Power-ups</h2>
         <div class="items-grid">
             <div class="item-card">
                 <div class="item-name">Speed Boost</div>
                 <div class="item-price">100 coins</div>
                 <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
             </div>
-            <div class="item-card">
-                <div class="item-name">Double Points</div>
-                <div class="item-price">200 coins</div>
-                <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
-            </div>
         </div>
     </div>
 
-    <div id="confirmationPopup">
-        <p>Are you sure you want to buy this item?</p>
-        <button id="confirmBuy">Yes</button>
-        <button id="cancelBuy">No</button>
-    </div>
-
     <script>
-        let coins = 1000;
-        let currentPrice = 0;
-        let currentButton = null;
-        let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems')) || [];
+        let coins = localStorage.getItem('coins') ? parseInt(localStorage.getItem('coins')) : 1000;
+        const ownedItems = JSON.parse(localStorage.getItem('ownedItems')) || [];
+        const coinBalance = document.getElementById('coinBalance');
+        coinBalance.textContent = coins;
 
-        document.getElementById('backToGame').addEventListener('click', () => {
-            window.location.href = 'game.html'; // Change to your game URL
+        document.querySelectorAll('.buy-button').forEach(button => {
+            const itemName = button.closest('.item-card').querySelector('.item-name').textContent;
+            if (ownedItems.includes(itemName)) {
+                button.textContent = 'Owned';
+                button.disabled = true;
+                button.classList.add('owned');
+            }
         });
 
         function buyItem(price, button) {
-            if (button.disabled) return;
-            currentPrice = price;
-            currentButton = button;
-            document.getElementById('confirmationPopup').style.display = 'block';
-        }
+            if (coins >= price && !button.disabled) {
+                const rect = button.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
 
-        document.getElementById('confirmBuy').addEventListener('click', () => {
-            if (coins >= currentPrice) {
-                coins -= currentPrice;
-                document.getElementById('coinBalance').textContent = coins;
+                coins -= price;
+                coinBalance.textContent = coins;
+                localStorage.setItem('coins', coins);
 
-                const itemName = currentButton.closest('.item-card').querySelector('.item-name').textContent;
-                purchasedItems.push(itemName);
-                localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+                const itemName = button.closest('.item-card').querySelector('.item-name').textContent;
+                ownedItems.push(itemName);
+                localStorage.setItem('ownedItems', JSON.stringify(ownedItems));
 
-                currentButton.textContent = 'Owned';
-                currentButton.disabled = true;
-                currentButton.classList.add('owned');
+                button.textContent = 'Owned';
+                button.disabled = true;
+                button.classList.add('owned', 'pulse');
 
-                createParticles(event.clientX, event.clientY);
+                createParticles(x, y);
             } else {
                 alert('Not enough coins!');
             }
-            document.getElementById('confirmationPopup').style.display = 'none';
-        });
-
-        document.getElementById('cancelBuy').addEventListener('click', () => {
-            document.getElementById('confirmationPopup').style.display = 'none';
-        });
-
-        function createParticles(x, y) {
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 1000);
-            }
         }
 
-        window.addEventListener('load', () => {
-            purchasedItems.forEach(itemName => {
-                document.querySelectorAll('.item-card').forEach(card => {
-                    if (card.querySelector('.item-name').textContent === itemName) {
-                        const button = card.querySelector('.buy-button');
-                        button.textContent = 'Owned';
-                        button.disabled = true;
-                        button.classList.add('owned');
-                    }
-                });
-            });
-        });
-    </script>
+        function createParticles(x, y) {
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
 
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200;
+
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+    </script>
 </body>
 </html>
