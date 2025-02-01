@@ -2,356 +2,175 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Game</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: Courier New, Monospace;
-            line-height: 1.6;
-            padding: 20px;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            min-height: 100vh;
-            color: #333;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        .glow-effect {
-            animation: glowPulse 2s infinite;
-        }
-
-        @keyframes glowPulse {
-            0% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
-        }
-
-        .header {
+            margin: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #fdbb2d;
-            position: relative;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #000069;
+            color: #ecf0f1;
+            font-family: 'Times New Roman', sans-serif;
+            touch-action: manipulation;
             overflow: hidden;
         }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
+        canvas {
+            background-color: #000000;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
+        #scoreboard {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 1em;
+            text-align: left;
         }
-
-        .header h1 {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.5em;
-            position: relative;
-        }
-
-        .coins {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .store-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #4ecdc4;
-            transform-origin: center;
-            transition: transform 0.3s;
-        }
-
-        .store-section:hover {
-            transform: scale(1.01);
-        }
-
-        .section-title {
-            margin-bottom: 20px;
-            color: #1a2a6c;
-            font-size: 1.8em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            border-bottom: 3px solid #4ecdc4;
-            padding-bottom: 10px;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-            animation: borderSlide 2s infinite;
-        }
-
-        @keyframes borderSlide {
-            0% { width: 0; left: 0; }
-            50% { width: 100%; left: 0; }
-            100% { width: 0; left: 100%; }
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .item-card {
-            border: none;
-            border-radius: 15px;
-            padding: 20px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .item-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .item-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-        }
-
-        .item-name {
-            font-weight: bold;
+        #score {
+            font-size: 2em;
             margin-bottom: 10px;
-            color: #1a2a6c;
-            font-size: 1.3em;
-            position: relative;
+            text-align: center;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
         }
-
-        .item-description {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 15px;
-        }
-
-        .item-price {
-            color: #ff6b6b;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .buy-button {
-            background: linear-gradient(45deg, #4ecdc4, #2ecc71);
+        #restartBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #e74c3c;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9em;
-            position: relative;
-            overflow: hidden;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        #restartBtn:hover {
+            background-color: #c0392b;
+        }
+        #nameInputContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #nameField {
+            background-color: #fff;
+            color: #000;
+            border: 2px solid #3498db;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+        #nameSubmit {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #specialPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 50px;
+            z-index: 10;
         }
 
-        .buy-button::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent
-            );
-            transform: rotate(45deg);
-            transition: 0.5s;
-            opacity: 0;
+          #specialPopup2 {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 50px;
+            z-index: 10;
+        }
+        
+        #specialPopup button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #29c5e1;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .buy-button:hover::after {
-            opacity: 1;
-            transform: rotate(45deg) translateX(100%);
-        }
-
-        .buy-button:hover {
-            background: linear-gradient(45deg, #2ecc71, #4ecdc4);
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-        }
-
-        .buy-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .owned {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-        }
-
-        .owned:hover {
-            background: linear-gradient(45deg, #ff8e8e, #ff6b6b);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-
-        .shake {
-            animation: shake 0.5s;
+          #specialPopup2 button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #29c5e1;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
+<body>
+    <div id="scoreboard">
+        <div id="highscore"><strong>Highscores</strong></div>
+    </div>
+    <div id="score">0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
 
-  <body>
-    <!-- Login/Signup Form -->
-    <div id="authForm">
-        <h2>Login / Sign Up</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="loginButton">Login</button>
-        <button id="signupButton">Sign Up</button>
+    <button id="restartBtn">Restart</button>
+    <div id="nameInputContainer">
+        <input type="text" id="nameField" placeholder="Enter your name">
+        <button id="nameSubmit">Submit</button>
     </div>
 
-    <!-- Store Content -->
-    <div id="storeContent" style="display: none;">
-        <div class="header">
-            <h1>Snake Game Store</h1>
-            <div class="coins">Coins: <span id="coinBalance">0</span></div>
-            <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
-            <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
-        </div>
-
-        <!-- Power-ups Section -->
-        <div class="store-section">
-            <h2 class="section-title">Power-ups</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Speed Boost</div>
-                    <div class="item-description">Move 25% faster for one game</div>
-                    <div class="item-price">100 coins</div>
-                    <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Double Points</div>
-                    <div class="item-description">Earn twice the coins for each food item</div>
-                    <div class="item-price">200 coins</div>
-                    <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Snake Skins Section -->
-        <div class="store-section">
-            <h2 class="section-title">Snake Skins</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Rainbow Snake</div>
-                    <div class="item-description">Make your snake colorful and fabulous</div>
-                    <div class="item-price">500 coins</div>
-                    <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Golden Snake</div>
-                    <div class="item-description">Show off your wealth with a golden snake</div>
-                    <div class="item-price">1000 coins</div>
-                    <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mini-games Section -->
-        <div class="store-section">
-            <h2 class="section-title">Mini-games</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Maze Mode</div>
-                    <div class="item-description">Navigate through challenging mazes</div>
-                    <div class="item-price">300 coins</div>
-                    <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Time Trial</div>
-                    <div class="item-description">Race against the clock to score points</div>
-                    <div class="item-price">400 coins</div>
-                    <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
-                </div>
-            </div>
-        </div>
+    <div id="specialPopup">
+        <p>Nice 29!</p>
+        <button id="continueBtn">Continue</button>
+        <button id="secretBtn">Secret</button>
     </div>
 
-    <!-- Firebase and JavaScript -->
+     <div id="specialPopup2">
+        <p>Magic!</p>
+        <button id="continueBtn2">Continue</button>
+        <button id="secretBtn2">Secret</button>
+    </div>
+
     <script type="module">
-        // Import Firebase modules
+        // Firebase configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
             authDomain: "turtlearth-6b0a6.firebaseapp.com",
@@ -362,159 +181,307 @@
             measurementId: "G-WVYQDY75EG"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // DOM elements
-        const authForm = document.getElementById('authForm');
-        const storeContent = document.getElementById('storeContent');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginButton = document.getElementById('loginButton');
-        const signupButton = document.getElementById('signupButton');
-        const logoutButton = document.getElementById('logoutButton');
-        const coinBalance = document.getElementById('coinBalance');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        let currentUser = null;
-        let coins = 0;
-        let purchasedItems = [];
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
 
-        // Show login/signup form by default
-        authForm.style.display = 'block';
-        storeContent.style.display = 'none';
+        let snake = [{x: 10, y: 10}];
+        let apple = {x: 5, y: 5};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameOver = false;
+        let gamePaused = false;
 
-        // Sign Up
-        signupButton.addEventListener('click', async () => {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
+        const maxHighscores = 5;
 
-            if (!username || !password) {
-                alert('Please enter a username and password.');
+        // Game speed variables
+        const normalSpeed = 100; // Normal game speed (100ms)
+        const pausedSpeed = 1000; // Slowed down speed when "paused" (1000ms)
+        let gameSpeed = normalSpeed;
+
+        // Swipe gesture variables
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        function drawSnakePart(snakePart) {
+            ctx.fillStyle = '#49ff00';
+            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+            ctx.strokeStyle = '#49ff69';
+            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        function drawSnake() {
+            snake.forEach(drawSnakePart);
+        }
+
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            if (score === 29 && !gamePaused) {
+                gamePaused = true;
+                gameSpeed = pausedSpeed; // Slow down the game loop
+                document.getElementById('specialPopup').style.display = 'block';
                 return;
             }
 
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-                currentUser = userCredential.user;
-
-                // Save user data to Firestore
-                await setDoc(doc(db, 'users', currentUser.uid), {
-                    username,
-                    coins: 1000, // Starting coins
-                    purchasedItems: []
-                });
-
-                alert('Sign up successful!');
-                loadUserData();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        });
-
-        // Login
-        loginButton.addEventListener('click', async () => {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            if (!username || !password) {
-                alert('Please enter a username and password.');
+               if (score === 42 && !gamePaused) {
+                gamePaused = true;
+                gameSpeed = pausedSpeed; // Slow down the game loop
+                document.getElementById('specialPopup2').style.display = 'block';
                 return;
             }
 
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-                currentUser = userCredential.user;
-                alert('Login successful!');
-                loadUserData();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
+              if (score === 69 && !gamePaused) {
+                gamePaused = true;
+                gameSpeed = pausedSpeed; // Slow down the game loop
+                document.getElementById('specialPopup2').style.display = 'block';
+                return;
             }
-        });
 
-        // Logout
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                currentUser = null;
-                authForm.style.display = 'block';
-                storeContent.style.display = 'none';
-                alert('Logged out successfully!');
-            } catch (error) {
-                alert(`Error: ${error.message}`);
+             if (score === 88 && !gamePaused) {
+                gamePaused = true;
+                gameSpeed = pausedSpeed; // Slow down the game loop
+                document.getElementById('specialPopup2').style.display = 'block';
+                return;
             }
-        });
 
-        // Load user data from Firestore
-        async function loadUserData() {
-            if (!currentUser) return;
+            if (dx !== 0 || dy !== 0) {
+                if (
+                    head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)
+                ) {
+                    gameOver = true;
+                    promptForName();
+                    return;
+                }
+            }
 
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                coins = userData.coins;
-                purchasedItems = userData.purchasedItems || [];
+            snake.unshift(head);
 
-                // Update UI
-                coinBalance.textContent = coins;
-                updatePurchasedItems();
-
-                authForm.style.display = 'none';
-                storeContent.style.display = 'block';
+            if (head.x === apple.x && head.y === apple.y) {
+                score += 1;
+                document.getElementById('score').textContent = `${score}`;
+                generateApple();
+            } else {
+                snake.pop();
             }
         }
 
-        // Update purchased items in the UI
-        function updatePurchasedItems() {
-            const itemCards = document.querySelectorAll('.item-card');
-            itemCards.forEach(card => {
-                const itemName = card.querySelector('.item-name').textContent;
-                const button = card.querySelector('.buy-button');
+        function drawApple() {
+            ctx.fillStyle = '#ff2900';
+            ctx.beginPath();
+            ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
 
-                if (purchasedItems.includes(itemName)) {
-                    button.textContent = 'Owned';
-                    button.disabled = true;
-                    button.classList.add('owned');
+        function generateApple() {
+            apple.x = Math.floor(Math.random() * tileCount);
+            apple.y = Math.floor(Math.random() * tileCount);
+
+            snake.forEach(part => {
+                if (part.x === apple.x && part.y === apple.y) {
+                    generateApple();
                 }
             });
         }
 
-        // Buy item
-        async function buyItem(price, button) {
-            if (button.disabled) return;
+        async function updateHighscores(playerName) {
+            const highscoreRef = doc(db, 'highscores', 'global');
+            try {
+                const docSnap = await getDoc(highscoreRef);
+                const highscores = docSnap.exists() ? docSnap.data().highscores : [];
 
-            if (coins < price) {
-                alert('Not enough coins!');
-                return;
-            }
+                highscores.push({ name: playerName, score: score });
+                highscores.sort((a, b) => b.score - a.score);
 
-            coins -= price;
-            coinBalance.textContent = coins;
+                if (highscores.length > maxHighscores) {
+                    highscores.pop();
+                }
 
-            const itemName = button.closest('.item-card').querySelector('.item-name').textContent;
-            purchasedItems.push(itemName);
+                await setDoc(highscoreRef, { highscores });
 
-            button.textContent = 'Owned';
-            button.disabled = true;
-            button.classList.add('owned');
-
-            // Update Firestore
-            if (currentUser) {
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    coins,
-                    purchasedItems
+                const highscoreDiv = document.getElementById('highscore');
+                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+                highscores.forEach((entry, index) => {
+                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
                 });
+            } catch (error) {
+                console.error("Error updating highscores:", error);
             }
         }
 
-        // Check if user is already logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                loadUserData();
+        async function loadHighscores() {
+            const highscoreRef = doc(db, 'highscores', 'global');
+            try {
+                const docSnap = await getDoc(highscoreRef);
+                if (docSnap.exists()) {
+                    const highscores = docSnap.data().highscores;
+                    const highscoreDiv = document.getElementById('highscore');
+                    highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+                    highscores.forEach((entry, index) => {
+                        highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading highscores:", error);
+            }
+        }
+
+        let gameLoopTimeout;
+
+        function gameLoop() {
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '48px serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawApple();
+            moveSnake();
+            drawSnake();
+            gameLoopTimeout = setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
+        }
+
+        // Swipe gesture logic
+        function handleTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        }
+
+        function handleTouchEnd(event) {
+            touchEndX = event.changedTouches[0].clientX;
+            touchEndY = event.changedTouches[0].clientY;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (deltaX > 0 && dx === 0) {
+                    dx = 1; // Swipe right
+                    dy = 0;
+                } else if (deltaX < 0 && dx === 0) {
+                    dx = -1; // Swipe left
+                    dy = 0;
+                }
+            } else {
+                // Vertical swipe
+                if (deltaY > 0 && dy === 0) {
+                    dy = 1; // Swipe down
+                    dx = 0;
+                } else if (deltaY < 0 && dy === 0) {
+                    dy = -1; // Swipe up
+                    dx = 0;
+                }
+            }
+        }
+
+        // Add touch event listeners
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
+
+        document.addEventListener('keydown', (event) => {
+            if (!gamePaused) {
+                switch (event.key) {
+                    case 'ArrowUp':
+                        if (dy === 0) { dx = 0; dy = -1; }
+                        break;
+                    case 'ArrowDown':
+                        if (dy === 0) { dx = 0; dy = 1; }
+                        break;
+                    case 'ArrowLeft':
+                        if (dx === 0) { dx = -1; dy = 0; }
+                        break;
+                    case 'ArrowRight':
+                        if (dx === 0) { dx = 1; dy = 0; }
+                        break;
+                }
             }
         });
+
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            document.getElementById('specialPopup').style.display = 'none'; // Hide the popup
+            score += 1; // Award one extra point
+            document.getElementById('score').textContent = `${score}`; // Update the score display
+            gamePaused = false; // Unpause the game
+            gameSpeed = normalSpeed; // Return to normal speed
+        });
+
+        document.getElementById('secretBtn').addEventListener('click', () => {
+            window.location.href = "Turtleearth.html";
+        });
+
+        document.getElementById('continueBtn2').addEventListener('click', () => {
+            document.getElementById('specialPopup2').style.display = 'none'; // Hide the popup
+            score += 1; // Award one extra point
+            document.getElementById('score').textContent = `${score}`; // Update the score display
+            gamePaused = false; // Unpause the game
+            gameSpeed = normalSpeed; // Return to normal speed
+        });
+
+        document.getElementById('secretBtn2').addEventListener('click', () => {
+            window.location.href = "Turtleearth.html";
+        });
+
+        function resetGame() {
+            // Clear the existing game loop timeout
+            clearTimeout(gameLoopTimeout);
+
+            // Reset game state
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            gameOver = false;
+            gamePaused = false;
+            gameSpeed = normalSpeed; // Reset speed to normal
+
+            // Update the UI
+            document.getElementById('score').textContent = '0';
+            document.getElementById('nameInputContainer').style.display = 'none';
+            document.getElementById('specialPopup').style.display = 'none';
+            document.getElementById('specialPopup2').style.display = 'none';
+
+
+            // Generate a new apple
+            generateApple();
+
+            // Restart the game loop
+            gameLoop();
+        }
+
+        document.getElementById('restartBtn').addEventListener('click', resetGame);
+
+        function promptForName() {
+            const nameInputContainer = document.getElementById('nameInputContainer');
+            nameInputContainer.style.display = 'block';
+        }
+
+        document.getElementById('nameSubmit').addEventListener('click', () => {
+            const playerName = document.getElementById('nameField').value || 'Anonymous';
+            updateHighscores(playerName);
+            document.getElementById('nameInputContainer').style.display = 'none';
+        });
+
+        loadHighscores();
+        gameLoop();
     </script>
 </body>
 </html>
