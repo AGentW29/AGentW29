@@ -426,6 +426,7 @@
         const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
         currentUser = userCredential.user;
         loadUserData();
+        location.reload();
       } catch (error) {
         alert(`Error: ${error.message}`);
       }
