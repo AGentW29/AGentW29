@@ -425,7 +425,6 @@
       try {
         const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
         currentUser = userCredential.user;
-        alert('Login successful!');
         loadUserData();
       } catch (error) {
         alert(`Error: ${error.message}`);
@@ -496,7 +495,7 @@
       // Deduct coins and mark the item as purchased
       coins -= price;
       // Get the item name from the DOM (assuming the structure remains consistent)
-      const itemName = button.previousElementSibling.previousElementSibling.textContent;
+      const itemName = button.parentElement.querySelector('.item-name').textContent;
       purchasedItems.push(itemName);
 
       // Update Firestore with the new coins balance and purchased items list
