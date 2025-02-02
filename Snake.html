@@ -561,6 +561,17 @@ function drawSnake() {
 
     loadHighscores();
     gameLoop();
+
+    // Check if the URL contains the refresh parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('refresh')) {
+    // Remove the refresh parameter from the URL
+    const newUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+
+    // Refresh the page
+    window.location.reload();
+  }
   </script>
 </body>
 </html>
