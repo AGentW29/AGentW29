@@ -391,7 +391,7 @@ function drawSnake() {
 
       if (head.x === apple.x && head.y === apple.y) {
         const pointIncrement = activeUpgrades.doublePoints ? 2 : 1;
-        score += 1;
+       score += pointIncrement;
         document.getElementById("score").textContent = score;
         generateApple();
       } else {
