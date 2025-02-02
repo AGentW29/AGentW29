@@ -188,9 +188,9 @@
         // "Speed Boost", "Double Points", "Rainbow Snake", "Golden Snake"
         purchasedItems.forEach(itemName => {
           switch (itemName) {
-            case "Speed Boost":
+            case "Slowness":
               // Mark as available (one-time use).
-              activeUpgrades.speedBoost = true;
+              activeUpgrades.slowness = true;
               break;
             case "Double Points":
               activeUpgrades.doublePoints = true;
@@ -235,7 +235,7 @@
 
     // Game speed variables
     const normalSpeed = 100; // Normal game speed (100ms)
-    const pausedSpeed = 1000; // Slowed down speed when "paused" (1000ms)
+    const pausedSpeed = 5000; // Slowed down speed when "paused" (1000ms)
     let gameSpeed = normalSpeed;
 
     // Swipe gesture variables
@@ -328,7 +328,7 @@ function drawSnake() {
   if (userDoc.exists()) {
     let purchasedItems = userDoc.data().purchasedItems || [];
     // Remove the upgrade by filtering it out.
-    purchasedItems = purchasedItems.filter(item => item !== "Speed Boost");
+    purchasedItems = purchasedItems.filter(item => item !== "Slowness");
     await setDoc(userRef, { purchasedItems }, { merge: true });
   }
 }
@@ -527,12 +527,12 @@ function drawSnake() {
   gameOver = false;
   gamePaused = false;
   
-  if (activeUpgrades.speedBoost) {
-  gameSpeed = normalSpeed * 0.75;
+  if (activeUpgrades.Slowness) {
+  gameSpeed = normalSpeed * 2;
   delete activeUpgrades.speedBoost;
   // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
   if (auth.currentUser) {
-    removeUsedUpgrade(auth.currentUser, "Speed Boost");
+    removeUsedUpgrade(auth.currentUser, "Slowness");
   }
 } else {
   gameSpeed = normalSpeed;
