@@ -562,14 +562,23 @@ function drawSnake() {
     loadHighscores();
     gameLoop();
 
-    // Check if the URL contains the refresh parameter
+  window.addEventListener('load', () => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('refresh')) {
     // Remove the refresh parameter from the URL
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
-     document.getElementById('restartBtn').click();
+    
+    // Now safely get the restart button and click it
+    const restartBtn = document.getElementById('restartBtn');
+    if (restartBtn) {
+      restartBtn.click();
+    } else {
+      console.error("Restart button not found.");
+    }
   }
+});
+
   </script>
 </body>
 </html>
