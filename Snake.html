@@ -55,7 +55,12 @@
     #restartBtn:hover {
       background-color: #c0392b;
     }
-    /* Removed the .centered styles so the button always stays the same */
+    /* When game over, the restart button moves to the center */
+    #restartBtn.centered {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
     #nameInputContainer {
       position: fixed;
       top: 50%;
@@ -324,7 +329,8 @@
         ctx.font = "48px serif";
         ctx.textAlign = "center";
         ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-        // Note: We no longer move or resize the restart button.
+        // Move the restart button to the center
+        document.getElementById("restartBtn").classList.add("centered");
         return;
       }
 
@@ -448,6 +454,8 @@
       document.getElementById("nameInputContainer").style.display = "none";
       document.getElementById("specialPopup").style.display = "none";
       document.getElementById("specialPopup2").style.display = "none";
+      // Remove the centered class so the restart button goes back to its original position
+      document.getElementById("restartBtn").classList.remove("centered");
 
       generateApple();
       gameLoop();
