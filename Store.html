@@ -480,33 +480,37 @@
             });
         }
 
-        // Buy item
-        async function buyItem(price, button) {
-            if (button.disabled) return;
+      async function buyItem(price, button) {
+    if (!currentUser) {
+        alert("You must be logged in to buy items!");
+        return;
+    }
 
-            if (coins < price) {
-                alert('Not enough coins!');
-                return;
-            }
+    if (coins < price) {
+        alert("Not enough coins!");
+        button.classList.add("shake");
+        setTimeout(() => button.classList.remove("shake"), 500);
+        return;
+    }
 
-            coins -= price;
-            coinBalance.textContent = coins;
+    // Deduct coins and mark item as purchased
+    coins -= price;
+    purchasedItems.push(button.previousElementSibling.previousElementSibling.textContent); // Store item name
 
-            const itemName = button.closest('.item-card').querySelector('.item-name').textContent;
-            purchasedItems.push(itemName);
+    // Update Firestore
+    const userRef = doc(db, 'users', currentUser.uid);
+    await updateDoc(userRef, {
+        coins,
+        purchasedItems
+    });
 
-            button.textContent = 'Owned';
-            button.disabled = true;
-            button.classList.add('owned');
+    // Update UI
+    coinBalance.textContent = coins;
+    button.textContent = "Owned";
+    button.disabled = true;
+    button.classList.add("owned");
+}
 
-            // Update Firestore
-            if (currentUser) {
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    coins,
-                    purchasedItems
-                });
-            }
-        }
 
         
 
