@@ -569,8 +569,9 @@ function drawSnake() {
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
 
-    // Refresh the page
-    window.location.reload();
+   setTimeout(() => {
+      window.location.href = "Snake.html?refresh=true";
+    }, 2000); // 2000 milliseconds = 2 seconds
   }
   </script>
 </body>
