@@ -148,22 +148,72 @@
   </div>
 
   <script type="module">
-    // Firebase configuration
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+  // Firebase imports (already have Firestore in your code)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
-      authDomain: "turtlearth-6b0a6.firebaseapp.com",
-      projectId: "turtlearth-6b0a6",
-      storageBucket: "turtlearth-6b0a6.appspot.com",
-      messagingSenderId: "90749703119",
-      appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
-      measurementId: "G-WVYQDY75EG"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+    authDomain: "turtlearth-6b0a6.firebaseapp.com",
+    projectId: "turtlearth-6b0a6",
+    storageBucket: "turtlearth-6b0a6.appspot.com",
+    messagingSenderId: "90749703119",
+    appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+    measurementId: "G-WVYQDY75EG"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  // Global variable to hold the active upgrades.
+  let activeUpgrades = {};
+
+  // Listen for auth state change.
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // User is signed in.
+      console.log("User is signed in:", user.uid);
+      // Load user data from Firestore.
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        // Assuming you saved upgrades in a field (for example, purchasedItems)
+        // You can store them as an array or an object. Here we'll assume an array of item names.
+        const purchasedItems = userData.purchasedItems || [];
+        // Convert purchased items to an activeUpgrades object.
+        // For example, you might have:
+        // "Speed Boost", "Double Points", "Rainbow Snake", "Golden Snake"
+        purchasedItems.forEach(itemName => {
+          switch (itemName) {
+            case "Speed Boost":
+              // Mark as available (one-time use).
+              activeUpgrades.speedBoost = true;
+              break;
+            case "Double Points":
+              activeUpgrades.doublePoints = true;
+              break;
+            case "Rainbow Snake":
+              activeUpgrades.rainbowSnake = true;
+              break;
+            case "Golden Snake":
+              activeUpgrades.goldenSnake = true;
+              break;
+            // Add more cases if needed.
+          }
+        });
+        console.log("Active Upgrades:", activeUpgrades);
+      } else {
+        console.log("User document does not exist!");
+      }
+    } else {
+      // No user is signed in. You can redirect to your login/store page:
+      window.location.href = "Store.html";
+    }
+  });
+
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -194,16 +244,30 @@
     let touchEndX = 0;
     let touchEndY = 0;
 
-    function drawSnakePart(snakePart) {
-      ctx.fillStyle = "#49ff00";
-      ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-      ctx.strokeStyle = "#49ff69";
-      ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-    }
+   function drawSnakePart(snakePart, index) {
+  // Default snake colors.
+  let fillColor = "#49ff00";
+  let strokeColor = "#49ff69";
 
-    function drawSnake() {
-      snake.forEach(drawSnakePart);
-    }
+  if (activeUpgrades.goldenSnake) {
+    fillColor = "gold";
+    strokeColor = "darkgoldenrod";
+  } else if (activeUpgrades.rainbowSnake) {
+    const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+    fillColor = rainbowColors[index % rainbowColors.length];
+    strokeColor = "black";
+  }
+
+  ctx.fillStyle = fillColor;
+  ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+  ctx.strokeStyle = strokeColor;
+  ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+}
+
+function drawSnake() {
+  snake.forEach((part, index) => drawSnakePart(part, index));
+}
+
 
     function drawApple() {
       ctx.fillStyle = "#ff2900";
@@ -257,6 +321,18 @@
         console.error("Error loading highscores:", error);
       }
     }
+
+    async function removeUsedUpgrade(user, upgradeKey) {
+  const userRef = doc(db, "users", user.uid);
+  const userDoc = await getDoc(userRef);
+  if (userDoc.exists()) {
+    let purchasedItems = userDoc.data().purchasedItems || [];
+    // Remove the upgrade by filtering it out.
+    purchasedItems = purchasedItems.filter(item => item !== "Speed Boost");
+    await setDoc(userRef, { purchasedItems }, { merge: true });
+  }
+}
+
 
     function updateHighscoreUI(highscores) {
       const highscoreDiv = document.getElementById("highscore");
@@ -314,6 +390,7 @@
       snake.unshift(head);
 
       if (head.x === apple.x && head.y === apple.y) {
+        const pointIncrement = activeUpgrades.doublePoints ? 2 : 1;
         score += 1;
         document.getElementById("score").textContent = score;
         generateApple();
@@ -439,29 +516,39 @@
       window.location.href = "Store.html";
     });
 
-    function resetGame() {
-      clearTimeout(gameLoopTimeout);
+   function resetGame() {
+  clearTimeout(gameLoopTimeout);
 
-      // Reset game state
-      snake = [{ x: 10, y: 10 }];
-      dx = 0;
-      dy = 0;
-      score = 0;
-      gameOver = false;
-      gamePaused = false;
-      gameSpeed = normalSpeed;
+  // Reset game state
+  snake = [{ x: 10, y: 10 }];
+  dx = 0;
+  dy = 0;
+  score = 0;
+  gameOver = false;
+  gamePaused = false;
+  
+  if (activeUpgrades.speedBoost) {
+  gameSpeed = normalSpeed * 0.75;
+  delete activeUpgrades.speedBoost;
+  // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
+  if (auth.currentUser) {
+    removeUsedUpgrade(auth.currentUser, "Speed Boost");
+  }
+} else {
+  gameSpeed = normalSpeed;
+}
 
-      // Update UI elements
-      document.getElementById("score").textContent = "0";
-      document.getElementById("nameInputContainer").style.display = "none";
-      document.getElementById("specialPopup").style.display = "none";
-      document.getElementById("specialPopup2").style.display = "none";
-      // Remove the centered class so the restart button goes back to its original position
-      document.getElementById("restartBtn").classList.remove("centered");
+  // Reset UI elements
+  document.getElementById("score").textContent = "0";
+  document.getElementById("nameInputContainer").style.display = "none";
+  document.getElementById("specialPopup").style.display = "none";
+  document.getElementById("specialPopup2").style.display = "none";
+  document.getElementById("restartBtn").classList.remove("centered");
 
-      generateApple();
-      gameLoop();
-    }
+  generateApple();
+  gameLoop();
+}
+
 
     document.getElementById("restartBtn").addEventListener("click", resetGame);
 
