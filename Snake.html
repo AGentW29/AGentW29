@@ -180,326 +180,159 @@
         <button id="secretBtn2">Secret</button>
     </div>
 
-    <script type="module">
-        // Firebase configuration
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+   <script type="module">
+    // Firebase configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
-            authDomain: "turtlearth-6b0a6.firebaseapp.com",
-            projectId: "turtlearth-6b0a6",
-            storageBucket: "turtlearth-6b0a6.appspot.com",
-            messagingSenderId: "90749703119",
-            appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
-            measurementId: "G-WVYQDY75EG"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+        authDomain: "turtlearth-6b0a6.firebaseapp.com",
+        projectId: "turtlearth-6b0a6",
+        storageBucket: "turtlearth-6b0a6.appspot.com",
+        messagingSenderId: "90749703119",
+        appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+        measurementId: "G-WVYQDY75EG"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
 
-        let snake = [{x: 10, y: 10}];
-        let apple = {x: 5, y: 5};
-        let dx = 0;
-        let dy = 0;
-        let score = 0;
-        let gameOver = false;
-        let gamePaused = false;
+    let snake = [{x: 10, y: 10}];
+    let apple = {x: 5, y: 5};
+    let dx = 0;
+    let dy = 0;
+    let score = 0;
+    let gameOver = false;
+    let gamePaused = false;
 
-        const maxHighscores = 5;
+    const maxHighscores = 5;
+    let highscores = [];
 
-        // Game speed variables
-        const normalSpeed = 100; // Normal game speed (100ms)
-        const pausedSpeed = 1000; // Slowed down speed when "paused" (1000ms)
-        let gameSpeed = normalSpeed;
+    const normalSpeed = 100;
+    let gameSpeed = normalSpeed;
+    let gameLoopTimeout;
 
-        // Swipe gesture variables
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
-        function drawSnakePart(snakePart) {
-            ctx.fillStyle = '#49ff00';
-            ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-            ctx.strokeStyle = '#49ff69';
-            ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+    async function loadHighscores() {
+        const highscoreRef = doc(db, 'highscores', 'global');
+        try {
+            const docSnap = await getDoc(highscoreRef);
+            if (docSnap.exists()) {
+                highscores = docSnap.data().highscores;
+                updateHighscoreUI();
+            }
+        } catch (error) {
+            console.error("Error loading highscores:", error);
         }
-
-        function drawSnake() {
-            snake.forEach(drawSnakePart);
-        }
-
-        function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-
-            if (score === 29 && !gamePaused) {
-                gamePaused = true;
-                gameSpeed = pausedSpeed; // Slow down the game loop
-                document.getElementById('specialPopup').style.display = 'block';
-                return;
-            }
-
-               if (score === 42 && !gamePaused) {
-                gamePaused = true;
-                gameSpeed = pausedSpeed; // Slow down the game loop
-                document.getElementById('specialPopup2').style.display = 'block';
-                return;
-            }
-
-              if (score === 69 && !gamePaused) {
-                gamePaused = true;
-                gameSpeed = pausedSpeed; // Slow down the game loop
-                document.getElementById('specialPopup2').style.display = 'block';
-                return;
-            }
-
-             if (score === 88 && !gamePaused) {
-                gamePaused = true;
-                gameSpeed = pausedSpeed; // Slow down the game loop
-                document.getElementById('specialPopup2').style.display = 'block';
-                return;
-            }
-
-            if (dx !== 0 || dy !== 0) {
-                if (
-                    head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount ||
-                    snake.some(segment => segment.x === head.x && segment.y === head.y)
-                ) {
-                    gameOver = true;
-                    promptForName();
-                    return;
-                }
-            }
-
-            snake.unshift(head);
-
-            if (head.x === apple.x && head.y === apple.y) {
-                score += 1;
-                document.getElementById('score').textContent = `${score}`;
-                generateApple();
-            } else {
-                snake.pop();
-            }
-        }
-
-        function drawApple() {
-            ctx.fillStyle = '#ff2900';
-            ctx.beginPath();
-            ctx.arc((apple.x + 0.5) * gridSize, (apple.y + 0.5) * gridSize, gridSize / 2 - 2, 0, 2 * Math.PI);
-            ctx.fill();
-        }
-
-        function generateApple() {
-            apple.x = Math.floor(Math.random() * tileCount);
-            apple.y = Math.floor(Math.random() * tileCount);
-
-            snake.forEach(part => {
-                if (part.x === apple.x && part.y === apple.y) {
-                    generateApple();
-                }
-            });
-        }
-
-        async function updateHighscores(playerName) {
-            const highscoreRef = doc(db, 'highscores', 'global');
-            try {
-                const docSnap = await getDoc(highscoreRef);
-                const highscores = docSnap.exists() ? docSnap.data().highscores : [];
-
-                highscores.push({ name: playerName, score: score });
-                highscores.sort((a, b) => b.score - a.score);
-
-                if (highscores.length > maxHighscores) {
-                    highscores.pop();
-                }
-
-                await setDoc(highscoreRef, { highscores });
-
-                const highscoreDiv = document.getElementById('highscore');
-                highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                highscores.forEach((entry, index) => {
-                    highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-                });
-            } catch (error) {
-                console.error("Error updating highscores:", error);
-            }
-        }
-
-        async function loadHighscores() {
-            const highscoreRef = doc(db, 'highscores', 'global');
-            try {
-                const docSnap = await getDoc(highscoreRef);
-                if (docSnap.exists()) {
-                    const highscores = docSnap.data().highscores;
-                    const highscoreDiv = document.getElementById('highscore');
-                    highscoreDiv.innerHTML = "<strong>Highscores</strong>";
-                    highscores.forEach((entry, index) => {
-                        highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
-                    });
-                }
-            } catch (error) {
-                console.error("Error loading highscores:", error);
-            }
-        }
-
-        let gameLoopTimeout;
-
-       function gameLoop() {
-    if (gameOver) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ecf0f1';
-        ctx.font = '48px serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-
-        // Move the restart button to the center
-        document.getElementById('restartBtn').classList.add('centered');
-        return;
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawApple();
-    moveSnake();
-    drawSnake();
-    gameLoopTimeout = setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
-}
-        // Swipe gesture logic
-        function handleTouchStart(event) {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
+    function updateHighscoreUI() {
+        const highscoreDiv = document.getElementById('highscore');
+        highscoreDiv.innerHTML = "<strong>Highscores</strong>";
+        highscores.forEach((entry, index) => {
+            highscoreDiv.innerHTML += `<br>${index + 1}. ${entry.name}: ${entry.score}`;
+        });
+    }
+
+    async function updateHighscores(playerName) {
+        highscores.push({ name: playerName, score: score });
+        highscores.sort((a, b) => b.score - a.score);
+        if (highscores.length > maxHighscores) {
+            highscores.pop();
         }
 
-        function handleTouchEnd(event) {
-            touchEndX = event.changedTouches[0].clientX;
-            touchEndY = event.changedTouches[0].clientY;
-            handleSwipe();
+        const highscoreRef = doc(db, 'highscores', 'global');
+        try {
+            await setDoc(highscoreRef, { highscores });
+            updateHighscoreUI();
+        } catch (error) {
+            console.error("Error updating highscores:", error);
         }
+    }
 
-        function handleSwipe() {
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
+    function checkIfHighScore() {
+        if (highscores.length < maxHighscores || score > highscores[highscores.length - 1].score) {
+            document.getElementById('nameInputContainer').style.display = 'block';
+        }
+    }
 
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                // Horizontal swipe
-                if (deltaX > 0 && dx === 0) {
-                    dx = 1; // Swipe right
-                    dy = 0;
-                } else if (deltaX < 0 && dx === 0) {
-                    dx = -1; // Swipe left
-                    dy = 0;
-                }
-            } else {
-                // Vertical swipe
-                if (deltaY > 0 && dy === 0) {
-                    dy = 1; // Swipe down
-                    dx = 0;
-                } else if (deltaY < 0 && dy === 0) {
-                    dy = -1; // Swipe up
-                    dx = 0;
-                }
+    function moveSnake() {
+        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+        if (dx !== 0 || dy !== 0) {
+            if (
+                head.x < 0 || head.x >= tileCount ||
+                head.y < 0 || head.y >= tileCount ||
+                snake.some(segment => segment.x === head.x && segment.y === head.y)
+            ) {
+                gameOver = true;
+                checkIfHighScore();
+                return;
             }
         }
 
-        // Add touch event listeners
-        document.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchend', handleTouchEnd);
+        snake.unshift(head);
 
-        document.addEventListener('keydown', (event) => {
-            if (!gamePaused) {
-                switch (event.key) {
-                    case 'ArrowUp':
-                        if (dy === 0) { dx = 0; dy = -1; }
-                        break;
-                    case 'ArrowDown':
-                        if (dy === 0) { dx = 0; dy = 1; }
-                        break;
-                    case 'ArrowLeft':
-                        if (dx === 0) { dx = -1; dy = 0; }
-                        break;
-                    case 'ArrowRight':
-                        if (dx === 0) { dx = 1; dy = 0; }
-                        break;
-                }
-            }
-        });
+        if (head.x === apple.x && head.y === apple.y) {
+            score += 1;
+            document.getElementById('score').textContent = `${score}`;
+            generateApple();
+        } else {
+            snake.pop();
+        }
+    }
 
-        document.getElementById('continueBtn').addEventListener('click', () => {
-            document.getElementById('specialPopup').style.display = 'none'; // Hide the popup
-            score += 1; // Award one extra point
-            document.getElementById('score').textContent = `${score}`; // Update the score display
-            gamePaused = false; // Unpause the game
-            gameSpeed = normalSpeed; // Return to normal speed
-        });
-
-        document.getElementById('secretBtn').addEventListener('click', () => {
-            window.location.href = "Turtleearth.html";
-        });
-
-        document.getElementById('continueBtn2').addEventListener('click', () => {
-            document.getElementById('specialPopup2').style.display = 'none'; // Hide the popup
-            score += 1; // Award one extra point
-            document.getElementById('score').textContent = `${score}`; // Update the score display
-            gamePaused = false; // Unpause the game
-            gameSpeed = normalSpeed; // Return to normal speed
-        });
-
-        document.getElementById('secretBtn2').addEventListener('click', () => {
-            window.location.href = "Turtleearth.html";
-        });
-
-       function resetGame() {
-    // Clear the existing game loop timeout
-    clearTimeout(gameLoopTimeout);
-
-    // Reset game state
-    snake = [{x: 10, y: 10}];
-    dx = 0;
-    dy = 0;
-    score = 0;
-    gameOver = false;
-    gamePaused = false;
-    gameSpeed = normalSpeed; // Reset speed to normal
-
-    // Update the UI
-    document.getElementById('score').textContent = '0';
-    document.getElementById('nameInputContainer').style.display = 'none';
-    document.getElementById('specialPopup').style.display = 'none';
-    document.getElementById('specialPopup2').style.display = 'none';
-
-    // Remove the centered class from the restart button
-    document.getElementById('restartBtn').classList.remove('centered');
-
-    // Generate a new apple
-    generateApple();
-
-    // Restart the game loop
-    gameLoop();
-}
-
-        document.getElementById('restartBtn').addEventListener('click', resetGame);
-
-        function promptForName() {
-            const nameInputContainer = document.getElementById('nameInputContainer');
-            nameInputContainer.style.display = 'block';
+    function gameLoop() {
+        if (gameOver) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '48px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+            return;
         }
 
-        document.getElementById('nameSubmit').addEventListener('click', () => {
-            const playerName = document.getElementById('nameField').value || 'Anonymous';
-            updateHighscores(playerName);
-            document.getElementById('nameInputContainer').style.display = 'none';
-        });
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawApple();
+        moveSnake();
+        drawSnake();
+        gameLoopTimeout = setTimeout(gameLoop, gameSpeed);
+    }
 
-        loadHighscores();
+    function resetGame() {
+        clearTimeout(gameLoopTimeout);
+
+        snake = [{x: 10, y: 10}];
+        dx = 0;
+        dy = 0;
+        score = 0;
+        gameOver = false;
+        gamePaused = false;
+        gameSpeed = normalSpeed;
+
+        document.getElementById('score').textContent = '0';
+        document.getElementById('nameInputContainer').style.display = 'none';
+        generateApple();
         gameLoop();
-    </script>
+    }
+
+    document.getElementById('restartBtn').addEventListener('click', resetGame);
+
+    document.getElementById('nameSubmit').addEventListener('click', () => {
+        const playerName = document.getElementById('nameField').value || 'Anonymous';
+        updateHighscores(playerName);
+        document.getElementById('nameInputContainer').style.display = 'none';
+    });
+
+    loadHighscores();
+    gameLoop();
+</script>
 </body>
 </html>
