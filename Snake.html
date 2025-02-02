@@ -568,10 +568,7 @@ function drawSnake() {
     // Remove the refresh parameter from the URL
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
-
-   setTimeout(() => {
-      window.location.href = "Snake.html?refresh=true";
-    }, 2000); // 2000 milliseconds = 2 seconds
+     document.getElementById('restartBtn').click();
   }
   </script>
 </body>
