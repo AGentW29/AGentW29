@@ -447,40 +447,40 @@
         });
 
         // Load user data from Firestore
-        async function loadUserData() {
-            if (!currentUser) return;
+     async function loadUserData() {
+    if (!currentUser) return;
 
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                coins = userData.coins;
-                purchasedItems = userData.purchasedItems || [];
+    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+    if (userDoc.exists()) {
+        const userData = userDoc.data();
+        coins = userData.coins;
+        purchasedItems = userData.purchasedItems || [];
 
-                // Update UI
-                coinBalance.textContent = coins;
-                updatePurchasedItems();
+        // Update UI
+        coinBalance.textContent = coins;
+        updatePurchasedItems();
 
-                authForm.style.display = 'none';
-                storeContent.style.display = 'block';
-            }
-        }
+        authForm.style.display = 'none';
+        storeContent.style.display = 'block';
+    }
+}
 
         // Update purchased items in the UI
-        function updatePurchasedItems() {
-            const itemCards = document.querySelectorAll('.item-card');
-            itemCards.forEach(card => {
-                const itemName = card.querySelector('.item-name').textContent;
-                const button = card.querySelector('.buy-button');
+      function updatePurchasedItems() {
+    const itemCards = document.querySelectorAll('.item-card');
+    itemCards.forEach(card => {
+        const itemName = card.querySelector('.item-name').textContent;
+        const button = card.querySelector('.buy-button');
 
-                if (purchasedItems.includes(itemName)) {
-                    button.textContent = 'Owned';
-                    button.disabled = true;
-                    button.classList.add('owned');
-                }
-            });
+        if (purchasedItems.includes(itemName)) {
+            button.textContent = 'Owned';
+            button.disabled = true;
+            button.classList.add('owned');
         }
-
-      async function buyItem(price, button) {
+    });
+}
+        
+  async function buyItem(price, button) {
     if (!currentUser) {
         alert("You must be logged in to buy items!");
         return;
@@ -495,13 +495,14 @@
 
     // Deduct coins and mark item as purchased
     coins -= price;
-    purchasedItems.push(button.previousElementSibling.previousElementSibling.textContent); // Store item name
+    const itemName = button.previousElementSibling.previousElementSibling.textContent; // Get the item name
+    purchasedItems.push(itemName); // Add the item name to the purchasedItems array
 
     // Update Firestore
     const userRef = doc(db, 'users', currentUser.uid);
     await updateDoc(userRef, {
-        coins,
-        purchasedItems
+        coins: coins,
+        purchasedItems: purchasedItems
     });
 
     // Update UI
