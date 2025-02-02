@@ -528,7 +528,7 @@ function drawSnake() {
   gamePaused = false;
   
   if (activeUpgrades.slowness) {
-  gameSpeed = normalSpeed * 2;
+  gameSpeed = normalSpeed * 1.5;
   delete activeUpgrades.slowness;
   // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
   if (auth.currentUser) {
