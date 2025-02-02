@@ -55,6 +55,20 @@
         #restartBtn:hover {
             background-color: #c0392b;
         }
+        #restartBtn.centered {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
         #nameInputContainer {
             position: fixed;
             top: 50%;
@@ -338,24 +352,26 @@
 
         let gameLoopTimeout;
 
-        function gameLoop() {
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ecf0f1';
-                ctx.font = '48px serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-                return;
-            }
+       function gameLoop() {
+    if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ecf0f1';
+        ctx.font = '48px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawApple();
-            moveSnake();
-            drawSnake();
-            gameLoopTimeout = setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
-        }
+        // Move the restart button to the center
+        document.getElementById('restartBtn').classList.add('centered');
+        return;
+    }
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawApple();
+    moveSnake();
+    drawSnake();
+    gameLoopTimeout = setTimeout(gameLoop, gameSpeed); // Use gameSpeed to control the loop speed
+}
         // Swipe gesture logic
         function handleTouchStart(event) {
             touchStartX = event.touches[0].clientX;
@@ -440,32 +456,34 @@
             window.location.href = "Turtleearth.html";
         });
 
-        function resetGame() {
-            // Clear the existing game loop timeout
-            clearTimeout(gameLoopTimeout);
+       function resetGame() {
+    // Clear the existing game loop timeout
+    clearTimeout(gameLoopTimeout);
 
-            // Reset game state
-            snake = [{x: 10, y: 10}];
-            dx = 0;
-            dy = 0;
-            score = 0;
-            gameOver = false;
-            gamePaused = false;
-            gameSpeed = normalSpeed; // Reset speed to normal
+    // Reset game state
+    snake = [{x: 10, y: 10}];
+    dx = 0;
+    dy = 0;
+    score = 0;
+    gameOver = false;
+    gamePaused = false;
+    gameSpeed = normalSpeed; // Reset speed to normal
 
-            // Update the UI
-            document.getElementById('score').textContent = '0';
-            document.getElementById('nameInputContainer').style.display = 'none';
-            document.getElementById('specialPopup').style.display = 'none';
-            document.getElementById('specialPopup2').style.display = 'none';
+    // Update the UI
+    document.getElementById('score').textContent = '0';
+    document.getElementById('nameInputContainer').style.display = 'none';
+    document.getElementById('specialPopup').style.display = 'none';
+    document.getElementById('specialPopup2').style.display = 'none';
 
+    // Remove the centered class from the restart button
+    document.getElementById('restartBtn').classList.remove('centered');
 
-            // Generate a new apple
-            generateApple();
+    // Generate a new apple
+    generateApple();
 
-            // Restart the game loop
-            gameLoop();
-        }
+    // Restart the game loop
+    gameLoop();
+}
 
         document.getElementById('restartBtn').addEventListener('click', resetGame);
 
