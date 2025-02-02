@@ -1,457 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game Store</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snake Game Store</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            font-family: Courier New, Monospace;
-            line-height: 1.6;
-            padding: 20px;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            min-height: 100vh;
-            color: #999;
-            position: relative;
-            overflow-x: hidden;
-        }
+    body {
+      font-family: Courier New, Monospace;
+      line-height: 1.6;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      min-height: 100vh;
+      color: #999;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-        .glow-effect {
-            animation: glowPulse 2s infinite;
-        }
+    .glow-effect {
+      animation: glowPulse 2s infinite;
+    }
 
-        @keyframes glowPulse {
-            0% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
-        }
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+      100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.2); }
+    }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #fdbb2d;
-            position: relative;
-            overflow: hidden;
-        }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border: 2px solid #fdbb2d;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .header::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
-        }
+    .header::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
 
-        .header h1 {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.5em;
-            position: relative;
-        }
+    .header h1 {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.5em;
+      position: relative;
+    }
 
-        .coins {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
+    .coins {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
 
-        .store-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 2px solid #4ecdc4;
-            transform-origin: center;
-            transition: transform 0.3s;
-        }
+    .store-section {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border: 2px solid #4ecdc4;
+      transform-origin: center;
+      transition: transform 0.3s;
+    }
 
-        .store-section:hover {
-            transform: scale(1.01);
-        }
+    .store-section:hover {
+      transform: scale(1.01);
+    }
 
-        .section-title {
-            margin-bottom: 20px;
-            color: #1a2a6c;
-            font-size: 1.8em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            border-bottom: 3px solid #4ecdc4;
-            padding-bottom: 10px;
-            position: relative;
-        }
+    .section-title {
+      margin-bottom: 20px;
+      color: #1a2a6c;
+      font-size: 1.8em;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      border-bottom: 3px solid #4ecdc4;
+      padding-bottom: 10px;
+      position: relative;
+    }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-            animation: borderSlide 2s infinite;
-        }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+      animation: borderSlide 2s infinite;
+    }
 
-        @keyframes borderSlide {
-            0% { width: 0; left: 0; }
-            50% { width: 100%; left: 0; }
-            100% { width: 0; left: 100%; }
-        }
+    @keyframes borderSlide {
+      0% { width: 0; left: 0; }
+      50% { width: 100%; left: 0; }
+      100% { width: 0; left: 100%; }
+    }
 
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
 
-        .item-card {
-            border: none;
-            border-radius: 15px;
-            padding: 20px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
+    .item-card {
+      border: none;
+      border-radius: 15px;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .item-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
+    .item-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
 
-        .item-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-        }
+    .item-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+    }
 
-        .item-name {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #1a2a6c;
-            font-size: 1.3em;
-            position: relative;
-        }
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #1a2a6c;
+      font-size: 1.3em;
+      position: relative;
+    }
 
-        .item-description {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 15px;
-        }
+    .item-description {
+      color: #666;
+      font-size: 0.95em;
+      margin-bottom: 15px;
+    }
 
-        .item-price {
-            color: #ff6b6b;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
+    .item-price {
+      color: #ff6b6b;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+    }
 
-        .buy-button {
-            background: linear-gradient(45deg, #4ecdc4, #2ecc71);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9em;
-            position: relative;
-            overflow: hidden;
-        }
+    .buy-button {
+      background: linear-gradient(45deg, #4ecdc4, #2ecc71);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.9em;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .buy-button::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent
-            );
-            transform: rotate(45deg);
-            transition: 0.5s;
-            opacity: 0;
-        }
+    .buy-button::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transform: rotate(45deg);
+      transition: 0.5s;
+      opacity: 0;
+    }
 
-        .buy-button:hover::after {
-            opacity: 1;
-            transform: rotate(45deg) translateX(100%);
-        }
+    .buy-button:hover::after {
+      opacity: 1;
+      transform: rotate(45deg) translateX(100%);
+    }
 
-        .buy-button:hover {
-            background: linear-gradient(45deg, #2ecc71, #4ecdc4);
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-        }
+    .buy-button:hover {
+      background: linear-gradient(45deg, #2ecc71, #4ecdc4);
+      box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+    }
 
-        .buy-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+    .buy-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
 
-        .owned {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-        }
+    .owned {
+      background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    }
 
-        .owned:hover {
-            background: linear-gradient(45deg, #ff8e8e, #ff6b6b);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
+    .owned:hover {
+      background: linear-gradient(45deg, #ff8e8e, #ff6b6b);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
 
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
-        }
+    .pulse {
+      animation: pulse 0.5s ease-in-out;
+    }
 
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
 
-        .shake {
-            animation: shake 0.5s;
-        }
-    </style>
+    .shake {
+      animation: shake 0.5s;
+    }
+  </style>
 </head>
+<body>
+  <!-- Login/Signup Form -->
+  <div id="authForm">
+    <h2>Login / Sign Up</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button id="loginButton">Login</button>
+    <button id="signupButton">Sign Up</button>
+  </div>
 
-  <body>
-    <!-- Login/Signup Form -->
-    <div id="authForm">
-        <h2>Login / Sign Up</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="loginButton">Login</button>
-        <button id="signupButton">Sign Up</button>
+  <!-- Store Content -->
+  <div id="storeContent" style="display: none;">
+    <div class="header">
+      <h1>Snake Game Store</h1>
+      <div class="coins">Coins: <span id="coinBalance">0</span></div>
+      <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
+      <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
     </div>
 
-    <!-- Store Content -->
-    <div id="storeContent" style="display: none;">
-        <div class="header">
-            <h1>Snake Game Store</h1>
-            <div class="coins">Coins: <span id="coinBalance">0</span></div>
-            <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Back to Game</button>
-            <button id="logoutButton" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;">Logout</button>
+    <!-- Power-ups Section -->
+    <div class="store-section">
+      <h2 class="section-title">Power-ups</h2>
+      <div class="items-grid">
+        <div class="item-card">
+          <div class="item-name">Speed Boost</div>
+          <div class="item-description">Move 25% faster for one game</div>
+          <div class="item-price">100 coins</div>
+          <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
         </div>
-
-        <!-- Power-ups Section -->
-        <div class="store-section">
-            <h2 class="section-title">Power-ups</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Speed Boost</div>
-                    <div class="item-description">Move 25% faster for one game</div>
-                    <div class="item-price">100 coins</div>
-                    <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Double Points</div>
-                    <div class="item-description">Earn twice the coins for each food item</div>
-                    <div class="item-price">200 coins</div>
-                    <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
-                </div>
-            </div>
+        <div class="item-card">
+          <div class="item-name">Double Points</div>
+          <div class="item-description">Earn twice the coins for each food item</div>
+          <div class="item-price">200 coins</div>
+          <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
         </div>
-
-        <!-- Snake Skins Section -->
-        <div class="store-section">
-            <h2 class="section-title">Snake Skins</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Rainbow Snake</div>
-                    <div class="item-description">Make your snake colorful and fabulous</div>
-                    <div class="item-price">500 coins</div>
-                    <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Golden Snake</div>
-                    <div class="item-description">Show off your wealth with a golden snake</div>
-                    <div class="item-price">1000 coins</div>
-                    <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mini-games Section -->
-        <div class="store-section">
-            <h2 class="section-title">Mini-games</h2>
-            <div class="items-grid">
-                <div class="item-card">
-                    <div class="item-name">Maze Mode</div>
-                    <div class="item-description">Navigate through challenging mazes</div>
-                    <div class="item-price">300 coins</div>
-                    <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
-                </div>
-                <div class="item-card">
-                    <div class="item-name">Time Trial</div>
-                    <div class="item-description">Race against the clock to score points</div>
-                    <div class="item-price">400 coins</div>
-                    <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- Firebase and JavaScript -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    <!-- Snake Skins Section -->
+    <div class="store-section">
+      <h2 class="section-title">Snake Skins</h2>
+      <div class="items-grid">
+        <div class="item-card">
+          <div class="item-name">Rainbow Snake</div>
+          <div class="item-description">Make your snake colorful and fabulous</div>
+          <div class="item-price">500 coins</div>
+          <button class="buy-button" onclick="buyItem(500, this)">Buy</button>
+        </div>
+        <div class="item-card">
+          <div class="item-name">Golden Snake</div>
+          <div class="item-description">Show off your wealth with a golden snake</div>
+          <div class="item-price">1000 coins</div>
+          <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
+        </div>
+      </div>
+    </div>
 
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
-            authDomain: "turtlearth-6b0a6.firebaseapp.com",
-            projectId: "turtlearth-6b0a6",
-            storageBucket: "turtlearth-6b0a6.appspot.com",
-            messagingSenderId: "90749703119",
-            appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
-            measurementId: "G-WVYQDY75EG"
-        };
+    <!-- Mini-games Section -->
+    <div class="store-section">
+      <h2 class="section-title">Mini-games</h2>
+      <div class="items-grid">
+        <div class="item-card">
+          <div class="item-name">Maze Mode</div>
+          <div class="item-description">Navigate through challenging mazes</div>
+          <div class="item-price">300 coins</div>
+          <button class="buy-button" onclick="buyItem(300, this)">Buy</button>
+        </div>
+        <div class="item-card">
+          <div class="item-name">Time Trial</div>
+          <div class="item-description">Race against the clock to score points</div>
+          <div class="item-price">400 coins</div>
+          <button class="buy-button" onclick="buyItem(400, this)">Buy</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  <!-- Firebase and JavaScript -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-        // DOM elements
-        const authForm = document.getElementById('authForm');
-        const storeContent = document.getElementById('storeContent');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginButton = document.getElementById('loginButton');
-        const signupButton = document.getElementById('signupButton');
-        const logoutButton = document.getElementById('logoutButton');
-        const coinBalance = document.getElementById('coinBalance');
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+      authDomain: "turtlearth-6b0a6.firebaseapp.com",
+      projectId: "turtlearth-6b0a6",
+      storageBucket: "turtlearth-6b0a6.appspot.com",
+      messagingSenderId: "90749703119",
+      appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+      measurementId: "G-WVYQDY75EG"
+    };
 
-        let currentUser = null;
-        let coins = 0;
-        let purchasedItems = [];
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Show login/signup form by default
+    // DOM elements
+    const authForm = document.getElementById('authForm');
+    const storeContent = document.getElementById('storeContent');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+    const signupButton = document.getElementById('signupButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const coinBalance = document.getElementById('coinBalance');
+
+    let currentUser = null;
+    let coins = 0;
+    let purchasedItems = [];
+
+    // Show login/signup form by default
+    authForm.style.display = 'block';
+    storeContent.style.display = 'none';
+
+    // Sign Up
+    signupButton.addEventListener('click', async () => {
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        alert('Please enter a username and password.');
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+        currentUser = userCredential.user;
+
+        // Save user data to Firestore
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          username,
+          coins: 1000, // Starting coins
+          purchasedItems: []
+        });
+
+        alert('Sign up successful!');
+        loadUserData();
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+
+    // Login
+    loginButton.addEventListener('click', async () => {
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        alert('Please enter a username and password.');
+        return;
+      }
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+        currentUser = userCredential.user;
+        alert('Login successful!');
+        loadUserData();
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+
+    // Logout
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        currentUser = null;
         authForm.style.display = 'block';
         storeContent.style.display = 'none';
+        alert('Logged out successfully!');
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
 
-        // Sign Up
-        signupButton.addEventListener('click', async () => {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
+    // Load user data from Firestore
+    async function loadUserData() {
+      if (!currentUser) return;
 
-            if (!username || !password) {
-                alert('Please enter a username and password.');
-                return;
-            }
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-                currentUser = userCredential.user;
-
-                // Save user data to Firestore
-                await setDoc(doc(db, 'users', currentUser.uid), {
-                    username,
-                    coins: 1000, // Starting coins
-                    purchasedItems: []
-                });
-
-                alert('Sign up successful!');
-                loadUserData();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        });
-
-        // Login
-        loginButton.addEventListener('click', async () => {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            if (!username || !password) {
-                alert('Please enter a username and password.');
-                return;
-            }
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-                currentUser = userCredential.user;
-                alert('Login successful!');
-                loadUserData();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        });
-
-        // Logout
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                currentUser = null;
-                authForm.style.display = 'block';
-                storeContent.style.display = 'none';
-                alert('Logged out successfully!');
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        });
-
-        // Load user data from Firestore
-     async function loadUserData() {
-    if (!currentUser) return;
-
-    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-    if (userDoc.exists()) {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
         const userData = userDoc.data();
         coins = userData.coins;
         purchasedItems = userData.purchasedItems || [];
@@ -462,91 +461,65 @@
 
         authForm.style.display = 'none';
         storeContent.style.display = 'block';
+      }
     }
-}
 
-        // Update purchased items in the UI
-      function updatePurchasedItems() {
-    const itemCards = document.querySelectorAll('.item-card');
-    itemCards.forEach(card => {
+    // Update purchased items in the UI
+    function updatePurchasedItems() {
+      const itemCards = document.querySelectorAll('.item-card');
+      itemCards.forEach(card => {
         const itemName = card.querySelector('.item-name').textContent;
         const button = card.querySelector('.buy-button');
 
         if (purchasedItems.includes(itemName)) {
-            button.textContent = 'Owned';
-            button.disabled = true;
-            button.classList.add('owned');
+          button.textContent = 'Owned';
+          button.disabled = true;
+          button.classList.add('owned');
         }
-    });
-}
-        
-  async function buyItem(price, button) {
-    if (!currentUser) {
-        alert("You must be logged in to buy items!");
-        return;
+      });
     }
 
-    if (coins < price) {
+    // Global buyItem function attached to window for inline onclick access
+    window.buyItem = async function(price, button) {
+      if (!currentUser) {
+        alert("You must be logged in to buy items!");
+        return;
+      }
+
+      if (coins < price) {
         alert("Not enough coins!");
         button.classList.add("shake");
         setTimeout(() => button.classList.remove("shake"), 500);
         return;
-    }
+      }
 
-    // Deduct coins and mark item as purchased
-    coins -= price;
-    const itemName = button.previousElementSibling.previousElementSibling.textContent; // Get the item name
-    purchasedItems.push(itemName); // Add the item name to the purchasedItems array
+      // Deduct coins and mark the item as purchased
+      coins -= price;
+      // Get the item name from the DOM (assuming the structure remains consistent)
+      const itemName = button.previousElementSibling.previousElementSibling.textContent;
+      purchasedItems.push(itemName);
 
-    // Update Firestore
-    const userRef = doc(db, 'users', currentUser.uid);
-    await updateDoc(userRef, {
+      // Update Firestore with the new coins balance and purchased items list
+      const userRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userRef, {
         coins: coins,
         purchasedItems: purchasedItems
+      });
+
+      // Update UI
+      coinBalance.textContent = coins;
+      button.textContent = "Owned";
+      button.disabled = true;
+      button.classList.add("owned");
+    };
+
+    // Check if user is already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadUserData();
+      }
     });
-
-    // Update UI
-    coinBalance.textContent = coins;
-    button.textContent = "Owned";
-    button.disabled = true;
-    button.classList.add("owned");
-}
-
-        // Function to handle purchasing items
-window.buyItem = async function(price, button) {
-    if (!currentUser) {
-        alert('You need to log in first!');
-        return;
-    }
-
-    if (coins < price) {
-        alert('Not enough coins!');
-        return;
-    }
-
-    // Deduct coins and update Firestore
-    coins -= price;
-    await updateDoc(doc(db, 'users', currentUser.uid), {
-        coins: coins
-    });
-
-    // Update UI
-    coinBalance.textContent = coins;
-    button.textContent = 'Purchased';
-    button.disabled = true;
-    button.classList.add('owned');
-};
-
-
-        
-
-        // Check if user is already logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                loadUserData();
-            }
-        });
-    </script>
+  </script>
 </body>
 </html>
