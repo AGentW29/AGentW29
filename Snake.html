@@ -148,72 +148,73 @@
   </div>
 
   <script type="module">
-  // Firebase imports (already have Firestore in your code)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
-    authDomain: "turtlearth-6b0a6.firebaseapp.com",
-    projectId: "turtlearth-6b0a6",
-    storageBucket: "turtlearth-6b0a6.appspot.com",
-    messagingSenderId: "90749703119",
-    appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
-    measurementId: "G-WVYQDY75EG"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+      authDomain: "turtlearth-6b0a6.firebaseapp.com",
+      projectId: "turtlearth-6b0a6",
+      storageBucket: "turtlearth-6b0a6.appspot.com",
+      messagingSenderId: "90749703119",
+      appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+      measurementId: "G-WVYQDY75EG"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-  // Global variable to hold the active upgrades.
-  let activeUpgrades = {};
+    // Global variable to hold the active upgrades.
+    let activeUpgrades = {};
+    let coins = 0; // Add a coin balance variable
 
-  // Listen for auth state change.
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // User is signed in.
-      console.log("User is signed in:", user.uid);
-      // Load user data from Firestore.
-      const userRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        // Assuming you saved upgrades in a field (for example, purchasedItems)
-        // You can store them as an array or an object. Here we'll assume an array of item names.
-        const purchasedItems = userData.purchasedItems || [];
-        // Convert purchased items to an activeUpgrades object.
-        // For example, you might have:
-        // "Speed Boost", "Double Points", "Rainbow Snake", "Golden Snake"
-        purchasedItems.forEach(itemName => {
-          switch (itemName) {
-            case "Slowness":
-              // Mark as available (one-time use).
-              activeUpgrades.slowness = true;
-              break;
-            case "Double Points":
-              activeUpgrades.doublePoints = true;
-              break;
-            case "Rainbow Snake":
-              activeUpgrades.rainbowSnake = true;
-              break;
-            case "Golden Snake":
-              activeUpgrades.goldenSnake = true;
-              break;
-            // Add more cases if needed.
-          }
-        });
-        console.log("Active Upgrades:", activeUpgrades);
+    // Listen for auth state change.
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is signed in.
+        console.log("User is signed in:", user.uid);
+        // Load user data from Firestore.
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          coins = userData.coins || 0; // Load coin balance
+          // Assuming you saved upgrades in a field (for example, purchasedItems)
+          // You can store them as an array or an object. Here we'll assume an array of item names.
+          const purchasedItems = userData.purchasedItems || [];
+          // Convert purchased items to an activeUpgrades object.
+          // For example, you might have:
+          // "Speed Boost", "Double Points", "Rainbow Snake", "Golden Snake"
+          purchasedItems.forEach(itemName => {
+            switch (itemName) {
+              case "Slowness":
+                // Mark as available (one-time use).
+                activeUpgrades.slowness = true;
+                break;
+              case "Double Points":
+                activeUpgrades.doublePoints = true;
+                break;
+              case "Rainbow Snake":
+                activeUpgrades.rainbowSnake = true;
+                break;
+              case "Golden Snake":
+                activeUpgrades.goldenSnake = true;
+                break;
+              // Add more cases if needed.
+            }
+          });
+          console.log("Active Upgrades:", activeUpgrades);
+        } else {
+          console.log("User document does not exist!");
+        }
       } else {
-        console.log("User document does not exist!");
+        // No user is signed in. You can redirect to your login/store page:
+        window.location.href = "Store.html";
       }
-    } else {
-      // No user is signed in. You can redirect to your login/store page:
-      window.location.href = "Store.html";
-    }
-  });
-
+    });
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -244,30 +245,29 @@
     let touchEndX = 0;
     let touchEndY = 0;
 
-   function drawSnakePart(snakePart, index) {
-  // Default snake colors.
-  let fillColor = "#49ff00";
-  let strokeColor = "#49ff69";
+    function drawSnakePart(snakePart, index) {
+      // Default snake colors.
+      let fillColor = "#49ff00";
+      let strokeColor = "#49ff69";
 
-  if (activeUpgrades.goldenSnake) {
-    fillColor = "gold";
-    strokeColor = "darkgoldenrod";
-  } else if (activeUpgrades.rainbowSnake) {
-    const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
-    fillColor = rainbowColors[index % rainbowColors.length];
-    strokeColor = "black";
-  }
+      if (activeUpgrades.goldenSnake) {
+        fillColor = "gold";
+        strokeColor = "darkgoldenrod";
+      } else if (activeUpgrades.rainbowSnake) {
+        const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+        fillColor = rainbowColors[index % rainbowColors.length];
+        strokeColor = "black";
+      }
 
-  ctx.fillStyle = fillColor;
-  ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-  ctx.strokeStyle = strokeColor;
-  ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-}
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+      ctx.strokeStyle = strokeColor;
+      ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+    }
 
-function drawSnake() {
-  snake.forEach((part, index) => drawSnakePart(part, index));
-}
-
+    function drawSnake() {
+      snake.forEach((part, index) => drawSnakePart(part, index));
+    }
 
     function drawApple() {
       ctx.fillStyle = "#ff2900";
@@ -323,16 +323,15 @@ function drawSnake() {
     }
 
     async function removeUsedUpgrade(user, upgradeKey) {
-  const userRef = doc(db, "users", user.uid);
-  const userDoc = await getDoc(userRef);
-  if (userDoc.exists()) {
-    let purchasedItems = userDoc.data().purchasedItems || [];
-    // Remove the upgrade by filtering it out.
-    purchasedItems = purchasedItems.filter(item => item !== "Slowness");
-    await setDoc(userRef, { purchasedItems }, { merge: true });
-  }
-}
-
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        let purchasedItems = userDoc.data().purchasedItems || [];
+        // Remove the upgrade by filtering it out.
+        purchasedItems = purchasedItems.filter(item => item !== "Slowness");
+        await setDoc(userRef, { purchasedItems }, { merge: true });
+      }
+    }
 
     function updateHighscoreUI(highscores) {
       const highscoreDiv = document.getElementById("highscore");
@@ -391,11 +390,23 @@ function drawSnake() {
 
       if (head.x === apple.x && head.y === apple.y) {
         const pointIncrement = activeUpgrades.doublePoints ? 2 : 1;
-       score += pointIncrement;
+        score += pointIncrement;
+        coins += pointIncrement; // Increment coin balance
         document.getElementById("score").textContent = score;
+        updateCoinBalance(); // Update coin balance in Firestore
         generateApple();
       } else {
         snake.pop();
+      }
+    }
+
+    // Function to update the coin balance in Firestore
+    async function updateCoinBalance() {
+      if (auth.currentUser) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          coins: coins
+        });
       }
     }
 
@@ -495,7 +506,9 @@ function drawSnake() {
     document.getElementById("continueBtn").addEventListener("click", () => {
       document.getElementById("specialPopup").style.display = "none";
       score += 1;
+      coins += 1; // Increment coin balance
       document.getElementById("score").textContent = score;
+      updateCoinBalance(); // Update coin balance in Firestore
       gamePaused = false;
       gameSpeed = normalSpeed;
     });
@@ -507,7 +520,9 @@ function drawSnake() {
     document.getElementById("continueBtn2").addEventListener("click", () => {
       document.getElementById("specialPopup2").style.display = "none";
       score += 1;
+      coins += 1; // Increment coin balance
       document.getElementById("score").textContent = score;
+      updateCoinBalance(); // Update coin balance in Firestore
       gamePaused = false;
       gameSpeed = normalSpeed;
     });
@@ -516,39 +531,38 @@ function drawSnake() {
       window.location.href = "Store.html";
     });
 
-   function resetGame() {
-  clearTimeout(gameLoopTimeout);
+    function resetGame() {
+      clearTimeout(gameLoopTimeout);
 
-  // Reset game state
-  snake = [{ x: 10, y: 10 }];
-  dx = 0;
-  dy = 0;
-  score = 0;
-  gameOver = false;
-  gamePaused = false;
-  
-  if (activeUpgrades.slowness) {
-  gameSpeed = normalSpeed * 1.2;
-  delete activeUpgrades.slowness;
-  // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
-  if (auth.currentUser) {
-    removeUsedUpgrade(auth.currentUser, "Slowness");
-  }
-} else {
-  gameSpeed = normalSpeed;
-}
+      // Reset game state
+      snake = [{ x: 10, y: 10 }];
+      dx = 0;
+      dy = 0;
+      score = 0;
+      gameOver = false;
+      gamePaused = false;
 
-  // Reset UI elements
-  document.getElementById("score").textContent = "0";
-  document.getElementById("nameInputContainer").style.display = "none";
-  document.getElementById("specialPopup").style.display = "none";
-  document.getElementById("specialPopup2").style.display = "none";
-  document.getElementById("restartBtn").classList.remove("centered");
+      if (activeUpgrades.slowness) {
+        gameSpeed = normalSpeed * 1.2;
+        delete activeUpgrades.slowness;
+        // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
+        if (auth.currentUser) {
+          removeUsedUpgrade(auth.currentUser, "Slowness");
+        }
+      } else {
+        gameSpeed = normalSpeed;
+      }
 
-  generateApple();
-  gameLoop();
-}
+      // Reset UI elements
+      document.getElementById("score").textContent = "0";
+      document.getElementById("nameInputContainer").style.display = "none";
+      document.getElementById("specialPopup").style.display = "none";
+      document.getElementById("specialPopup2").style.display = "none";
+      document.getElementById("restartBtn").classList.remove("centered");
 
+      generateApple();
+      gameLoop();
+    }
 
     document.getElementById("restartBtn").addEventListener("click", resetGame);
 
@@ -562,23 +576,22 @@ function drawSnake() {
     loadHighscores();
     gameLoop();
 
-  window.addEventListener('load', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('refresh')) {
-    // Remove the refresh parameter from the URL
-    const newUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
-    
-    // Now safely get the restart button and click it
-    const restartBtn = document.getElementById('restartBtn');
-    if (restartBtn) {
-      restartBtn.click();
-    } else {
-      console.error("Restart button not found.");
-    }
-  }
-});
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('refresh')) {
+        // Remove the refresh parameter from the URL
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
 
+        // Now safely get the restart button and click it
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+          restartBtn.click();
+        } else {
+          console.error("Restart button not found.");
+        }
+      }
+    });
   </script>
 </body>
 </html>
