@@ -545,7 +545,7 @@
       gamePaused = false;
 
       if (activeUpgrades.slowness) {
-        gameSpeed = normalSpeed * 1.2;
+        gameSpeed = normalSpeed * 1.3;
         delete activeUpgrades.slowness;
         // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
         if (auth.currentUser) {
