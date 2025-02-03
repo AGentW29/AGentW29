@@ -250,13 +250,15 @@
       let fillColor = "#49ff00";
       let strokeColor = "#49ff69";
 
-      if (activeUpgrades.goldenSnake) {
-        fillColor = "gold";
-        strokeColor = "darkgoldenrod";
-      } else if (activeUpgrades.rainbowSnake) {
+      
+      if (activeUpgrades.rainbowSnake) {
         const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
         fillColor = rainbowColors[index % rainbowColors.length];
         strokeColor = "black";
+     
+      } else  if (activeUpgrades.goldenSnake) {
+        fillColor = "gold";
+        strokeColor = "darkgoldenrod";
       }
 
       ctx.fillStyle = fillColor;
@@ -329,6 +331,7 @@
         let purchasedItems = userDoc.data().purchasedItems || [];
         // Remove the upgrade by filtering it out.
         purchasedItems = purchasedItems.filter(item => item !== "Slowness");
+        purchasedItems = purchasedItems.filter(item => item !== "Double Points");
         await setDoc(userRef, { purchasedItems }, { merge: true });
       }
     }
@@ -395,6 +398,11 @@
         document.getElementById("score").textContent = score;
         updateCoinBalance(); // Update coin balance in Firestore
         generateApple();
+         delete activeUpgrades.doublePoints;
+        // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
+        if (auth.currentUser) {
+          removeUsedUpgrade(auth.currentUser, "Double Points");
+        }
       } else {
         snake.pop();
       }
