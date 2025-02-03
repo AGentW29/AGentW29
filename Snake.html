@@ -170,6 +170,7 @@
     // Global variable to hold the active upgrades.
     let activeUpgrades = {};
     let coins = 0; // Add a coin balance variable
+    let pointMultiplier = 1;
 
     // Listen for auth state change.
     onAuthStateChanged(auth, async (user) => {
@@ -354,54 +355,53 @@
     }
 
     function moveSnake() {
-      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+  const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
-      // Pause for special popup events (if score equals any special value).
-      if (score === 29 && !gamePaused) {
-        gamePaused = true;
-        gameSpeed = pausedSpeed;
-        document.getElementById("specialPopup").style.display = "block";
-        return;
-      }
-      if ((score === 42 || score === 69 || score === 88) && !gamePaused) {
-        gamePaused = true;
-        gameSpeed = pausedSpeed;
-        document.getElementById("specialPopup2").style.display = "block";
-        return;
-      }
+  // Pause for special popup events, etc.
+  if (score === 29 && !gamePaused) {
+    gamePaused = true;
+    gameSpeed = pausedSpeed;
+    document.getElementById("specialPopup").style.display = "block";
+    return;
+  }
+  if ((score === 42 || score === 69 || score === 88) && !gamePaused) {
+    gamePaused = true;
+    gameSpeed = pausedSpeed;
+    document.getElementById("specialPopup2").style.display = "block";
+    return;
+  }
 
-      // Check collisions only if the snake has started moving.
-      if (dx !== 0 || dy !== 0) {
-        if (
-          head.x < 0 ||
-          head.x >= tileCount ||
-          head.y < 0 ||
-          head.y >= tileCount ||
-          snake.some((segment) => segment.x === head.x && segment.y === head.y)
-        ) {
-          gameOver = true;
-          // Only prompt for name if the score qualifies as a high score.
-          if (qualifiesForHighscore()) {
-            document.getElementById("nameInputContainer").style.display = "block";
-          }
-          return;
-        }
+  // Check collisions only if the snake has started moving.
+  if (dx !== 0 || dy !== 0) {
+    if (
+      head.x < 0 ||
+      head.x >= tileCount ||
+      head.y < 0 ||
+      head.y >= tileCount ||
+      snake.some((segment) => segment.x === head.x && segment.y === head.y)
+    ) {
+      gameOver = true;
+      if (qualifiesForHighscore()) {
+        document.getElementById("nameInputContainer").style.display = "block";
       }
-
-      snake.unshift(head);
-
-      if (head.x === apple.x && head.y === apple.y) {
-        const pointIncrement = activeUpgrades.doublePoints ? 2 : 1;
-        score += pointIncrement;
-        coins += pointIncrement; // Increment coin balance
-        document.getElementById("score").textContent = score;
-        updateCoinBalance(); // Update coin balance in Firestore
-        generateApple();
-      } else {
-        snake.pop();
-      }
+      return;
     }
+  }
 
+  snake.unshift(head);
+
+  if (head.x === apple.x && head.y === apple.y) {
+    // Use pointMultiplier set at reset (either 1 or 2)
+    score += pointMultiplier;
+    // Optionally, also update coins (if you want them to follow the same rule)
+    coins += pointMultiplier;
+    document.getElementById("score").textContent = score;
+    updateCoinBalance();
+    generateApple();
+  } else {
+    snake.pop();
+  }
+}
     // Function to update the coin balance in Firestore
     async function updateCoinBalance() {
       if (auth.currentUser) {
@@ -534,44 +534,48 @@
     });
 
     function resetGame() {
-      clearTimeout(gameLoopTimeout);
+  clearTimeout(gameLoopTimeout);
 
-      // Reset game state
-      snake = [{ x: 10, y: 10 }];
-      dx = 0;
-      dy = 0;
-      score = 0;
-      gameOver = false;
-      gamePaused = false;
+  // Reset game state
+  snake = [{ x: 10, y: 10 }];
+  dx = 0;
+  dy = 0;
+  score = 0;
+  gameOver = false;
+  gamePaused = false;
 
-      if (activeUpgrades.slowness) {
-        gameSpeed = normalSpeed * 1.3;
-        delete activeUpgrades.slowness;
-        // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
-        if (auth.currentUser) {
-          removeUsedUpgrade(auth.currentUser, "Slowness");
-        }
-      } else {
-        gameSpeed = normalSpeed;
-      }
-
-      if (activeUpgrades.doublePoints) { // Add this block
-        delete activeUpgrades.doublePoints;
-        if (auth.currentUser) {
-          removeUsedUpgrade(auth.currentUser, "Double Points");
+  // Apply Slowness upgrade if active
+  if (activeUpgrades.slowness) {
+    gameSpeed = normalSpeed * 1.3;
+    delete activeUpgrades.slowness;
+    if (auth.currentUser) {
+      removeUsedUpgrade(auth.currentUser, "Slowness");
     }
-      }
+  } else {
+    gameSpeed = normalSpeed;
+  }
 
-      // Reset UI elements
-      document.getElementById("score").textContent = "0";
-      document.getElementById("nameInputContainer").style.display = "none";
-      document.getElementById("specialPopup").style.display = "none";
-      document.getElementById("specialPopup2").style.display = "none";
-      document.getElementById("restartBtn").classList.remove("centered");
-
-      generateApple();
-      gameLoop();
+  // Apply Double Points upgrade on reset by setting the pointMultiplier
+  if (activeUpgrades.doublePoints) {
+    pointMultiplier = 2;
+    delete activeUpgrades.doublePoints;
+    if (auth.currentUser) {
+      removeUsedUpgrade(auth.currentUser, "Double Points");
     }
+  } else {
+    pointMultiplier = 1;
+  }
+
+  // Reset UI elements
+  document.getElementById("score").textContent = "0";
+  document.getElementById("nameInputContainer").style.display = "none";
+  document.getElementById("specialPopup").style.display = "none";
+  document.getElementById("specialPopup2").style.display = "none";
+  document.getElementById("restartBtn").classList.remove("centered");
+
+  generateApple();
+  gameLoop();
+}
 
     document.getElementById("restartBtn").addEventListener("click", resetGame);
 
