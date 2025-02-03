@@ -324,17 +324,16 @@
       }
     }
 
-    async function removeUsedUpgrade(user, upgradeKey) {
-      const userRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        let purchasedItems = userDoc.data().purchasedItems || [];
-        // Remove the upgrade by filtering it out.
-        purchasedItems = purchasedItems.filter(item => item !== "Slowness");
-        purchasedItems = purchasedItems.filter(item => item !== "Double Points");
-        await setDoc(userRef, { purchasedItems }, { merge: true });
-      }
-    }
+   async function removeUsedUpgrade(user, upgradeKey) {
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      let purchasedItems = userDoc.data().purchasedItems || [];
+      // Filter by the actual upgrade key passed to the function
+      purchasedItems = purchasedItems.filter(item => item !== upgradeKey);
+      await setDoc(userRef, { purchasedItems }, { merge: true });
+  }
+}
 
     function updateHighscoreUI(highscores) {
       const highscoreDiv = document.getElementById("highscore");
@@ -398,11 +397,6 @@
         document.getElementById("score").textContent = score;
         updateCoinBalance(); // Update coin balance in Firestore
         generateApple();
-         delete activeUpgrades.doublePoints;
-        // Remove from Firestore (assuming the current user is available from onAuthStateChanged)
-        if (auth.currentUser) {
-          removeUsedUpgrade(auth.currentUser, "Double Points");
-        }
       } else {
         snake.pop();
       }
@@ -559,6 +553,13 @@
         }
       } else {
         gameSpeed = normalSpeed;
+      }
+
+      if (activeUpgrades.doublePoints) { // Add this block
+        delete activeUpgrades.doublePoints;
+        if (auth.currentUser) {
+          removeUsedUpgrade(auth.currentUser, "Double Points");
+    }
       }
 
       // Reset UI elements
