@@ -187,8 +187,6 @@
           // You can store them as an array or an object. Here we'll assume an array of item names.
           const purchasedItems = userData.purchasedItems || [];
           // Convert purchased items to an activeUpgrades object.
-          // For example, you might have:
-          // "Speed Boost", "Double Points", "Rainbow Snake", "Golden Snake"
           purchasedItems.forEach(itemName => {
             switch (itemName) {
               case "Slowness":
@@ -198,11 +196,23 @@
               case "Double Points":
                 activeUpgrades.doublePoints = true;
                 break;
+              case "Super Slowness":
+                activeUpgrades.superSlowness = true;
+                break;
+              case "Speed":
+                activeUpgrades.speed = true;
+                break;
               case "Rainbow Snake":
                 activeUpgrades.rainbowSnake = true;
                 break;
               case "Golden Snake":
                 activeUpgrades.goldenSnake = true;
+                break;
+              case "Cyan Snake":
+                activeUpgrades.cyanSnake = true;
+                break;
+              case "Random Colored Snake":
+                activeUpgrades.randomColoredSnake = true;
                 break;
               // Add more cases if needed.
             }
@@ -246,27 +256,48 @@
     let touchEndX = 0;
     let touchEndY = 0;
 
-    function drawSnakePart(snakePart, index) {
-      // Default snake colors.
-      let fillColor = "#49ff00";
-      let strokeColor = "#49ff69";
+   function drawSnakePart(snakePart, index) {
+  if (activeUpgrades.randomColoredSnake) {
+    if (!snakePart.color) { // Store color on segment
+      snakePart.color = getRandomHexColor();
+    }
+    fillColor = snakePart.color;
+    strokeColor = "black";
+  }
 
       
-      if (activeUpgrades.rainbowSnake) {
-        const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
-        fillColor = rainbowColors[index % rainbowColors.length];
-        strokeColor = "black";
-     
-      } else  if (activeUpgrades.goldenSnake) {
-        fillColor = "gold";
-        strokeColor = "darkgoldenrod";
-      }
+  // Fixed version:
+function getRandomHexColor() {
+  return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+}
 
-      ctx.fillStyle = fillColor;
-      ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-      ctx.strokeStyle = strokeColor;
-      ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+function drawSnakePart(snakePart, index) {
+  let fillColor = "#49ff00";
+  let strokeColor = "#49ff69";
+
+  if (activeUpgrades.randomColoredSnake) {
+    if (!snakePart.color) {
+      snakePart.color = getRandomHexColor(); // Store color on segment
     }
+    fillColor = snakePart.color;
+    strokeColor = "black";
+  } else if (activeUpgrades.rainbowSnake) {
+    const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+    fillColor = rainbowColors[index % rainbowColors.length];
+    strokeColor = "black";
+  } else if (activeUpgrades.goldenSnake) {
+    fillColor = "gold";
+    strokeColor = "darkgoldenrod";
+  } else if (activeUpgrades.cyanSnake) {
+    fillColor = "cyan";
+    strokeColor = "darkblue";
+  }
+
+  ctx.fillStyle = fillColor;
+  ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+  ctx.strokeStyle = strokeColor;
+  ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+}
 
     function drawSnake() {
       snake.forEach((part, index) => drawSnakePart(part, index));
@@ -325,14 +356,18 @@
       }
     }
 
-   async function removeUsedUpgrade(user, upgradeKey) {
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      let purchasedItems = userDoc.data().purchasedItems || [];
-      // Filter by the actual upgrade key passed to the function
+ async function removeUsedUpgrade(user, upgradeKey) {
+  const userRef = doc(db, "users", user.uid);
+  const userDoc = await getDoc(userRef);
+  if (userDoc.exists()) {
+    let purchasedItems = userDoc.data().purchasedItems || [];
+    
+    // Only remove consumables
+    const consumables = ["Double Points", "Speed", "Slowness", "Super Slowness"];
+    if (consumables.includes(upgradeKey)) {
       purchasedItems = purchasedItems.filter(item => item !== upgradeKey);
       await setDoc(userRef, { purchasedItems }, { merge: true });
+    }
   }
 }
 
@@ -390,11 +425,11 @@
 
   snake.unshift(head);
 
-  if (head.x === apple.x && head.y === apple.y) {
-    // Use pointMultiplier set at reset (either 1 or 2)
-    score += pointMultiplier;
-    // Optionally, also update coins (if you want them to follow the same rule)
-    coins += pointMultiplier;
+ if (head.x === apple.x && head.y === apple.y) {
+  const basePoints = 1;
+  const totalPoints = basePoints * pointMultiplier;
+  score += totalPoints;
+  coins += totalPoints;
     document.getElementById("score").textContent = score;
     updateCoinBalance();
     generateApple();
@@ -533,7 +568,7 @@
       window.location.href = "Store.html";
     });
 
-    function resetGame() {
+   function resetGame() {
   clearTimeout(gameLoopTimeout);
 
   // Reset game state
@@ -544,29 +579,31 @@
   gameOver = false;
   gamePaused = false;
 
-  // Apply Slowness upgrade if active
+  // Handle speed upgrades
   if (activeUpgrades.slowness) {
     gameSpeed = normalSpeed * 1.3;
     delete activeUpgrades.slowness;
-    if (auth.currentUser) {
-      removeUsedUpgrade(auth.currentUser, "Slowness");
-    }
+    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
+  } else if (activeUpgrades.superSlowness) {
+    gameSpeed = normalSpeed * 1.5;
+    delete activeUpgrades.superSlowness;
+    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
+  } else if (activeUpgrades.speed) {
+    gameSpeed = normalSpeed * 0.7;
+    delete activeUpgrades.speed;
+    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
   } else {
     gameSpeed = normalSpeed;
   }
 
-  // Apply Double Points upgrade on reset by setting the pointMultiplier
+  // Handle point multiplier
+  pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
   if (activeUpgrades.doublePoints) {
-    pointMultiplier = 2;
     delete activeUpgrades.doublePoints;
-    if (auth.currentUser) {
-      removeUsedUpgrade(auth.currentUser, "Double Points");
-    }
-  } else {
-    pointMultiplier = 1;
+    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
   }
 
-  // Reset UI elements
+  // Reset UI
   document.getElementById("score").textContent = "0";
   document.getElementById("nameInputContainer").style.display = "none";
   document.getElementById("specialPopup").style.display = "none";
