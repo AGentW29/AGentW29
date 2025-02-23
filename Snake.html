@@ -209,7 +209,8 @@
             rainbowSnake: false,
             goldenSnake: false,
             cyanSnake: false,
-            randomColoredSnake: false
+            randomColoredSnake: false,
+            aiSnake: false
           };
 
           // Apply selected skin if owned
@@ -259,6 +260,13 @@
     const pausedSpeed = 5000;
     let gameSpeed = normalSpeed;
 
+    // AI Snake variables
+    let aiSnake = [{ x: 15, y: 15 }];
+    let dxAI = 0;
+    let dyAI = 0;
+    let aiEnabled = false;
+    let aiDifficulty = 1; // 0-1 (1 = perfect decisions)
+    
     // Drawing functions with skin support
     function getRandomHexColor() {
       return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
@@ -385,6 +393,15 @@
     function moveSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
+       // Check collision with AI snake
+  if (aiEnabled && aiSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
+    gameOver = true;
+    if (qualifiesForHighscore()) {
+      document.getElementById("nameInputContainer").style.display = "block";
+    }
+    return;
+  }
+
   // Pause for special popup events, etc.
   if (score === 29 && !gamePaused) {
     gamePaused = true;
@@ -440,7 +457,75 @@
       }
     }
 
+    function moveAI() {
+  if (!aiEnabled || gameOver) return;
+
+  // Calculate direction towards apple
+  const head = aiSnake[0];
+  const possibleMoves = [];
+  
+  // Check possible moves
+  if (head.x < apple.x && dxAI !== -1) possibleMoves.push({dx: 1, dy: 0});
+  if (head.x > apple.x && dxAI !== 1) possibleMoves.push({dx: -1, dy: 0});
+  if (head.y < apple.y && dyAI !== -1) possibleMoves.push({dx: 0, dy: 1});
+  if (head.y > apple.y && dyAI !== 1) possibleMoves.push({dx: 0, dy: -1});
+
+  // Add random moves if no direct path
+  if (possibleMoves.length === 0) {
+    possibleMoves.push(
+      {dx: 1, dy: 0},
+      {dx: -1, dy: 0},
+      {dx: 0, dy: 1},
+      {dx: 0, dy: -1}
+    );
+  }
+
+  // Filter out reverse directions
+  const validMoves = possibleMoves.filter(move => 
+    !(move.dx === -dxAI && move.dy === -dyAI)
+  );
+
+  // Choose random valid move (with difficulty factor)
+  if (Math.random() < aiDifficulty && validMoves.length > 0) {
+    const bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+    dxAI = bestMove.dx;
+    dyAI = bestMove.dy;
+  }
+}
+
+function updateAI() {
+  if (!aiEnabled) return;
+
+  const head = { x: aiSnake[0].x + dxAI, y: aiSnake[0].y + dyAI };
+  
+  // Check AI collisions
+  const aiCollision = checkAICollision(head);
+  
+  if (aiCollision) {
+    gameOver = true;
+    return;
+  }
+
+  aiSnake.unshift(head);
+  
+  if (head.x === apple.x && head.y === apple.y) {
+    // AI ate the apple
+    generateApple();
+  } else {
+    aiSnake.pop();
+  }
+}
+
+function checkAICollision(head) {
+  return head.x < 0 || head.x >= tileCount || 
+         head.y < 0 || head.y >= tileCount ||
+         aiSnake.some(segment => segment.x === head.x && segment.y === head.y) ||
+         snake.some(segment => segment.x === head.x && segment.y === head.y);
+}
+
     let gameLoopTimeout;
+
+    
     function gameLoop() {
       if (gameOver) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
@@ -454,11 +539,25 @@
         return;
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawApple();
+    // Move and draw both snakes
+      moveAI();
+      updateAI();
       moveSnake();
+  
+      drawApple();
       drawSnake();
+      drawAISnake();
+
       gameLoopTimeout = setTimeout(gameLoop, gameSpeed);
+    }
+
+    function drawAISnake() {
+      aiSnake.forEach((part, index) => {
+        ctx.fillStyle = "#fff"; // White color for AI
+        ctx.strokeStyle = "#000000";
+        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+        ctx.strokeRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+      });
     }
 
     // Swipe gesture logic
@@ -572,6 +671,11 @@
       score = 0;
       gameOver = false;
       gamePaused = false;
+
+       // Reset AI snake
+      aiSnake = [{ x: 15, y: 15 }];
+      dxAI = 0;
+      dyAI = 0;
 
       // Preserve skin upgrades during reset
       const skinKeys = ['rainbowSnake', 'goldenSnake', 'cyanSnake', 'randomColoredSnake'];
