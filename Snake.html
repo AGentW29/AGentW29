@@ -397,38 +397,7 @@ function generateApple() {
       const lowestScore = currentHighscores[currentHighscores.length - 1].score;
       return score > lowestScore;
     }
-  activeUpgrades = {
-        ...preservedSkins,
-        slowness: false,
-        superSlowness: false,
-        speed: false,
-        doublePoints: false
-      };
 
-      // Handle speed upgrades
-      if (activeUpgrades.slowness) {
-        gameSpeed = normalSpeed * 1.3;
-        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
-      } else if (activeUpgrades.superSlowness) {
-        gameSpeed = normalSpeed * 1.5;
-        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
-      } else if (activeUpgrades.speed) {
-        gameSpeed = normalSpeed * 0.7;
-        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
-      } else {
-        gameSpeed = normalSpeed;
-      }
-
-      // Handle point multiplier
-      pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
-      if (activeUpgrades.doublePoints) {
-        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
-      }
-      if (aiEnabled){
-        gameSpeed = normalSpeed * 1.7;
-      }
-
-    
     function moveSnake() {
   const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
@@ -668,6 +637,33 @@ function checkAICollision(head) {
          snake.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
+    
+        activeUpgrades = {
+        ...preservedSkins,
+        slowness: false,
+        superSlowness: false,
+        speed: false,
+        doublePoints: false
+      };
+
+      // Handle speed upgrades
+      if (activeUpgrades.slowness) {
+        gameSpeed = normalSpeed * 1.3;
+      } else if (activeUpgrades.superSlowness) {
+        gameSpeed = normalSpeed * 1.5;
+      } else if (activeUpgrades.speed) {
+        gameSpeed = normalSpeed * 0.7;
+      } else {
+        gameSpeed = normalSpeed;
+      }
+
+      // Handle point multiplier
+      pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
+      if (aiEnabled){
+        gameSpeed = normalSpeed * 1.7;
+      }
+
+    
     let gameLoopTimeout;
 
     
@@ -833,6 +829,29 @@ function checkAICollision(head) {
         Object.entries(activeUpgrades)
           .filter(([key]) => skinKeys.includes(key))
       );
+
+      activeUpgrades = {
+        ...preservedSkins,
+        slowness: false,
+        superSlowness: false,
+        speed: false,
+        doublePoints: false
+      };
+
+      // Handle speed upgrades
+      if (activeUpgrades.slowness) {
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
+      } else if (activeUpgrades.superSlowness) {
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
+      } else if (activeUpgrades.speed) {
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
+      } 
+      
+      // Handle point multiplier
+      if (activeUpgrades.doublePoints) {
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
+      }
+
       
       // Reset UI
       document.getElementById("score").textContent = "0";
