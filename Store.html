@@ -383,251 +383,223 @@
   </div>
 
   <!-- Firebase and JavaScript -->
-  <script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    <script type="module">
+  // Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-    // Your Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
-      authDomain: "turtlearth-6b0a6.firebaseapp.com",
-      projectId: "turtlearth-6b0a6",
-      storageBucket: "turtlearth-6b0a6.appspot.com",
-      messagingSenderId: "90749703119",
-      appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
-      measurementId: "G-WVYQDY75EG"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+    authDomain: "turtlearth-6b0a6.firebaseapp.com",
+    projectId: "turtlearth-6b0a6",
+    storageBucket: "turtlearth-6b0a6.appspot.com",
+    messagingSenderId: "90749703119",
+    appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+    measurementId: "G-WVYQDY75EG"
+  };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    // DOM elements
-    const authForm = document.getElementById('authForm');
-    const storeContent = document.getElementById('storeContent');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginButton = document.getElementById('loginButton');
-    const signupButton = document.getElementById('signupButton');
-    const logoutButton = document.getElementById('logoutButton');
-    const coinBalance = document.getElementById('coinBalance');
+  // DOM elements
+  const authForm = document.getElementById('authForm');
+  const storeContent = document.getElementById('storeContent');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const loginButton = document.getElementById('loginButton');
+  const signupButton = document.getElementById('signupButton');
+  const logoutButton = document.getElementById('logoutButton');
+  const coinBalance = document.getElementById('coinBalance');
 
-    let currentUser = null;
-    let coins = 0;
-    let purchasedItems = [];
+  let currentUser = null;
+  let coins = 0;
+  let purchasedItems = [];
 
-    // Show login/signup form by default
-    authForm.style.display = 'block';
-    storeContent.style.display = 'none';
+  authForm.style.display = 'block';
+  storeContent.style.display = 'none';
 
-    // Sign Up
-    signupButton.addEventListener('click', async () => {
-      const username = usernameInput.value;
-      const password = passwordInput.value;
+  // Sign Up
+  signupButton.addEventListener('click', async () => {
+    const username = usernameInput.value;
+    const password = passwordInput.value;
 
-      if (!username || !password) {
-        alert('Please enter a username and password.');
-        return;
-      }
+    if (!username || !password) {
+      alert('Please enter a username and password.');
+      return;
+    }
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-        currentUser = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+      currentUser = userCredential.user;
 
-        // Save user data to Firestore
-        await setDoc(doc(db, 'users', currentUser.uid), {
-          username,
-          coins: 1000, // Starting coins
-          purchasedItems: []
-        });
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        username,
+        coins: 1000,
+        purchasedItems: [],
+        selectedSkin: null
+      });
 
-        alert('Sign up successful!');
-        loadUserData();
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-      }
-    });
+      alert('Sign up successful!');
+      await loadUserData();
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  });
 
-    // Login
-    loginButton.addEventListener('click', async () => {
-      const username = usernameInput.value;
-      const password = passwordInput.value;
+  // Login
+  loginButton.addEventListener('click', async () => {
+    const username = usernameInput.value;
+    const password = passwordInput.value;
 
-      if (!username || !password) {
-        alert('Please enter a username and password.');
-        return;
-      }
+    if (!username || !password) {
+      alert('Please enter a username and password.');
+      return;
+    }
 
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
-        currentUser = userCredential.user;
-        loadUserData();
-        location.reload();
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-      }
-    });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, `${username}@snakegame.com`, password);
+      currentUser = userCredential.user;
+      await loadUserData();
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  });
 
-    // Logout
-    logoutButton.addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-        currentUser = null;
-        authForm.style.display = 'block';
-        storeContent.style.display = 'none';
-        alert('Logged out successfully!');
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-      }
-    });
+  // Logout
+  logoutButton.addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      currentUser = null;
+      authForm.style.display = 'block';
+      storeContent.style.display = 'none';
+      alert('Logged out successfully!');
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  });
 
-    // Load user data from Firestore
-    async function loadUserData() {
+  // Load user data
+  async function loadUserData() {
+    try {
       if (!currentUser) return;
 
       const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        coins = userData.coins;
-        purchasedItems = userData.purchasedItems || [];
-
-        // Update UI
-        coinBalance.textContent = coins;
-        updatePurchasedItems();
-
-        authForm.style.display = 'none';
-        storeContent.style.display = 'block';
+      if (!userDoc.exists()) {
+        alert('User data not found!');
+        return;
       }
+
+      const userData = userDoc.data();
+      coins = userData.coins || 0;
+      purchasedItems = userData.purchasedItems || [];
+      const selectedSkin = userData.selectedSkin || null;
+
+      coinBalance.textContent = coins;
+      updatePurchasedItems();
+      updateSkinSelection(selectedSkin);
+
+      authForm.style.display = 'none';
+      storeContent.style.display = 'block';
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      alert('Error loading user data');
     }
-
-    // Update purchased items in the UI
-    function updatePurchasedItems() {
-      const itemCards = document.querySelectorAll('.item-card');
-      itemCards.forEach(card => {
-        const itemName = card.querySelector('.item-name').textContent;
-        const button = card.querySelector('.buy-button');
-
-        if (purchasedItems.includes(itemName)) {
-          button.textContent = 'Owned';
-          button.disabled = true;
-          button.classList.add('owned');
-        }
-      });
-    }
-
- // Modify the buyItem function
-window.buyItem = async function(price, button) {
-  if (!currentUser) {
-    alert("You must be logged in to buy items!");
-    return;
   }
 
-  const itemCard = button.closest('.item-card');
-  const itemName = itemCard.querySelector('.item-name').textContent;
-  const isSkin = itemCard.dataset.itemType === 'skin';
-  const skinKey = itemCard.dataset.skin;
-
-  // Check if already purchased
-  if (purchasedItems.includes(itemName)) {
-    if (isSkin) {
-      // Handle skin selection
-      const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
-        selectedSkin: skinKey
-      });
-      updateSkinButtons(itemCard);
-    }
-    return;
-  }
-
-  // Original purchase logic
-  if (coins < price) {
-    alert("Not enough coins!");
-    button.classList.add("shake");
-    setTimeout(() => button.classList.remove("shake"), 500);
-    return;
-  }
-
-  coins -= price;
-  purchasedItems.push(itemName);
-
-  const userRef = doc(db, 'users', currentUser.uid);
-  await updateDoc(userRef, {
-    coins: coins,
-    purchasedItems: purchasedItems
-  });
-
-  // Update UI
-  coinBalance.textContent = coins;
-  button.classList.add("owned");
-  button.textContent = isSkin ? "Select" : "Owned";
-  button.disabled = !isSkin;
-};
-
-// Add new helper function
-function updateSkinButtons(selectedCard) {
-  const allSkinCards = document.querySelectorAll('[data-item-type="skin"]');
-  const selectedSkin = selectedCard.dataset.skin;
-  
-  allSkinCards.forEach(card => {
-    const button = card.querySelector('.buy-button');
-    if (card === selectedCard) {
-      button.classList.add('selected');
-      button.textContent = 'Selected';
-    } else {
-      button.classList.remove('selected');
-      if (purchasedItems.includes(card.querySelector('.item-name').textContent)) {
-        button.textContent = 'Select';
-      }
-    }
-  });
-}
-
-// Update loadUserData function
-async function loadUserData() {
-  if (!currentUser) return;
-
-  const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-  if (userDoc.exists()) {
-    const userData = userDoc.data();
-    coins = userData.coins;
-    purchasedItems = userData.purchasedItems || [];
-    const selectedSkin = userData.selectedSkin || null;
-
-    // Update UI
-    coinBalance.textContent = coins;
+  function updatePurchasedItems() {
     document.querySelectorAll('.item-card').forEach(card => {
       const itemName = card.querySelector('.item-name').textContent;
       const button = card.querySelector('.buy-button');
-      const isSkin = card.dataset.itemType === 'skin';
-      
-      if (purchasedItems.includes(itemName)) {
-        button.classList.add("owned");
-        button.textContent = isSkin ? "Select" : "Owned";
-        button.disabled = isSkin ? false : true;
-        
-        if (isSkin && card.dataset.skin === selectedSkin) {
-          button.classList.add("selected");
-          button.textContent = "Selected";
-        }
-      }
-    });
-    
-    authForm.style.display = 'none';
-    storeContent.style.display = 'block';
-  }
-}
+      const isPurchased = purchasedItems.includes(itemName);
 
-    // Check if user is already logged in
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        loadUserData();
+      if (isPurchased) {
+        button.classList.add('owned');
+        button.disabled = card.dataset.itemType !== 'skin';
+        button.textContent = 'Owned';
       }
     });
-  </script>
+  }
+
+  function updateSkinSelection(selectedSkin) {
+    document.querySelectorAll('[data-item-type="skin"]').forEach(card => {
+      const button = card.querySelector('.buy-button');
+      const itemName = card.querySelector('.item-name').textContent;
+      const isPurchased = purchasedItems.includes(itemName);
+
+      if (isPurchased) {
+        button.disabled = false;
+        button.textContent = card.dataset.skin === selectedSkin ? 'Selected' : 'Select';
+        button.classList.toggle('selected', card.dataset.skin === selectedSkin);
+      }
+    });
+  }
+
+  // Buy/Select item handler
+  window.buyItem = async function(price, button) {
+    if (!currentUser) {
+      alert("You must be logged in!");
+      return;
+    }
+
+    const itemCard = button.closest('.item-card');
+    const itemName = itemCard.querySelector('.item-name').textContent;
+    const isSkin = itemCard.dataset.itemType === 'skin';
+    const skinKey = itemCard.dataset.skin;
+
+    // Handle skin selection
+    if (purchasedItems.includes(itemName)) {
+      if (isSkin) {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          selectedSkin: skinKey
+        });
+        updateSkinSelection(skinKey);
+      }
+      return;
+    }
+
+    // Handle purchase
+    if (coins < price) {
+      alert("Not enough coins!");
+      button.classList.add("shake");
+      setTimeout(() => button.classList.remove("shake"), 500);
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        coins: coins - price,
+        purchasedItems: [...purchasedItems, itemName]
+      });
+
+      coins -= price;
+      purchasedItems.push(itemName);
+      coinBalance.textContent = coins;
+      
+      button.classList.add('owned');
+      button.textContent = isSkin ? 'Select' : 'Owned';
+      button.disabled = !isSkin;
+
+      if (isSkin) {
+        updateSkinSelection(skinKey);
+      }
+    } catch (error) {
+      console.error('Error purchasing item:', error);
+      alert('Error completing purchase');
+    }
+  };
+
+  // Auth state listener
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      await loadUserData();
+    } else {
+      authForm.style.display = 'block';
+      storeContent.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
