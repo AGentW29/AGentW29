@@ -317,14 +317,17 @@
       ctx.fill();
     }
 
-  function generateApple() {
+function generateApple() {
+  let newX, newY;
   do {
-    apple.x = Math.floor(Math.random() * tileCount);
-    apple.y = Math.floor(Math.random() * tileCount);
+    newX = Math.floor(Math.random() * tileCount);
+    newY = Math.floor(Math.random() * tileCount);
   } while (
-    snake.some(part => part.x === apple.x && part.y === apple.y) ||
-    aiSnake.some(part => part.x === apple.x && part.y === apple.y)
+    snake.some(part => part.x === newX && part.y === newY) ||
+    (aiEnabled && aiSnake.some(part => part.x === newX && part.y === newY))
   );
+  apple.x = newX;
+  apple.y = newY;
 }
 
     // When updating highscores, we update the database and UI.
