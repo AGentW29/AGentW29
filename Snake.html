@@ -226,13 +226,16 @@
           }
 
           // Apply consumables
-          purchasedItems.forEach(itemName => {
-            switch (itemName) {
-              case "Slowness": activeUpgrades.slowness = true; break;
-              case "Double Points": activeUpgrades.doublePoints = true; break;
-              case "Super Slowness": activeUpgrades.superSlowness = true; break;
-              case "Speed": activeUpgrades.speed = true; break;
-              case "AI Snake": activeUpgrades.aiSnake = true; break;
+       // In the onAuthStateChanged callback, modify to:
+      purchasedItems.forEach(itemName => {
+        switch (itemName) {
+          case "Slowness": activeUpgrades.slowness = true; break;
+          case "Double Points": activeUpgrades.doublePoints = true; break;
+          case "Super Slowness": activeUpgrades.superSlowness = true; break;
+          case "Speed": activeUpgrades.speed = true; break;
+          case "AI Snake": aiEnabled = true; break; // Changed from activeUpgrades to aiEnabled
+       }
+    });
 
           // Add this in the onAuthStateChanged callback after processing purchasedItems:
           aiEnabled = purchasedItems.includes("AI Snake");
@@ -528,6 +531,7 @@ function checkAICollision(head) {
 
     
     function gameLoop() {
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (gameOver) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
