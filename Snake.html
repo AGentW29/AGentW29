@@ -556,14 +556,16 @@ function checkAICollision(head) {
       gameLoopTimeout = setTimeout(gameLoop, gameSpeed);
     }
 
-    function drawAISnake() {
-      aiSnake.forEach((part, index) => {
-        ctx.fillStyle = "#fff"; // White color for AI
-        ctx.strokeStyle = "#000000";
-        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
-        ctx.strokeRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
-      });
-    }
+   function drawAISnake() {
+  if (!aiEnabled) return;
+  aiSnake.forEach((part, index) => {
+    ctx.fillStyle = "#fff"; // White color for AI
+    ctx.strokeStyle = "#000000";
+    ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+    ctx.strokeRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+  });
+}
+
 
     // Swipe gesture logic
     function handleTouchStart(event) {
