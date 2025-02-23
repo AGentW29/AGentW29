@@ -169,7 +169,7 @@
   </div>
 
   <script type="module">
-    // Firebase imports
+   // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
@@ -188,69 +188,61 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Global variable to hold the active upgrades.
+    // Global variables
     let activeUpgrades = {};
-    let coins = 0; // Add a coin balance variable
+    let coins = 0;
     let pointMultiplier = 1;
 
-    // Listen for auth state change.
+    // Auth state listener with skin handling
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in.
-        console.log("User is signed in:", user.uid);
-        // Load user data from Firestore.
         const userRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          coins = userData.coins || 0; // Load coin balance
-          // Assuming you saved upgrades in a field (for example, purchasedItems)
-          // You can store them as an array or an object. Here we'll assume an array of item names.
+          coins = userData.coins || 0;
           const purchasedItems = userData.purchasedItems || [];
-          // Convert purchased items to an activeUpgrades object.
+          const selectedSkin = userData.selectedSkin || null;
+
+          // Reset skin upgrades
+          activeUpgrades = {
+            rainbowSnake: false,
+            goldenSnake: false,
+            cyanSnake: false,
+            randomColoredSnake: false
+          };
+
+          // Apply selected skin if owned
+          if (selectedSkin && purchasedItems.some(item => {
+            const skinNames = {
+              rainbowSnake: "Rainbow Snake",
+              goldenSnake: "Golden Snake",
+              cyanSnake: "Cyan Snake",
+              randomColoredSnake: "Random Colored Snake"
+            };
+            return item === skinNames[selectedSkin];
+          })) {
+            activeUpgrades[selectedSkin] = true;
+          }
+
+          // Apply consumables
           purchasedItems.forEach(itemName => {
             switch (itemName) {
-              case "Slowness":
-                // Mark as available (one-time use).
-                activeUpgrades.slowness = true;
-                break;
-              case "Double Points":
-                activeUpgrades.doublePoints = true;
-                break;
-              case "Super Slowness":
-                activeUpgrades.superSlowness = true;
-                break;
-              case "Speed":
-                activeUpgrades.speed = true;
-                break;
-              case "Rainbow Snake":
-                activeUpgrades.rainbowSnake = true;
-                break;
-              case "Golden Snake":
-                activeUpgrades.goldenSnake = true;
-                break;
-              case "Cyan Snake":
-                activeUpgrades.cyanSnake = true;
-                break;
-              case "Random Colored Snake":
-                activeUpgrades.randomColoredSnake = true;
-                break;
-              // Add more cases if needed.
+              case "Slowness": activeUpgrades.slowness = true; break;
+              case "Double Points": activeUpgrades.doublePoints = true; break;
+              case "Super Slowness": activeUpgrades.superSlowness = true; break;
+              case "Speed": activeUpgrades.speed = true; break;
             }
           });
-          console.log("Active Upgrades:", activeUpgrades);
-        } else {
-          console.log("User document does not exist!");
         }
       } else {
-        // No user is signed in. You can redirect to your login/store page:
         window.location.href = "Store.html";
       }
     });
 
+    // Game variables and functions
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-
     const gridSize = 20;
     const tileCount = canvas.width / gridSize;
 
@@ -261,54 +253,44 @@
     let score = 0;
     let gameOver = false;
     let gamePaused = false;
-
-    const maxHighscores = 5;
-    // We'll load highscores from the database and store them here.
     let currentHighscores = [];
-
-    // Game speed variables
-    const normalSpeed = 100; // Normal game speed (100ms)
-    const pausedSpeed = 5000; // Slowed down speed when "paused" (1000ms)
+    const maxHighscores = 5;
+    const normalSpeed = 100;
+    const pausedSpeed = 5000;
     let gameSpeed = normalSpeed;
 
-    // Swipe gesture variables
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
-
-  // Fixed version:
-function getRandomHexColor() {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-}
-
-function drawSnakePart(snakePart, index) {
-  let fillColor = "#49ff00";
-  let strokeColor = "#49ff69";
-
-  if (activeUpgrades.randomColoredSnake) {
-    if (!snakePart.color) {
-      snakePart.color = getRandomHexColor(); // Store color on segment
+    // Drawing functions with skin support
+    function getRandomHexColor() {
+      return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
     }
-    fillColor = snakePart.color;
-    strokeColor = "black";
-  } else if (activeUpgrades.rainbowSnake) {
-    const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
-    fillColor = rainbowColors[index % rainbowColors.length];
-    strokeColor = "black";
-  } else if (activeUpgrades.goldenSnake) {
-    fillColor = "gold";
-    strokeColor = "darkgoldenrod";
-  } else if (activeUpgrades.cyanSnake) {
-    fillColor = "cyan";
-    strokeColor = "darkblue";
-  }
 
-  ctx.fillStyle = fillColor;
-  ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-  ctx.strokeStyle = strokeColor;
-  ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
-}
+    function drawSnakePart(snakePart, index) {
+      let fillColor = "#49ff00";
+      let strokeColor = "#49ff69";
+
+      // Skin priority: Selected skin > Random Color > Other skins
+      if (activeUpgrades.randomColoredSnake) {
+        if (!snakePart.color) snakePart.color = getRandomHexColor();
+        fillColor = snakePart.color;
+        strokeColor = "black";
+      } else if (activeUpgrades.rainbowSnake) {
+        const rainbowColors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+        fillColor = rainbowColors[index % rainbowColors.length];
+        strokeColor = "black";
+      } else if (activeUpgrades.goldenSnake) {
+        fillColor = "gold";
+        strokeColor = "darkgoldenrod";
+      } else if (activeUpgrades.cyanSnake) {
+        fillColor = "cyan";
+        strokeColor = "darkblue";
+      }
+
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+      ctx.strokeStyle = strokeColor;
+      ctx.strokeRect(snakePart.x * gridSize, snakePart.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+
 
     function drawSnake() {
       snake.forEach((part, index) => drawSnakePart(part, index));
@@ -579,51 +561,63 @@ function drawSnakePart(snakePart, index) {
       window.location.href = "Store.html";
     });
 
-   function resetGame() {
-  clearTimeout(gameLoopTimeout);
+   // Modified resetGame function
+    function resetGame() {
+      clearTimeout(gameLoopTimeout);
 
-  // Reset game state
-  snake = [{ x: 10, y: 10 }];
-  dx = 0;
-  dy = 0;
-  score = 0;
-  gameOver = false;
-  gamePaused = false;
+      // Reset game state
+      snake = [{ x: 10, y: 10 }];
+      dx = 0;
+      dy = 0;
+      score = 0;
+      gameOver = false;
+      gamePaused = false;
 
-  // Handle speed upgrades
-  if (activeUpgrades.slowness) {
-    gameSpeed = normalSpeed * 1.3;
-    delete activeUpgrades.slowness;
-    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
-  } else if (activeUpgrades.superSlowness) {
-    gameSpeed = normalSpeed * 1.5;
-    delete activeUpgrades.superSlowness;
-    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
-  } else if (activeUpgrades.speed) {
-    gameSpeed = normalSpeed * 0.7;
-    delete activeUpgrades.speed;
-    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
-  } else {
-    gameSpeed = normalSpeed;
-  }
+      // Preserve skin upgrades during reset
+      const skinKeys = ['rainbowSnake', 'goldenSnake', 'cyanSnake', 'randomColoredSnake'];
+      const preservedSkins = Object.fromEntries(
+        Object.entries(activeUpgrades)
+          .filter(([key]) => skinKeys.includes(key))
+      );
 
-  // Handle point multiplier
-  pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
-  if (activeUpgrades.doublePoints) {
-    delete activeUpgrades.doublePoints;
-    if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
-  }
+      activeUpgrades = {
+        ...preservedSkins,
+        slowness: false,
+        superSlowness: false,
+        speed: false,
+        doublePoints: false
+      };
 
-  // Reset UI
-  document.getElementById("score").textContent = "0";
-  document.getElementById("nameInputContainer").style.display = "none";
-  document.getElementById("specialPopup").style.display = "none";
-  document.getElementById("specialPopup2").style.display = "none";
-  document.getElementById("restartBtn").classList.remove("centered");
+      // Handle speed upgrades
+      if (activeUpgrades.slowness) {
+        gameSpeed = normalSpeed * 1.3;
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
+      } else if (activeUpgrades.superSlowness) {
+        gameSpeed = normalSpeed * 1.5;
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
+      } else if (activeUpgrades.speed) {
+        gameSpeed = normalSpeed * 0.7;
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
+      } else {
+        gameSpeed = normalSpeed;
+      }
 
-  generateApple();
-  gameLoop();
-}
+      // Handle point multiplier
+      pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
+      if (activeUpgrades.doublePoints) {
+        if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
+      }
+
+      // Reset UI
+      document.getElementById("score").textContent = "0";
+      document.getElementById("nameInputContainer").style.display = "none";
+      document.getElementById("specialPopup").style.display = "none";
+      document.getElementById("specialPopup2").style.display = "none";
+      document.getElementById("restartBtn").classList.remove("centered");
+
+      generateApple();
+      gameLoop();
+    }
 
     document.getElementById("restartBtn").addEventListener("click", resetGame);
 
