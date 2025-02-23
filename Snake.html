@@ -209,8 +209,7 @@
             rainbowSnake: false,
             goldenSnake: false,
             cyanSnake: false,
-            randomColoredSnake: false,
-            aiSnake: false
+            randomColoredSnake: false
           };
 
           // Apply selected skin if owned
@@ -233,6 +232,7 @@
               case "Double Points": activeUpgrades.doublePoints = true; break;
               case "Super Slowness": activeUpgrades.superSlowness = true; break;
               case "Speed": activeUpgrades.speed = true; break;
+              case "AI Snake": activeUpgrades.aiSnake = true; break;
             }
           });
         }
@@ -312,8 +312,12 @@
     }
 
     function generateApple() {
-      apple.x = Math.floor(Math.random() * tileCount);
-      apple.y = Math.floor(Math.random() * tileCount);
+       apple.x = Math.floor(Math.random() * tileCount);
+       apple.y = Math.floor(Math.random() * tileCount);
+      } while (
+       snake.some(part => part.x === apple.x && part.y === apple.y) ||
+       aiSnake.some(part => part.x === apple.x && part.y === apple.y)
+      );
 
       // Make sure the apple does not generate on the snake.
       snake.forEach((part) => {
