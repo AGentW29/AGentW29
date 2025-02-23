@@ -270,9 +270,6 @@
     let dyAI = 0;
     let aiEnabled = false;
     let aiDifficulty = 1; // 0-1 (1 = perfect decisions)
-    let aiPath = [];
-    let aiReplanInterval = 1;
-    let aiMoveCounter = 0;
     
     // Drawing functions with skin support
     function getRandomHexColor() {
@@ -464,148 +461,42 @@ function generateApple() {
         });
       }
     }
-  function heuristic(pos0, pos1) {
-      return Math.abs(pos1.x - pos0.x) + Math.abs(pos1.y - pos0.y);
-    }
 
-    function isPositionOccupied(pos) {
-      return aiSnake.some(segment => segment.x === pos.x && segment.y === pos.y) ||
-            snake.some(segment => segment.x === pos.x && segment.y === pos.y);
-    }
+    function moveAI() {
+  if (!aiEnabled || gameOver) return;
 
-    function findPath(start, goal) {
-      const openSet = new Set();
-      const closedSet = new Set();
-      const cameFrom = new Map();
-      const startNode = `${start.x},${start.y}`;
-      const goalNode = `${goal.x},${goal.y}`;
-      
-      const gScore = new Map();
-      const fScore = new Map();
-      
-      openSet.add(startNode);
-      gScore.set(startNode, 0);
-      fScore.set(startNode, heuristic(start, goal));
+  // Calculate direction towards apple
+  const head = aiSnake[0];
+  const possibleMoves = [];
+  
+  // Check possible moves
+  if (head.x < apple.x && dxAI !== -1) possibleMoves.push({dx: 1, dy: 0});
+  if (head.x > apple.x && dxAI !== 1) possibleMoves.push({dx: -1, dy: 0});
+  if (head.y < apple.y && dyAI !== -1) possibleMoves.push({dx: 0, dy: 1});
+  if (head.y > apple.y && dyAI !== 1) possibleMoves.push({dx: 0, dy: -1});
 
-      while (openSet.size > 0) {
-        let current = null;
-        let lowestF = Infinity;
-        
-        openSet.forEach(node => {
-          const score = fScore.get(node) || Infinity;
-          if (score < lowestF) {
-            lowestF = score;
-            current = node;
-          }
-        });
+  // Add random moves if no direct path
+  if (possibleMoves.length === 0) {
+    possibleMoves.push(
+      {dx: 1, dy: 0},
+      {dx: -1, dy: 0},
+      {dx: 0, dy: 1},
+      {dx: 0, dy: -1}
+    );
+  }
 
-        if (current === goalNode) {
-          const path = [];
-          let temp = current;
-          while (cameFrom.has(temp)) {
-            path.push(temp);
-            temp = cameFrom.get(temp);
-          }
-          return path.reverse().map(node => {
-            const [x, y] = node.split(',').map(Number);
-            return { x, y };
-          });
-        }
+  // Filter out reverse directions
+  const validMoves = possibleMoves.filter(move => 
+    !(move.dx === -dxAI && move.dy === -dyAI)
+  );
 
-        openSet.delete(current);
-        closedSet.add(current);
-
-        const [x, y] = current.split(',').map(Number);
-        const neighbors = [
-          {x: x+1, y},
-          {x: x-1, y},
-          {x, y: y+1},
-          {x, y: y-1}
-        ];
-
-        neighbors.forEach(neighbor => {
-          const neighborNode = `${neighbor.x},${neighbor.y}`;
-          
-          if (neighbor.x < 0 || neighbor.x >= tileCount ||
-              neighbor.y < 0 || neighbor.y >= tileCount ||
-              isPositionOccupied(neighbor)) return;
-
-          if (closedSet.has(neighborNode)) return;
-
-          const tentativeG = (gScore.get(current) || 0) + 1;
-          
-          if (!openSet.has(neighborNode)) {
-            openSet.add(neighborNode);
-          } else if (tentativeG >= (gScore.get(neighborNode) || Infinity)) {
-            return;
-          }
-
-          cameFrom.set(neighborNode, current);
-          gScore.set(neighborNode, tentativeG);
-          fScore.set(neighborNode, tentativeG + heuristic(neighbor, goal));
-        });
-      }
-      return null;
-    }
-
-    
-  function moveAI() {
-      if (!aiEnabled || gameOver) return;
-
-      // Periodic path recalculation
-      if (aiMoveCounter++ % aiReplanInterval === 0 || aiPath.length === 0) {
-        aiPath = findPath(aiSnake[0], apple) || [];
-      }
-
-      // Defensive collision check
-      if (Math.random() < 0.1) {
-        const futurePos = {
-          x: aiSnake[0].x + dxAI,
-          y: aiSnake[0].y + dyAI
-        };
-        if (isPositionOccupied(futurePos)) {
-          aiPath = [];
-        }
-      }
-
-      // Path following
-      if (aiPath.length > 0) {
-        const nextStep = aiPath[0];
-        const head = aiSnake[0];
-        
-        if (nextStep.x > head.x && dxAI !== -1) {
-          dxAI = 1;
-          dyAI = 0;
-        } else if (nextStep.x < head.x && dxAI !== 1) {
-          dxAI = -1;
-          dyAI = 0;
-        } else if (nextStep.y > head.y && dyAI !== -1) {
-          dxAI = 0;
-          dyAI = 1;
-        } else if (nextStep.y < head.y && dyAI !== 1) {
-          dxAI = 0;
-          dyAI = -1;
-        }
-        
-        if (head.x === nextStep.x && head.y === nextStep.y) {
-          aiPath.shift();
-        }
-      } else {
-        // Fallback movement
-        const directions = [
-          {dx: 1, dy: 0},
-          {dx: -1, dy: 0},
-          {dx: 0, dy: 1},
-          {dx: 0, dy: -1}
-        ].filter(move => !(move.dx === -dxAI && move.dy === -dyAI));
-
-        if (directions.length > 0) {
-          const move = directions[Math.floor(Math.random() * directions.length)];
-          dxAI = move.dx;
-          dyAI = move.dy;
-        }
-      }
-    }
+  // Choose random valid move (with difficulty factor)
+  if (Math.random() < aiDifficulty && validMoves.length > 0) {
+    const bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+    dxAI = bestMove.dx;
+    dyAI = bestMove.dy;
+  }
+}
 
 function updateAI() {
   if (!aiEnabled) return;
@@ -637,33 +528,6 @@ function checkAICollision(head) {
          snake.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
-    
-        activeUpgrades = {
-        ...preservedSkins,
-        slowness: false,
-        superSlowness: false,
-        speed: false,
-        doublePoints: false
-      };
-
-      // Handle speed upgrades
-      if (activeUpgrades.slowness) {
-        gameSpeed = normalSpeed * 1.3;
-      } else if (activeUpgrades.superSlowness) {
-        gameSpeed = normalSpeed * 1.5;
-      } else if (activeUpgrades.speed) {
-        gameSpeed = normalSpeed * 0.7;
-      } else {
-        gameSpeed = normalSpeed;
-      }
-
-      // Handle point multiplier
-      pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
-      if (aiEnabled){
-        gameSpeed = normalSpeed * 1.7;
-      }
-
-    
     let gameLoopTimeout;
 
     
@@ -820,8 +684,6 @@ function checkAICollision(head) {
       aiSnake = [{ x: 15, y: 15 }];
       dxAI = 0;
       dyAI = 0;
-      aiPath = [];
-      aiMoveCounter = 0;
 
       // Preserve skin upgrades during reset
       const skinKeys = ['rainbowSnake', 'goldenSnake', 'cyanSnake', 'randomColoredSnake'];
@@ -840,19 +702,26 @@ function checkAICollision(head) {
 
       // Handle speed upgrades
       if (activeUpgrades.slowness) {
+        gameSpeed = normalSpeed * 1.3;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
       } else if (activeUpgrades.superSlowness) {
+        gameSpeed = normalSpeed * 1.5;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
       } else if (activeUpgrades.speed) {
+        gameSpeed = normalSpeed * 0.7;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
-      } 
-      
+      } else {
+        gameSpeed = normalSpeed;
+      }
+
       // Handle point multiplier
+      pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
-
-      
+      if (aiEnabled){
+        gameSpeed = normalSpeed * 1.7;
+      }
       // Reset UI
       document.getElementById("score").textContent = "0";
       document.getElementById("nameInputContainer").style.display = "none";
