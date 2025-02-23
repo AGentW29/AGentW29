@@ -55,6 +55,23 @@
     #restartBtn:hover {
       background-color: #c0392b;
     }
+
+      #shopBtn {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background-color: #b7ac3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.2s;
+    }
+    #shopBtn:hover {
+      background-color: #a79c2c;
+    }
     /* When game over, the restart button moves to the center */
     #restartBtn.centered {
       position: fixed;
@@ -133,6 +150,10 @@
   <div id="nameInputContainer">
     <input type="text" id="nameField" placeholder="Enter your name" />
     <button id="nameSubmit">Submit</button>
+  </div>
+  
+  <button id="shopBtn">Shop</button>
+  <div href="shop.html">
   </div>
 
   <div id="specialPopup">
