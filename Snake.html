@@ -193,7 +193,7 @@
     let coins = 0;
     let pointMultiplier = 1;
 
-    // Auth state listener with skin handling
+     // FIXED AUTH STATE LISTENER
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userRef = doc(db, "users", user.uid);
@@ -204,15 +204,19 @@
           const purchasedItems = userData.purchasedItems || [];
           const selectedSkin = userData.selectedSkin || null;
           
-          // Reset skin upgrades
+          // Reset upgrades
           activeUpgrades = {
             rainbowSnake: false,
             goldenSnake: false,
             cyanSnake: false,
-            randomColoredSnake: false
+            randomColoredSnake: false,
+            slowness: false,
+            superSlowness: false,
+            speed: false,
+            doublePoints: false
           };
 
-          // Apply selected skin if owned
+          // Apply selected skin
           if (selectedSkin && purchasedItems.some(item => {
             const skinNames = {
               rainbowSnake: "Rainbow Snake",
@@ -226,26 +230,20 @@
           }
 
           // Apply consumables
-       // In the onAuthStateChanged callback, modify to:
-      purchasedItems.forEach(itemName => {
-        switch (itemName) {
-          case "Slowness": activeUpgrades.slowness = true; break;
-          case "Double Points": activeUpgrades.doublePoints = true; break;
-          case "Super Slowness": activeUpgrades.superSlowness = true; break;
-          case "Speed": activeUpgrades.speed = true; break;
-          case "AI Snake": aiEnabled = true; break; // Changed from activeUpgrades to aiEnabled
-       }
-    });
-
-          // Add this in the onAuthStateChanged callback after processing purchasedItems:
-          aiEnabled = purchasedItems.includes("AI Snake");
+          purchasedItems.forEach(itemName => {
+            switch (itemName) {
+              case "Slowness": activeUpgrades.slowness = true; break;
+              case "Double Points": activeUpgrades.doublePoints = true; break;
+              case "Super Slowness": activeUpgrades.superSlowness = true; break;
+              case "Speed": activeUpgrades.speed = true; break;
+              case "AI Snake": aiEnabled = true; break;
             }
           });
         }
       } else {
         window.location.href = "Store.html";
       }
-    });
+    }); // FIXED: Proper callback closing
 
     // Game variables and functions
     const canvas = document.getElementById("gameCanvas");
