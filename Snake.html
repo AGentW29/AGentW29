@@ -269,7 +269,7 @@
     let dxAI = 0;
     let dyAI = 0;
     let aiEnabled = false;
-    let aiDifficulty = 1; // 0-1 (1 = perfect decisions)
+    let aiDifficulty = 0.1; // 0-1 (1 = perfect decisions)
     
     // Drawing functions with skin support
     function getRandomHexColor() {
@@ -719,7 +719,9 @@ function checkAICollision(head) {
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
-
+      if (aiEnabled){
+        gameSpeed = normalSpeed * 1.7;
+      }
       // Reset UI
       document.getElementById("score").textContent = "0";
       document.getElementById("nameInputContainer").style.display = "none";
