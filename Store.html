@@ -234,6 +234,16 @@
       box-shadow: none;
     }
 
+    .buy-button.owned {
+      background: #4CAF50;
+      content: 'Select';
+    }
+
+    .buy-button.selected {
+      background: #2E7D32;
+      cursor: default;
+    }
+
     .owned {
       background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
     }
@@ -325,26 +335,25 @@
     <div class="store-section">
       <h2 class="section-title">Snake Skins</h2>
       <div class="items-grid">
-        <div class="item-card">
+        <div class="item-card" data-item-type="skin" data-skin="rainbowSnake">
           <div class="item-name">Rainbow Snake</div>
           <div class="item-description">Make your snake colorful and fabulous</div>
           <div class="item-price">800 coins</div>
           <button class="buy-button" onclick="buyItem(800, this)">Buy</button>
-          <button class="skin-button" data-skin="rainbow" onclick="handleSkinSelection('rainbow', this)">Select</button>
         </div>
-        <div class="item-card">
+        <div class="item-card" data-item-type="skin" data-skin="goldenSnake">
           <div class="item-name">Golden Snake</div>
           <div class="item-description">Show off your wealth with a golden snake</div>
           <div class="item-price">200 coins</div>
           <button class="buy-button" onclick="buyItem(200, this)">Buy</button>
         </div>
-        <div class="item-card">
+        <div class="item-card" data-item-type="skin" data-skin="cyanSnake">
           <div class="item-name">Cyan Snake</div>
           <div class="item-description">Make your Snake a cool Cyan</div>
           <div class="item-price">100 coins</div>
           <button class="buy-button" onclick="buyItem(100, this)">Buy</button>
         </div>
-        <div class="item-card">
+        <div class="item-card" data-item-type="skin" data-skin="randomColoredSnake">
           <div class="item-name">Random Colored Snake</div>
           <div class="item-description">Have your Snake look different every time</div>
           <div class="item-price">700 coins</div>
@@ -509,39 +518,108 @@
       });
     }
 
-    // Global buyItem function attached to window for inline onclick access
-    window.buyItem = async function(price, button) {
-      if (!currentUser) {
-        alert("You must be logged in to buy items!");
-        return;
-      }
+ // Modify the buyItem function
+window.buyItem = async function(price, button) {
+  if (!currentUser) {
+    alert("You must be logged in to buy items!");
+    return;
+  }
 
-      if (coins < price) {
-        alert("Not enough coins!");
-        button.classList.add("shake");
-        setTimeout(() => button.classList.remove("shake"), 500);
-        return;
-      }
+  const itemCard = button.closest('.item-card');
+  const itemName = itemCard.querySelector('.item-name').textContent;
+  const isSkin = itemCard.dataset.itemType === 'skin';
+  const skinKey = itemCard.dataset.skin;
 
-      // Deduct coins and mark the item as purchased
-      coins -= price;
-      // Get the item name from the DOM (assuming the structure remains consistent)
-      const itemName = button.parentElement.querySelector('.item-name').textContent;
-      purchasedItems.push(itemName);
-
-      // Update Firestore with the new coins balance and purchased items list
+  // Check if already purchased
+  if (purchasedItems.includes(itemName)) {
+    if (isSkin) {
+      // Handle skin selection
       const userRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userRef, {
-        coins: coins,
-        purchasedItems: purchasedItems
+        selectedSkin: skinKey
       });
+      updateSkinButtons(itemCard);
+    }
+    return;
+  }
 
-      // Update UI
-      coinBalance.textContent = coins;
-      button.textContent = "Owned";
-      button.disabled = true;
-      button.classList.add("owned");
-    };
+  // Original purchase logic
+  if (coins < price) {
+    alert("Not enough coins!");
+    button.classList.add("shake");
+    setTimeout(() => button.classList.remove("shake"), 500);
+    return;
+  }
+
+  coins -= price;
+  purchasedItems.push(itemName);
+
+  const userRef = doc(db, 'users', currentUser.uid);
+  await updateDoc(userRef, {
+    coins: coins,
+    purchasedItems: purchasedItems
+  });
+
+  // Update UI
+  coinBalance.textContent = coins;
+  button.classList.add("owned");
+  button.textContent = isSkin ? "Select" : "Owned";
+  button.disabled = !isSkin;
+};
+
+// Add new helper function
+function updateSkinButtons(selectedCard) {
+  const allSkinCards = document.querySelectorAll('[data-item-type="skin"]');
+  const selectedSkin = selectedCard.dataset.skin;
+  
+  allSkinCards.forEach(card => {
+    const button = card.querySelector('.buy-button');
+    if (card === selectedCard) {
+      button.classList.add('selected');
+      button.textContent = 'Selected';
+    } else {
+      button.classList.remove('selected');
+      if (purchasedItems.includes(card.querySelector('.item-name').textContent)) {
+        button.textContent = 'Select';
+      }
+    }
+  });
+}
+
+// Update loadUserData function
+async function loadUserData() {
+  if (!currentUser) return;
+
+  const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+    coins = userData.coins;
+    purchasedItems = userData.purchasedItems || [];
+    const selectedSkin = userData.selectedSkin || null;
+
+    // Update UI
+    coinBalance.textContent = coins;
+    document.querySelectorAll('.item-card').forEach(card => {
+      const itemName = card.querySelector('.item-name').textContent;
+      const button = card.querySelector('.buy-button');
+      const isSkin = card.dataset.itemType === 'skin';
+      
+      if (purchasedItems.includes(itemName)) {
+        button.classList.add("owned");
+        button.textContent = isSkin ? "Select" : "Owned";
+        button.disabled = isSkin ? false : true;
+        
+        if (isSkin && card.dataset.skin === selectedSkin) {
+          button.classList.add("selected");
+          button.textContent = "Selected";
+        }
+      }
+    });
+    
+    authForm.style.display = 'none';
+    storeContent.style.display = 'block';
+  }
+}
 
     // Check if user is already logged in
     onAuthStateChanged(auth, (user) => {
