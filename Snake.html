@@ -203,7 +203,7 @@
           coins = userData.coins || 0;
           const purchasedItems = userData.purchasedItems || [];
           const selectedSkin = userData.selectedSkin || null;
-
+          
           // Reset skin upgrades
           activeUpgrades = {
             rainbowSnake: false,
@@ -233,6 +233,9 @@
               case "Super Slowness": activeUpgrades.superSlowness = true; break;
               case "Speed": activeUpgrades.speed = true; break;
               case "AI Snake": activeUpgrades.aiSnake = true; break;
+
+          // Add this in the onAuthStateChanged callback after processing purchasedItems:
+          aiEnabled = purchasedItems.includes("AI Snake");
             }
           });
         }
@@ -311,21 +314,15 @@
       ctx.fill();
     }
 
-    function generateApple() {
-       apple.x = Math.floor(Math.random() * tileCount);
-       apple.y = Math.floor(Math.random() * tileCount);
-      } while (
-       snake.some(part => part.x === apple.x && part.y === apple.y) ||
-       aiSnake.some(part => part.x === apple.x && part.y === apple.y)
-      );
-
-      // Make sure the apple does not generate on the snake.
-      snake.forEach((part) => {
-        if (part.x === apple.x && part.y === apple.y) {
-          generateApple();
-        }
-      });
-    }
+  function generateApple() {
+  do {
+    apple.x = Math.floor(Math.random() * tileCount);
+    apple.y = Math.floor(Math.random() * tileCount);
+  } while (
+    snake.some(part => part.x === apple.x && part.y === apple.y) ||
+    aiSnake.some(part => part.x === apple.x && part.y === apple.y)
+  );
+}
 
     // When updating highscores, we update the database and UI.
     async function updateHighscores(playerName) {
