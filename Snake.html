@@ -452,6 +452,10 @@ function generateApple() {
     snake.pop();
   }
 }
+
+     if ((dx !== 0 || dy !== 0) && !playerHasMoved) {
+        playerHasMoved = true;
+      }
     // Function to update the coin balance in Firestore
     async function updateCoinBalance() {
       if (auth.currentUser) {
@@ -463,7 +467,7 @@ function generateApple() {
     }
 
     function moveAI() {
-  if (!aiEnabled || gameOver) return;
+ if (!aiEnabled || gameOver || !playerHasMoved) return; // Add !playerHasMoved check
 
   // Calculate direction towards apple
   const head = aiSnake[0];
@@ -583,6 +587,10 @@ function checkAICollision(head) {
     function handleSwipe() {
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
+
+      if ((dx !== 0 || dy !== 0) && !playerHasMoved) {
+        playerHasMoved = true;
+     }
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         // Horizontal swipe
