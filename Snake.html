@@ -229,16 +229,29 @@
             activeUpgrades[selectedSkin] = true;
           }
 
-          // Apply consumables
-          purchasedItems.forEach(itemName => {
-            switch (itemName) {
-              case "Slowness": activeUpgrades.slowness = true; break;
-              case "Double Points": activeUpgrades.doublePoints = true; break;
-              case "Super Slowness": activeUpgrades.superSlowness = true; break;
-              case "Speed": activeUpgrades.speed = true; break;
-              case "AI Snake": aiEnabled = true; break;
-            }
-          });
+         purchasedItems.forEach(itemName => {
+    switch (itemName) {
+      case "Slowness": 
+        activeUpgrades.slowness = true;
+        updateGameSpeed(); // ADD THIS
+        break;
+      case "Double Points": 
+        activeUpgrades.doublePoints = true; 
+        break;
+      case "Super Slowness": 
+        activeUpgrades.superSlowness = true;
+        updateGameSpeed(); // ADD THIS
+        break;
+      case "Speed": 
+        activeUpgrades.speed = true;
+        updateGameSpeed(); // ADD THIS
+        break;
+      case "AI Snake": 
+        aiEnabled = true;
+        updateGameSpeed(); // ADD THIS
+        break;
+    }
+  });
         }
       } else {
         window.location.href = "Store.html";
@@ -335,6 +348,20 @@ function generateApple() {
   apple.x = newX;
   apple.y = newY;
 }
+
+    function updateGameSpeed() {
+    if (activeUpgrades.slowness) {
+      gameSpeed = normalSpeed * 1.3;
+    } else if (activeUpgrades.superSlowness) {
+      gameSpeed = normalSpeed * 1.5;
+    } else if (activeUpgrades.speed) {
+      gameSpeed = normalSpeed * 0.7;
+    } else if (aiEnabled) {
+      gameSpeed = normalSpeed * 1.8;
+    } else {
+      gameSpeed = normalSpeed;
+    }
+  }
 
     // When updating highscores, we update the database and UI.
     async function updateHighscores(playerName) {
@@ -822,26 +849,19 @@ function checkAICollision(head) {
 
       // Handle speed upgrades
       if (activeUpgrades.slowness) {
-        gameSpeed = normalSpeed * 1.3;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Slowness");
       } else if (activeUpgrades.superSlowness) {
-        gameSpeed = normalSpeed * 1.5;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
       } else if (activeUpgrades.speed) {
-        gameSpeed = normalSpeed * 0.7;
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
-      } else {
-        gameSpeed = normalSpeed;
-      }
+    
 
       // Handle point multiplier
       pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
-      if (aiEnabled){
-        gameSpeed = normalSpeed * 1.7;
-      }
+        
       // Reset UI
       document.getElementById("score").textContent = "0";
       document.getElementById("nameInputContainer").style.display = "none";
