@@ -248,7 +248,8 @@
         break;
     }
   });
-        updateGameSpeed(); // ADD THIS
+        updateGameSpeed(); 
+        resetGame();
         }
       } else {
         window.location.href = "Store.html";
@@ -868,7 +869,6 @@ function checkAICollision(head) {
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
-      updateGameSpeed();
         
       // Reset UI
       document.getElementById("score").textContent = "0";
@@ -877,6 +877,7 @@ function checkAICollision(head) {
       document.getElementById("specialPopup2").style.display = "none";
       document.getElementById("restartBtn").classList.remove("centered");
 
+      updateGameSpeed();
       generateApple();
       gameLoop();
     }
@@ -909,9 +910,9 @@ function checkAICollision(head) {
         }
       }
     });
-    window.addEventListener('load', () => {
-      resetGame();
-    });
+    //window.addEventListener('load', () => {
+      //resetGame();
+    //});
 
   </script>
 </body>
