@@ -443,6 +443,14 @@ function generateApple() {
     return;
   }
 
+      // In moveSnake() where points are awarded
+    if (aiEnabled) {
+      const basePoints = 1;
+      const totalPoints = basePoints * 5; // 5x multiplier
+      score += totalPoints;
+      coins += totalPoints;
+    }
+
   // Pause for special popup events, etc.
   if (score === 29 && !gamePaused) {
     gamePaused = true;
@@ -862,13 +870,6 @@ function checkAICollision(head) {
       pointMultiplier = activeUpgrades.doublePoints ? 2 : 1;
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
-      }
-    // In moveSnake() where points are awarded
-    if (aiEnabled) {
-      const basePoints = 1;
-      const totalPoints = basePoints * 5; // 5x multiplier
-      score += totalPoints;
-      coins += totalPoints;
       }
       updateGameSpeed();
         
