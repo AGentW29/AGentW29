@@ -443,13 +443,7 @@ function generateApple() {
     return;
   }
 
-      // In moveSnake() where points are awarded
-    if (aiEnabled) {
-      const basePoints = 1;
-      const totalPoints = basePoints * 5; // 5x multiplier
-      score += totalPoints;
-      coins += totalPoints;
-    }
+    
 
   // Pause for special popup events, etc.
   if (score === 29 && !gamePaused) {
@@ -484,18 +478,24 @@ function generateApple() {
 
   snake.unshift(head);
 
- if (head.x === apple.x && head.y === apple.y) {
-  const basePoints = 1;
-  const totalPoints = basePoints * pointMultiplier;
+if (head.x === apple.x && head.y === apple.y) {
+  let basePoints = 1;
+  let multiplier = 1;
+  
+  if (aiEnabled) multiplier = 5;
+  if (activeUpgrades.doublePoints) multiplier *= 2;
+
+  const totalPoints = basePoints * multiplier;
   score += totalPoints;
   coins += totalPoints;
-    document.getElementById("score").textContent = score;
-    updateCoinBalance();
-    generateApple();
-  } else {
-    snake.pop();
-  }
+  
+  document.getElementById("score").textContent = score;
+  updateCoinBalance();
+  generateApple();
+} else {
+  snake.pop();
 }
+    }
     // Function to update the coin balance in Firestore
     async function updateCoinBalance() {
       if (auth.currentUser) {
