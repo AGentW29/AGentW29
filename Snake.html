@@ -854,6 +854,7 @@ function checkAICollision(head) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Super Slowness");
       } else if (activeUpgrades.speed) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Speed");
+      }
     
 
       // Handle point multiplier
@@ -861,6 +862,8 @@ function checkAICollision(head) {
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
+
+      updateGameSpeed();
         
       // Reset UI
       document.getElementById("score").textContent = "0";
