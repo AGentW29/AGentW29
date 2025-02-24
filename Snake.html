@@ -712,6 +712,10 @@ function checkAICollision(head) {
           dx = 0;
         }
       }
+       // Add this at the end of the function
+        if ((dx !== 0 || dy !== 0) && !playerHasMoved) {
+          playerHasMoved = true;
+  }
     }
 
     document.addEventListener("touchstart", handleTouchStart);
