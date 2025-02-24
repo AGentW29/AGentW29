@@ -233,23 +233,21 @@
     switch (itemName) {
       case "Slowness": 
         activeUpgrades.slowness = true;
-        updateGameSpeed(); // ADD THIS
         break;
       case "Double Points": 
         activeUpgrades.doublePoints = true; 
         break;
       case "Super Slowness": 
         activeUpgrades.superSlowness = true;
-        updateGameSpeed(); // ADD THIS
         break;
       case "Speed": 
         activeUpgrades.speed = true;
-        updateGameSpeed(); // ADD THIS
         break;
       case "AI Snake": 
         aiEnabled = true;
-        updateGameSpeed(); // ADD THIS
         break;
+
+        updateGameSpeed(); // ADD THIS
     }
   });
         }
