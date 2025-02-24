@@ -863,7 +863,13 @@ function checkAICollision(head) {
       if (activeUpgrades.doublePoints) {
         if (auth.currentUser) removeUsedUpgrade(auth.currentUser, "Double Points");
       }
-
+    // In moveSnake() where points are awarded
+    if (aiEnabled) {
+      const basePoints = 1;
+      const totalPoints = basePoints * 5; // 5x multiplier
+      score += totalPoints;
+      coins += totalPoints;
+      }
       updateGameSpeed();
         
       // Reset UI
