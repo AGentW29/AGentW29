@@ -1,6 +1,6 @@
 # Turtlearth Website
 
-A website project featuring drawing and chat functionality.
+A website project for true Turtleearthers.
 
 ## Project Structure
 
