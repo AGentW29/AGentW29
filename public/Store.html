@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Snake Game Store</title>
+  <title>Game Store</title>
   <style>
     * {
       box-sizing: border-box;
@@ -274,6 +274,9 @@
     .shake {
       animation: shake 0.5s;
     }
+
+    /* Tetris Game Styles Removed - Now in tetris.html */
+
   </style>
 </head>
 <body>
@@ -289,7 +292,7 @@
   <!-- Store Content -->
   <div id="storeContent" style="display: none;">
     <div class="header">
-      <h1>Snake Game Store </h1>
+      <h1>Game Store </h1>
       <div class="coins">Coins: <span id="coinBalance">0</span></div>
       <a href="Snake.html?refresh=true">
      <button id="backToGame" style="background: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer;" onclick="window.location.href='Snake.html'"; onclick="location.reload()";>
@@ -372,11 +375,11 @@
     <div class="store-section">
       <h2 class="section-title">Mini-games</h2>
       <div class="items-grid">
-        <div class="item-card">
-          <div class="item-name">Tetris</div>
-          <div class="item-description">Coming soon</div>
-          <div class="item-price">10000 coins</div>
-          <button class="buy-button" onclick="buyItem(10000, this)">Buy</button>
+        <div class="item-card" data-item-name="Tetris"> <div class="item-name">Tetris</div>
+          <div class="item-description">Play the classic block-stacking game!</div>
+          <div class="item-price">1000 coins</div>
+          <button class="buy-button" onclick="buyItem(1000, this)">Buy</button>
+          
         </div>
         <div class="item-card">
           <div class="item-name">Suggestions?</div>
@@ -521,9 +524,24 @@
       const isPurchased = purchasedItems.includes(itemName);
 
       if (isPurchased) {
-        button.classList.add('owned');
-        button.disabled = card.dataset.itemType !== 'skin';
-        button.textContent = 'Owned';
+        if (itemName === 'Tetris') {
+          button.textContent = 'Play';
+          button.classList.add('owned');
+          button.disabled = false;
+          button.onclick = function() { window.location.href = 'tetris.html'; };
+        } else {
+          button.classList.add('owned');
+          button.disabled = card.dataset.itemType !== 'skin';
+          button.textContent = 'Owned';
+        }
+      } else {
+        button.classList.remove('owned', 'selected');
+        button.disabled = false;
+        button.textContent = 'Buy';
+        if (itemName === 'Tetris') {
+            const price = parseInt(card.querySelector('.item-price').textContent.replace(' coins', ''));
+            button.onclick = function() { buyItem(price, this); };
+        }
       }
     });
   }
@@ -554,15 +572,18 @@
     const isSkin = itemCard.dataset.itemType === 'skin';
     const skinKey = itemCard.dataset.skin;
 
-    // Handle skin selection
+    // Handle skin selection or already owned non-skin items
     if (purchasedItems.includes(itemName)) {
       if (isSkin) {
         await updateDoc(doc(db, 'users', currentUser.uid), {
           selectedSkin: skinKey
         });
         updateSkinSelection(skinKey);
+      } else if (itemName === 'Tetris') {
+        // If Tetris is owned, the button is already handled by updatePurchasedItems to be a "Play" link.
+        // This function primarily deals with skins after this point or initial purchase.
       }
-      return;
+      return; // For owned skins, selection is handled. For owned Tetris, it's already a play link.
     }
 
     // Handle purchase
@@ -583,13 +604,23 @@
       purchasedItems.push(itemName);
       coinBalance.textContent = coins;
       
-      button.classList.add('owned');
-      button.textContent = isSkin ? 'Select' : 'Owned';
-      button.disabled = !isSkin;
-
-      if (isSkin) {
+      if (itemName === 'Tetris') {
+        button.textContent = 'Play';
+        button.classList.add('owned');
+        button.disabled = false;
+        button.onclick = function() { window.location.href = 'tetris.html'; };
+      } else if (isSkin) {
+        button.classList.add('owned');
+        button.textContent = 'Select';
+        button.disabled = false; // Skins become selectable
         updateSkinSelection(skinKey);
+      } else {
+        // Other generic items if any
+        button.classList.add('owned');
+        button.textContent = 'Owned';
+        button.disabled = true;
       }
+
     } catch (error) {
       console.error('Error purchasing item:', error);
       alert('Error completing purchase');
