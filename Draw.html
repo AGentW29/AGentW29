@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw board</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #drawingCanvas {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            touch-action: none;
+        }
+        #toolbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .color-option:hover, .color-option.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        #brushSize {
+            margin: 0 10px;
+            width: 100px;
+        }
+        #clearBtn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #clearBtn:hover {
+            background-color: #ff6b81;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Magic board</h1>
+        <canvas id="drawingCanvas"></canvas>
+        <div id="toolbar">
+            <div class="color-option active" style="background-color: #000000;" data-color="#000000"></div>
+            <div class="color-option" style="background-color: #ff4757;" data-color="#ff4757"></div>
+            <div class="color-option" style="background-color: #2ed573;" data-color="#2ed573"></div>
+            <div class="color-option" style="background-color: #1e90ff;" data-color="#1e90ff"></div>
+            <div class="color-option" style="background-color: #ffa502;" data-color="#ffa502"></div>
+            <input type="range" id="brushSize" min="1" max="20" value="5">
+            <button id="clearBtn">Clear</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = '#000000';
+        let currentBrushSize = 5;
+
+        function resizeCanvas() {
+            canvas.width = Math.min(800, window.innerWidth - 40);
+            canvas.height = Math.min(600, window.innerHeight - 200);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const socket = io();
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getCoordinates(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const [x, y] = getCoordinates(e);
+            ctx.beginPath();
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentBrushSize;
+            ctx.lineCap = 'round';
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            socket.emit('draw', {
+                x0: lastX,
+                y0: lastY,
+                x1: x,
+                y1: y,
+                color: currentColor,
+                brushSize: currentBrushSize
+            });
+
+            [lastX, lastY] = [x, y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches) {
+                return [
+                    e.touches[0].clientX - rect.left,
+                    e.touches[0].clientY - rect.top
+                ];
+            } else {
+                return [
+                    e.clientX - rect.left,
+                    e.clientY - rect.top
+                ];
+            }
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        const toolbar = document.getElementById('toolbar');
+        toolbar.addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-option')) {
+                currentColor = e.target.dataset.color;
+                document.querySelector('.color-option.active').classList.remove('active');
+                e.target.classList.add('active');
+            }
+        });
+
+        const brushSize = document.getElementById('brushSize');
+        brushSize.addEventListener('input', (e) => {
+            currentBrushSize = e.target.value;
+        });
+
+        const clearBtn = document.getElementById('clearBtn');
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            socket.emit('clear');
+        });
+
+        // Load existing drawing when connected
+        socket.on('loadDrawing', (drawingData) => {
+            drawingData.forEach(data => {
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = data.brushSize;
+                ctx.lineCap = 'round';
+                ctx.moveTo(data.x0, data.y0);
+                ctx.lineTo(data.x1, data.y1);
+                ctx.stroke();
+            });
+        });
+
+        socket.on('draw', (data) => {
+            ctx.beginPath();
+            ctx.strokeStyle = data.color;
+            ctx.lineWidth = data.brushSize;
+            ctx.lineCap = 'round';
+            ctx.moveTo(data.x0, data.y0);
+            ctx.lineTo(data.x1, data.y1);
+            ctx.stroke();
+        });
+
+        socket.on('clear', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+</body>
+</html>
