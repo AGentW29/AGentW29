@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris</title>
+  <style>
+    body {
+      background: #000069; /* Snake game background */
+      color: #ecf0f1;    /* Snake game text color */
+      font-family: 'Times New Roman', sans-serif; /* Snake game font */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow: hidden; /* Consistent with Snake */
+      touch-action: manipulation; /* Consistent with Snake */
+    }
+    canvas {
+      border: 1px solid #ecf0f1; /* Light border to contrast with dark blue */
+      background-color: #000000; /* Snake game canvas background */
+      border-radius: 10px; /* Snake game canvas style */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* Snake game canvas style */
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2.5em;
+      color: #ffc100; /* Using Snake's store button color for prominence */
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Adding a slight shadow for depth */
+    }
+    .controls-info {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        text-align: left;
+    }
+    .controls-info h2 {
+        margin-top: 0;
+        color: #ff6b6b; /* A color from your store page */
+    }
+    .controls-info p {
+        margin: 5px 0;
+        font-size: 1em;
+    }
+    a.back-link, button.game-button {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 10px 20px;
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 5px; /* Snake button style */
+        font-weight: bold;  /* Making font bold like store button text */
+        font-size: 1em;     /* Snake button style */
+        cursor: pointer;
+        transition: background-color 0.2s; /* Snake button style */
+    }
+
+    a.back-link {
+        background-color: #ffc100; /* Snake Store Button color */
+    }
+    a.back-link:hover {
+        background-color: #eeb000; /* Snake Store Button hover color */
+    }
+
+    /* Style for a potential Restart button if added directly to Tetris page */
+    button.restart-tetris-btn {
+        background-color: #e74c3c; /* Snake Restart Button color */
+    }
+    button.restart-tetris-btn:hover {
+        background-color: #c0392b; /* Snake Restart Button hover color */
+    }
+
+    /* High Score Display - styled like Snake.html #scoreboard */
+    #tetris-scoreboard {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 1em; /* Snake scoreboard font size */
+      text-align: left;
+      color: #ecf0f1;
+      background-color: rgba(0,0,0,0.3); /* Optional: Slight background for readability */
+      padding: 5px;
+      border-radius: 3px;
+    }
+    #tetris-highscore-list strong {
+        color: #ffc100; /* Accent for the "Highscores" title */
+    }
+
+    /* Name Input Container - styled like Snake.html #nameInputContainer */
+    #tetrisNameInputContainer {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none; /* Hidden by default */
+      background-color: rgba(0, 0, 0, 0.85); /* Darker for better contrast */
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 1000; /* Ensure it's on top */
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+    #tetrisNameInputContainer p {
+        font-size: 1.5em;
+        color: #ffc100; /* Prominent message color */
+        margin-bottom: 15px;
+    }
+    #tetrisNameField {
+      background-color: #fff; /* Snake name field style */
+      color: #000;
+      border: 2px solid #3498db; /* Snake name field border */
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 1em;
+      text-align: center;
+      width: 220px; /* Slightly wider */
+      margin-bottom: 15px;
+    }
+    #tetrisNameSubmit {
+      background-color: #2ecc71; /* Snake name submit style */
+      color: white;
+      border: none;
+      padding: 10px 25px; /* More padding */
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.2s;
+    }
+    #tetrisNameSubmit:hover {
+        background-color: #27ae60;
+    }
+
+    /* Restart Button Styles (matches Snake.html #restartBtn) */
+    #tetrisRestartBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      font-family: 'Times New Roman', sans-serif;
+      transition: background-color 0.2s, top 0.3s, left 0.3s, transform 0.3s;
+      z-index: 1001; /* Above name input if it overlaps */
+    }
+    #tetrisRestartBtn:hover {
+      background-color: #c0392b;
+    }
+    #tetrisRestartBtn.centered {
+      top: 60%; /* Adjusted slightly for Tetris layout if needed */
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px; /* Slightly wider if text is longer */
+      padding: 15px 25px; /* Larger when centered */
+      font-size: 1.2em;
+    }
+
+    /* Store Button Styles (matches Snake.html #storeBtn) */
+    #tetrisStoreBtn {
+      position: fixed;
+      top: 70px; /* Below restart button */
+      right: 20px;
+      background-color: #ffc100;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      font-family: 'Times New Roman', sans-serif;
+      text-decoration: none; /* If it's an <a> tag styled as button */
+      text-align: center;
+      transition: background-color 0.2s;
+      z-index: 1001;
+    }
+    #tetrisStoreBtn:hover {
+      background-color: #eeb000;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Login Prompt (Initially Hidden) -->
+  <div id="tetris-login-prompt" style="display: none; text-align: center;">
+    <h1>Login Required</h1>
+    <p>You need to be logged in to play Tetris and save your scores/coins.</p>
+    <a href="Store.html" class="back-link" style="margin-top: 10px;">Go to Store to Login</a>
+  </div>
+
+  <!-- Game Content (Initially shown, hidden if not logged in) -->
+  <div id="tetris-game-content">
+    <!-- Highscore Display Area -->
+    <div id="tetris-scoreboard">
+      <div id="tetris-highscore-list"><strong>Highscores</strong><br>Loading...</div>
+    </div>
+
+    <!-- Name Input Container (Initially Hidden) -->
+    <div id="tetrisNameInputContainer">
+      <p>New Highscore!</p>
+      <input type="text" id="tetrisNameField" placeholder="Enter your name (max 10 chars)" maxlength="10" />
+      <button id="tetrisNameSubmit">Submit</button>
+    </div>
+
+    <h1>Tetris</h1>
+    <canvas id="tetris-game-canvas" width="320" height="640"></canvas>
+    <!-- Buttons for Restart and Store -->
+    <button id="tetrisRestartBtn">Restart</button>
+    <a href="Store.html" id="tetrisStoreBtn">Store</a>
+  </div>
+
+  <script type="module">
+    // Firebase Imports (Essential for high score saving)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import {
+        getFirestore, doc, getDoc, updateDoc, collection, query,
+        orderBy, limit, addDoc, getDocs, writeBatch, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+
+    // Firebase Config (Replace with your actual config if different or use a shared config file)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+        authDomain: "turtlearth-6b0a6.firebaseapp.com",
+        projectId: "turtlearth-6b0a6",
+        storageBucket: "turtlearth-6b0a6.appspot.com",
+        messagingSenderId: "90749703119",
+        appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+        measurementId: "G-WVYQDY75EG"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUid = null;
+    let currentUserData = null; // To store user data including coins
+    let personalHighScore = 0;
+    const personalBestValueEl = document.getElementById('personal-best-value');
+
+    const tetrisHighscoreListEl = document.getElementById('tetris-highscore-list');
+    const tetrisNameInputContainerEl = document.getElementById('tetrisNameInputContainer');
+    const tetrisNameFieldEl = document.getElementById('tetrisNameField');
+    const tetrisNameSubmitEl = document.getElementById('tetrisNameSubmit');
+    const tetrisRestartBtnEl = document.getElementById('tetrisRestartBtn');
+    
+    const tetrisLoginPromptEl = document.getElementById('tetris-login-prompt');
+    const tetrisGameContentEl = document.getElementById('tetris-game-content');
+
+    const canvas = document.getElementById('tetris-game-canvas');
+    const context = canvas.getContext('2d');
+    const grid = 32; // Size of each cell in the grid
+    const tetrominoSequence = [];
+    const playfield = [];
+
+    // Initialize playfield (10x20 visible, with 2 hidden rows above for piece spawning)
+    for (let row = -2; row < 20; row++) {
+      playfield[row] = [];
+      for (let col = 0; col < 10; col++) {
+        playfield[row][col] = 0;
+      }
+    }
+
+    // Tetromino shapes and their colors
+    const tetrominos = {
+      'I': [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
+      'J': [[1,0,0], [1,1,1], [0,0,0]],
+      'L': [[0,0,1], [1,1,1], [0,0,0]],
+      'O': [[1,1], [1,1]],
+      'S': [[0,1,1], [1,1,0], [0,0,0]],
+      'Z': [[1,1,0], [0,1,1], [0,0,0]],
+      'T': [[0,1,0], [1,1,1], [0,0,0]]
+    };
+    const colors = {
+      'I': 'cyan', 'O': 'yellow', 'T': 'purple', 'S': 'green',
+      'Z': 'red', 'J': 'blue', 'L': 'orange'
+    };
+
+    let score = 0; // Basic score
+    let linesCleared = 0; // Basic lines cleared count
+
+    let count = 0; // Frame counter for piece drop
+    let tetromino = getNextTetromino();
+    let rAF = null;  // requestAnimationFrame ID
+    let gameOver = false;
+
+    const MAX_HIGH_SCORES = 5; // Display top 5 high scores, like Snake
+    let gamePausedForNameInput = false;
+
+    // --- Firebase Auth and High Score Logic ---
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUid = user.uid;
+        tetrisLoginPromptEl.style.display = 'none';
+        tetrisGameContentEl.style.display = 'block'; // Or flex/grid if that was its original display
+        
+        // Load user data to get current coins
+        const userDocRef = doc(db, "users", currentUid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+            currentUserData = userDocSnap.data();
+        } else {
+            console.error("User document not found for UID:", currentUid);
+            // Potentially redirect to store or handle as an error state
+            // For now, coin operations will fail silently if currentUserData is null
+            currentUserData = { coins: 0 }; // Fallback to prevent errors, but this is not ideal
+        }
+
+        if (tetrisNameInputContainerEl.style.display !== 'none' && user.displayName) {
+            tetrisNameFieldEl.value = user.displayName;
+        }
+        await loadTetrisHighScores(); // Load high scores once user is confirmed
+        // Only initialize/start game if it hasn't been started and user is logged in
+        if (!rAF) { // Check if game loop is not already running
+            restartGame(); // Start the game or reset it
+        }
+        tetrisRestartBtnEl.style.display = 'block'; // Ensure restart button is visible
+        document.getElementById('tetrisStoreBtn').style.display = 'block'; // Ensure store button is visible
+      } else {
+        currentUid = null;
+        currentUserData = null;
+        tetrisLoginPromptEl.style.display = 'block';
+        tetrisGameContentEl.style.display = 'none';
+        tetrisRestartBtnEl.style.display = 'none'; // Hide restart button
+        document.getElementById('tetrisStoreBtn').style.display = 'none'; // Hide store button
+        if (rAF) { // If game was running, stop it
+            cancelAnimationFrame(rAF);
+            rAF = null;
+        }
+      }
+    });
+
+    async function loadTetrisHighScores() {
+      if (!db || !tetrisHighscoreListEl) return;
+      try {
+        const q = query(collection(db, "tetris_highscores"), orderBy("score", "desc"), limit(MAX_HIGH_SCORES));
+        const querySnapshot = await getDocs(q);
+        
+        tetrisHighscoreListEl.innerHTML = "<strong>Highscores</strong><br>"; // Clear previous scores
+        if (querySnapshot.empty) {
+            tetrisHighscoreListEl.innerHTML += "No scores yet!";
+            return;
+        }
+        let rank = 1;
+        querySnapshot.forEach((doc) => {
+          const scoreData = doc.data();
+          tetrisHighscoreListEl.innerHTML += `${rank}. ${escapeHTML(scoreData.name)}: ${scoreData.score}<br>`;
+          rank++;
+        });
+      } catch (error) {
+        console.error("Error loading Tetris high scores: ", error);
+        tetrisHighscoreListEl.innerHTML = "<strong>Highscores</strong><br>Error loading scores.";
+      }
+    }
+
+    async function checkAndPromptForHighScore(currentScore) {
+        if (!currentUid || currentScore === 0) return; // Only for logged-in users with a score
+
+        const scoresCollectionRef = collection(db, "tetris_highscores");
+        const q = query(scoresCollectionRef, orderBy("score", "desc"), limit(MAX_HIGH_SCORES));
+        const querySnapshot = await getDocs(q);
+
+        let qualifies = false;
+        if (querySnapshot.docs.length < MAX_HIGH_SCORES) {
+            qualifies = true;
+        } else {
+            const lowestHighScore = querySnapshot.docs[querySnapshot.docs.length - 1].data().score;
+            if (currentScore > lowestHighScore) {
+                qualifies = true;
+            }
+        }
+
+        if (qualifies) {
+            gamePausedForNameInput = true;
+            if (auth.currentUser && auth.currentUser.displayName) {
+                tetrisNameFieldEl.value = auth.currentUser.displayName; // Prefill if logged in
+            }
+            tetrisNameInputContainerEl.style.display = 'block';
+            tetrisNameFieldEl.focus();
+        } else {
+            // Game over sequence continues without name input
+            gamePausedForNameInput = false;
+        }
+    }
+    
+    tetrisNameSubmitEl.addEventListener('click', async () => {
+        const playerName = tetrisNameFieldEl.value.trim() || currentUserData?.username || "Anonymous";
+        if (score > 0 && currentUid) {
+            try {
+                const scoresCollectionRef = collection(db, "tetris_highscores");
+                await addDoc(scoresCollectionRef, { name: playerName, score: score });
+                
+                const allScoresQuery = query(scoresCollectionRef, orderBy("score", "desc"));
+                const allScoresSnap = await getDocs(allScoresQuery);
+                if (allScoresSnap.docs.length > MAX_HIGH_SCORES) {
+                    const batch = writeBatch(db);
+                    for (let i = MAX_HIGH_SCORES; i < allScoresSnap.docs.length; i++) {
+                        batch.delete(allScoresSnap.docs[i].ref);
+                    }
+                    await batch.commit();
+                }
+                await loadTetrisHighScores();
+            } catch (error) {
+                console.error("Error saving Tetris high score: ", error);
+            }
+        }
+        tetrisNameInputContainerEl.style.display = 'none';
+        tetrisNameFieldEl.value = '';
+        gamePausedForNameInput = false;
+        // After submitting name, ensure restart button is correctly positioned (centered)
+        tetrisRestartBtnEl.classList.add('centered'); 
+    });
+
+    // Helper to prevent XSS from names in high scores
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"/]/g, function (s) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;'
+            }[s];
+        });
+    }
+
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateSequence() {
+      const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+      while (sequence.length) {
+        const rand = getRandomInt(0, sequence.length - 1);
+        const name = sequence.splice(rand, 1)[0];
+        tetrominoSequence.push(name);
+      }
+    }
+
+    function getNextTetromino() {
+      if (tetrominoSequence.length === 0) {
+        generateSequence();
+      }
+      const name = tetrominoSequence.pop();
+      const matrix = tetrominos[name];
+      const col = playfield[0].length / 2 - Math.ceil(matrix[0].length / 2);
+      const row = name === 'I' ? -1 : -2; // I spawns slightly lower
+      return { name, matrix, row, col };
+    }
+
+    function rotate(matrix) {
+      const N = matrix.length - 1;
+      const result = matrix.map((row, i) =>
+        row.map((val, j) => matrix[N - j][i])
+      );
+      return result;
+    }
+
+    function isValidMove(matrix, cellRow, cellCol) {
+      for (let row = 0; row < matrix.length; row++) {
+        for (let col = 0; col < matrix[row].length; col++) {
+          if (matrix[row][col] && (
+              cellCol + col < 0 || // Off left edge
+              cellCol + col >= playfield[0].length || // Off right edge
+              cellRow + row >= playfield.length || // Off bottom edge
+              playfield[cellRow + row]?.[cellCol + col] // Collides with another piece
+            )) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function placeTetromino() {
+      for (let row = 0; row < tetromino.matrix.length; row++) {
+        for (let col = 0; col < tetromino.matrix[row].length; col++) {
+          if (tetromino.matrix[row][col]) {
+            if (tetromino.row + row < 0) { // Piece is offscreen and locked (game over)
+              return showGameOver();
+            }
+            playfield[tetromino.row + row][tetromino.col + col] = tetromino.name;
+          }
+        }
+      }
+
+      // Check for line clears
+      let linesClearedThisTurn = 0;
+      for (let r = playfield.length - 1; r >= 0; ) {
+        if (playfield[r].every(cell => !!cell)) {
+          linesClearedThisTurn++;
+          // Drop every row above this one
+          for (let sr = r; sr >= 0; sr--) {
+            for (let c = 0; c < playfield[sr].length; c++) {
+              playfield[sr][c] = playfield[sr-1]?.[c] || 0;
+            }
+          }
+          // Don't decrement r, check the same row again as it's now new content
+        } else {
+          r--; // Move to the row above
+        }
+      }
+      
+      if (linesClearedThisTurn > 0) {
+          linesCleared += linesClearedThisTurn;
+          score += linesClearedThisTurn * 10 * linesClearedThisTurn; 
+          // updateCurrentScoreDisplay(); // If using HTML element for current score
+      }
+
+      tetromino = getNextTetromino();
+    }
+    
+    function drawScore() {
+        context.fillStyle = '#ecf0f1'; // Snake game text color
+        context.font = '18px "Times New Roman", sans-serif'; // Snake game font
+        context.textAlign = 'left';
+        context.textBaseline = 'top';
+        context.fillText('Score: ' + score, 10, 10);
+        context.fillText('Lines: ' + linesCleared, 10, 30);
+    }
+
+    function showGameOver() {
+      cancelAnimationFrame(rAF);
+      gameOver = true;
+      gamePausedForNameInput = false;
+
+      if (currentUid && score > 0) {
+          saveCoins(score); // Save score as coins for the logged-in user
+      }
+
+      checkAndPromptForHighScore(score); // Then check for global high score
+
+      context.fillStyle = 'black';
+      context.globalAlpha = 0.75;
+      context.fillRect(0, canvas.height / 2 - 40, canvas.width, 80); // Adjusted for two lines
+      context.globalAlpha = 1;
+      context.fillStyle = '#ecf0f1'; // Snake game text color
+      context.font = '36px "Times New Roman", sans-serif'; // Snake game font
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2 - 15);
+
+      // Position Restart button to center
+      tetrisRestartBtnEl.classList.add('centered');
+    }
+    
+    function restartGame() {
+        if (gamePausedForNameInput) return;
+        // Do not restart game if user is not logged in and prompt is showing.
+        if (!currentUid && tetrisLoginPromptEl.style.display === 'block') {
+            return;
+        }
+
+        // Reset playfield
+        for (let row = -2; row < 20; row++) {
+            for (let col = 0; col < 10; col++) {
+                playfield[row][col] = 0;
+            }
+        }
+        tetrominoSequence.length = 0; // Clear sequence
+        tetromino = getNextTetromino();
+        score = 0;
+        linesCleared = 0;
+        gameOver = false;
+        count = 0;
+        tetrisRestartBtnEl.classList.remove('centered'); // Ensure restart button is in its normal position
+        tetrisNameInputContainerEl.style.display = 'none'; // Hide name input if it was somehow visible
+        gamePausedForNameInput = false;
+
+        // updateCurrentScoreDisplay(); // Reset current score display if using HTML element
+        if (rAF) cancelAnimationFrame(rAF);
+        rAF = requestAnimationFrame(gameLoop);
+    }
+
+
+    function gameLoop() {
+      rAF = requestAnimationFrame(gameLoop);
+      context.clearRect(0,0,canvas.width,canvas.height);
+
+      // Draw the playfield
+      for (let row = 0; row < 20; row++) {
+        for (let col = 0; col < 10; col++) {
+          if (playfield[row][col]) {
+            const name = playfield[row][col];
+            context.fillStyle = colors[name];
+            context.fillRect(col * grid, row * grid, grid-1, grid-1); // -1 for grid effect
+          }
+        }
+      }
+
+      // Draw the active tetromino
+      if (tetromino && !gameOver && !gamePausedForNameInput) { // Pause game if waiting for name
+        if (++count > 35) { // Adjust 35 for fall speed (lower is faster)
+          tetromino.row++;
+          count = 0;
+          if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
+            tetromino.row--; // Move back up
+            placeTetromino();
+          }
+        }
+
+        context.fillStyle = colors[tetromino.name];
+        for (let row = 0; row < tetromino.matrix.length; row++) {
+          for (let col = 0; col < tetromino.matrix[row].length; col++) {
+            if (tetromino.matrix[row][col]) {
+              // Draw piece, ensure it's not drawn off-screen at the top before it enters playfield
+              if (tetromino.row + row >= 0) { 
+                context.fillRect((tetromino.col + col) * grid, (tetromino.row + row) * grid, grid-1, grid-1);
+              }
+            }
+          }
+        }
+      }
+      drawScore(); // Draw score every frame
+      if (gameOver) {
+          showGameOver(); // Keep showing game over message
+      }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', function(e) {
+      if (gamePausedForNameInput) { // If name input is active, only allow Enter for submit (optional)
+          if (e.key === 'Enter') {
+              tetrisNameSubmitEl.click();
+          }
+          return; 
+      }
+      if (gameOver) {
+          if (e.key === 'r' || e.key === 'R') {
+              restartGame();
+          }
+          return;
+      }
+      
+      let handled = false;
+      switch (e.key) {
+        case 'ArrowLeft':
+          const Lcol = tetromino.col - 1;
+          if (isValidMove(tetromino.matrix, tetromino.row, Lcol)) tetromino.col = Lcol;
+          handled = true;
+          break;
+        case 'ArrowRight':
+          const Rcol = tetromino.col + 1;
+          if (isValidMove(tetromino.matrix, tetromino.row, Rcol)) tetromino.col = Rcol;
+          handled = true;
+          break;
+        case 'ArrowUp':
+          const rotatedMatrix = rotate(tetromino.matrix);
+          if (isValidMove(rotatedMatrix, tetromino.row, tetromino.col)) tetromino.matrix = rotatedMatrix;
+          handled = true;
+          break;
+        case 'ArrowDown':
+          const Drow = tetromino.row + 1;
+          if (!isValidMove(tetromino.matrix, Drow, tetromino.col)) {
+            // If moving down is invalid, it means it has landed.
+            // Place it, but don't increment score or anything yet, that's handled by placeTetromino
+            placeTetromino();
+          } else {
+            tetromino.row = Drow;
+          }
+          count = 0; // Reset drop counter for soft drop
+          handled = true;
+          break;
+      }
+      if (handled) {
+          e.preventDefault(); // Prevent page scroll if arrow keys are used
+      }
+    });
+
+    // Start the game
+    rAF = requestAnimationFrame(gameLoop);
+
+    async function saveCoins(earnedScore) {
+        if (!currentUid || !currentUserData || typeof earnedScore !== 'number' || earnedScore <= 0) {
+            console.log("Cannot save coins: No user, no user data, or zero score.");
+            return;
+        }
+
+        const currentCoins = currentUserData.coins || 0;
+        const newTotalCoins = currentCoins + earnedScore; // 1 point = 1 coin
+
+        try {
+            const userDocRef = doc(db, "users", currentUid);
+            await updateDoc(userDocRef, { coins: newTotalCoins });
+            currentUserData.coins = newTotalCoins; // Update local copy
+            console.log(`Coins updated: ${earnedScore} added. New total: ${newTotalCoins}`);
+        } catch (error) {
+            console.error("Error updating coins:", error);
+        }
+    }
+
+    // Event listener for the new restart button
+    if (tetrisRestartBtnEl) {
+        tetrisRestartBtnEl.addEventListener('click', () => {
+            if (!gamePausedForNameInput) { // Prevent restart if name input is showing
+              restartGame();
+            }
+        });
+    }
+  </script>
+</body>
+</html> 
