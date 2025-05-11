@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turtle Earth - Chat</title>
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #f0f4f0;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #34495e;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 2em 0;
+        }
+        h1 {
+            margin: 0;
+            font-size: 4em;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 1em 0;
+            font-size: 2em;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 1em;
+        }
+        nav ul li a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        main {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 0 2em;
+        }
+        .chat-container {
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .message-input {
+            display: flex;
+            gap: 10px;
+        }
+        .message-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .message-input button {
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .message-input button:hover {
+            background-color: #219a52;
+        }
+        .home-button {
+            position: fixed;
+            top: 50px;
+            left: 50px;
+            background-color: #27ae60;
+            color: white;
+            padding: 0.5em 1em;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1000;
+            font-size: 1.5em;
+        }
+        .username {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .timestamp {
+            font-size: 0.8em;
+            color: #7f8c8d;
+        }
+        @media screen and (max-width: 480px) {
+            body {
+                font-size: 16px;
+            }
+            .home-button {
+                font-size: 1.2em;
+                top: 10px;
+                left: 10px;
+                padding: 0.3em 0.6em;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            nav {
+                font-size: 0.8em;
+            }
+            .message-input {
+                flex-direction: column;
+            }
+            .message-input button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">Home</a>
+    <header>
+        <h1>🐢 Turtle Earth Chat 🌍</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#" onclick="history.back(); return false;">Back</a></li>
+            <li><a href="Turtleearth.html">Turtlearth</a></li>
+            <li><a href="Members.html">Members</a></li>
+            <li><a href="History.html">History</a></li>
+            <li><a href="Chat.html">Chat</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="chat-container">
+            <div class="messages" id="messages"></div>
+            <div class="message-input">
+                <input type="text" id="username" placeholder="Your name" required>
+                <input type="text" id="message" placeholder="Type your message..." required>
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+            authDomain: "turtlearth-6b0a6.firebaseapp.com",
+            projectId: "turtlearth-6b0a6",
+            storageBucket: "turtlearth-6b0a6.appspot.com",
+            messagingSenderId: "90749703119",
+            appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+            measurementId: "G-WVYQDY75EG"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Function to send message
+        function sendMessage() {
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('message').value;
+            
+            if (!username || !message) {
+                alert('Please enter both username and message');
+                return;
+            }
+
+            // Add message to Firestore
+            db.collection('messages').add({
+                username: username,
+                message: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                document.getElementById('message').value = '';
+            })
+            .catch((error) => {
+                console.error("Error adding message: ", error);
+            });
+        }
+
+        // Listen for new messages
+        db.collection('messages')
+            .orderBy('timestamp', 'asc')
+            .onSnapshot((snapshot) => {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message';
+                    
+                    const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Just now';
+                    
+                    messageElement.innerHTML = `
+                        <span class="username">${data.username}</span>
+                        <span class="timestamp">${timestamp}</span>
+                        <p>${data.message}</p>
+                    `;
+                    
+                    messagesDiv.appendChild(messageElement);
+                });
+                
+                // Scroll to bottom
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+
+        // Allow sending message with Enter key
+        document.getElementById('message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

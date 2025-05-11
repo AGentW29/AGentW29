@@ -1,16 +1,39 @@
-## Hi there 👋
+# Turtlearth Website
 
-<!--
-**AGentW29/AGentW29** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+A website project featuring drawing and chat functionality.
 
-Here are some ideas to get you started:
+## Project Structure
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+- `/public` - Contains all HTML files
+- `/src` - Contains JavaScript source files and package.json
+- `/assets` - Contains all image files
+- `/styles` - Reserved for CSS files
+
+## Features
+
+- Drawing functionality
+- Chat system
+- Member profiles
+- Store page
+- Snake game
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the server:
+   ```bash
+   npm start
+   ```
+
+3. Open `public/index.html` in your browser
+
+## Technologies Used
+
+- Node.js
+- Express
+- Socket.IO
+- HTML/CSS/JavaScript
