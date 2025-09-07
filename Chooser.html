@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finger Selector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            touch-action: none;
+        }
+
+        .finger {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: transparent;
+            border: 7px solid rgba(255, 255, 255, 0.8);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .finger.pulse {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .finger.winner {
+            animation: winnerScale 0.8s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        @keyframes winnerScale {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.8); }
+            100% { transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 95;
+        }
+
+        @keyframes fireworkExplosion {
+            0% {
+                opacity: 1;
+                transform: scale(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        class FingerSelector {
+            constructor() {
+                this.fingers = new Map();
+                this.countdown = null;
+                this.isCountingDown = false;
+                this.colors = [
+                    'rgba(255, 107, 107, 0.8)',
+                    'rgba(78, 205, 196, 0.8)',
+                    'rgba(255, 195, 0, 0.8)',
+                    'rgba(199, 121, 208, 0.8)',
+                    'rgba(119, 221, 119, 0.8)',
+                    'rgba(255, 159, 67, 0.8)',
+                    'rgba(116, 185, 255, 0.8)',
+                    'rgba(162, 155, 254, 0.8)'
+                ];
+                this.init();
+            }
+
+            init() {
+                document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+                document.addEventListener('touchcancel', this.handleTouchEnd.bind(this), { passive: false });
+                
+                // Prevent default touch behaviors
+                document.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+                document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+            }
+
+            handleTouchStart(e) {
+                for (let touch of e.changedTouches) {
+                    this.addFinger(touch);
+                }
+                this.resetCountdown();
+            }
+
+            handleTouchMove(e) {
+                for (let touch of e.changedTouches) {
+                    this.updateFinger(touch);
+                }
+            }
+
+            handleTouchEnd(e) {
+                for (let touch of e.changedTouches) {
+                    this.removeFinger(touch.identifier);
+                }
+                this.resetCountdown();
+            }
+
+            addFinger(touch) {
+                const colorIndex = this.fingers.size % this.colors.length;
+                const finger = document.createElement('div');
+                finger.className = 'finger pulse';
+                finger.style.left = touch.clientX + 'px';
+                finger.style.top = touch.clientY + 'px';
+                finger.style.borderColor = this.colors[colorIndex];
+                
+                document.body.appendChild(finger);
+                
+                this.fingers.set(touch.identifier, {
+                    element: finger,
+                    x: touch.clientX,
+                    y: touch.clientY,
+                    color: this.colors[colorIndex]
+                });
+            }
+
+            updateFinger(touch) {
+                const finger = this.fingers.get(touch.identifier);
+                if (finger) {
+                    finger.element.style.left = touch.clientX + 'px';
+                    finger.element.style.top = touch.clientY + 'px';
+                    finger.x = touch.clientX;
+                    finger.y = touch.clientY;
+                }
+            }
+
+            removeFinger(touchId) {
+                const finger = this.fingers.get(touchId);
+                if (finger) {
+                    document.body.removeChild(finger.element);
+                    this.fingers.delete(touchId);
+                }
+            }
+
+            resetCountdown() {
+                // Clear any existing countdown
+                if (this.countdown) {
+                    clearTimeout(this.countdown);
+                    this.countdown = null;
+                }
+                this.isCountingDown = false;
+                
+                // Start new countdown if we have enough fingers
+                if (this.fingers.size >= 2) {
+                    this.startCountdown();
+                }
+            }
+
+            startCountdown() {
+                this.isCountingDown = true;
+                this.countdown = setTimeout(() => {
+                    this.selectWinner();
+                }, 5000);
+            }
+
+            selectWinner() {
+                const fingerArray = Array.from(this.fingers.values());
+                if (fingerArray.length === 0) {
+                    this.isCountingDown = false;
+                    return;
+                }
+                
+                const winner = fingerArray[Math.floor(Math.random() * fingerArray.length)];
+                
+                // Remove pulse animation from all fingers
+                this.fingers.forEach(finger => {
+                    finger.element.classList.remove('pulse');
+                });
+                
+                // Fill the winner circle and animate
+                winner.element.classList.add('winner');
+                winner.element.style.background = `radial-gradient(circle at 30% 30%, ${winner.color}, ${winner.color.replace('0.8', '0.6')})`;
+                
+                // Create fireworks
+                this.createFireworks(winner.x, winner.y);
+                
+                // Reset after animation
+                setTimeout(() => {
+                    this.reset();
+                }, 3000);
+            }
+
+            createFireworks(x, y) {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8'];
+                
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = x + 'px';
+                        firework.style.top = y + 'px';
+                        firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        const angle = (Math.PI * 2 * i) / 50;
+                        const velocity = 100 + Math.random() * 100;
+                        const vx = Math.cos(angle) * velocity;
+                        const vy = Math.sin(angle) * velocity;
+                        
+                        firework.style.animation = 'fireworkExplosion 1s ease-out forwards';
+                        firework.style.transform = `translate(${vx}px, ${vy}px)`;
+                        
+                        document.body.appendChild(firework);
+                        
+                        setTimeout(() => {
+                            if (firework.parentNode) {
+                                document.body.removeChild(firework);
+                            }
+                        }, 1000);
+                    }, i * 10);
+                }
+            }
+
+            reset() {
+                this.fingers.forEach(finger => {
+                    document.body.removeChild(finger.element);
+                });
+                this.fingers.clear();
+                this.isCountingDown = false;
+                
+                // Clear any remaining countdown
+                if (this.countdown) {
+                    clearTimeout(this.countdown);
+                    this.countdown = null;
+                }
+            }
+        }
+
+        // Initialize the app when the page loads
+        new FingerSelector();
+    </script>
+</body>
+</html>
