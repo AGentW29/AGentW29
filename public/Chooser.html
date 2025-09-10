@@ -26,21 +26,33 @@
   height: 100vh;
   overflow: hidden;
   background: 
-    repeating-linear-gradient(
-      120deg,
-      rgba(210, 25, 150, 0) 0px,
-      rgba(210, 25, 150, 1) 50px,
-      rgba(210, 25, 150, 0) 53px,
-      transparent 300px
-    ),
-      repeating-linear-gradient(
-      60deg,
-      rgba(210, 25, 150, 0) 50px,
-      rgba(210, 25, 150, 1) 100px,
-      rgba(210, 25, 150, 0) 50px,
-      transparent 300px
-    ),
-    linear-gradient(135deg, #00ccff 0%, #00ff00 100%);
+  radial-gradient(circle at 50% 50%, 
+    transparent 200px,
+    rgba(0, 150, 255, 0.1) 220px,
+    rgba(0, 200, 255, 0.3) 230px,
+    rgba(0, 150, 255, 0.1) 240px,
+    transparent 250px
+  ),
+  radial-gradient(circle at 50% 50%, 
+    transparent 180px,
+    rgba(0, 180, 255, 0.15) 190px,
+    rgba(0, 220, 255, 0.4) 195px,
+    rgba(0, 180, 255, 0.15) 200px,
+    transparent 205px
+  ),
+  radial-gradient(circle at 50% 50%, 
+    transparent 160px,
+    rgba(0, 200, 255, 0.2) 165px,
+    rgba(0, 255, 255, 0.5) 168px,
+    rgba(0, 200, 255, 0.2) 171px,
+    transparent 175px
+  ),
+  radial-gradient(ellipse 800px 400px at 45% 55%, 
+    rgba(0, 100, 200, 0.1) 0%,
+    rgba(0, 150, 255, 0.05) 40%,
+    transparent 70%
+  ),
+  #0a0a0a;
   position: relative;
   touch-action: none;
 }
