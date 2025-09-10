@@ -227,6 +227,9 @@
                     void finger.element.offsetWidth; 
                     finger.element.classList.add('pulse');
                 });
+                if (this.fingers.size <= 1) {
+                    finger.element.classList.remove('pulse');
+                }
             }
 
             updateFinger(touch) {
@@ -236,9 +239,6 @@
                     finger.element.style.top = touch.clientY + 'px';
                     finger.x = touch.clientX;
                     finger.y = touch.clientY;
-                }
-                if (this.fingers.size <= 1) {
-                    finger.element.classList.remove('pulse');
                 }
             }
 
