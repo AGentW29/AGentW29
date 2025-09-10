@@ -224,6 +224,7 @@
                 });
                 this.fingers.forEach(finger => {
                     finger.element.classList.remove('pulse');
+                    void finger.element.offsetWidth; 
                     finger.element.classList.add('pulse');
                 });
             }
@@ -245,6 +246,7 @@
                     this.fingers.delete(touchId);
                     this.fingers.forEach(finger => {
                     finger.element.classList.remove('pulse');
+                    void finger.element.offsetWidth; 
                     finger.element.classList.add('pulse');
                 });
                 }
