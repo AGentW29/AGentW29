@@ -237,6 +237,9 @@
                     finger.x = touch.clientX;
                     finger.y = touch.clientY;
                 }
+                if (this.fingers.size <= 1) {
+                    finger.element.classList.remove('pulse');
+                }
             }
 
             removeFinger(touchId) {
