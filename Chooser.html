@@ -222,6 +222,10 @@
                     y: touch.clientY,
                     color: this.colors[colorIndex]
                 });
+                this.fingers.forEach(finger => {
+                    finger.element.classList.remove('pulse');
+                    finger.element.classList.add('pulse');
+                });
             }
 
             updateFinger(touch) {
@@ -239,7 +243,10 @@
                 if (finger) {
                     document.body.removeChild(finger.element);
                     this.fingers.delete(touchId);
-                    
+                    this.fingers.forEach(finger => {
+                    finger.element.classList.remove('pulse');
+                    finger.element.classList.add('pulse');
+                });
                 }
             }
 
