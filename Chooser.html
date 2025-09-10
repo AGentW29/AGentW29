@@ -222,7 +222,6 @@
                     y: touch.clientY,
                     color: this.colors[colorIndex]
                 });
-                this.sycnPulsAnimations();
             }
 
             updateFinger(touch) {
@@ -240,19 +239,9 @@
                 if (finger) {
                     document.body.removeChild(finger.element);
                     this.fingers.delete(touchId);
-                    this.syncPulsAnimations();
+                    
                 }
             }
-            syncPulseAnimations() {
-               // Restart all pulse animations in sync
-               this.fingers.forEach(finger => {
-                    finger.element.classList.remove('pulse');
-               // Force reflow to restart the animation
-               void finger.element.offsetWidth;
-                    finger.element.classList.add('pulse');
-                });
-            }
-
 
             resetCountdown() {
                 // Clear any existing countdown
