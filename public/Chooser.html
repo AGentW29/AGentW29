@@ -190,6 +190,9 @@
                 for (let touch of e.changedTouches) {
                     this.addFinger(touch);
                 }
+                if (this.fingers.size <= 1) {
+                    finger.element.classList.remove('pulse');
+                }
                 this.resetCountdown();
             }
 
@@ -227,9 +230,6 @@
                     void finger.element.offsetWidth; 
                     finger.element.classList.add('pulse');
                 });
-                if (this.fingers.size <= 1) {
-                    finger.element.classList.remove('pulse');
-                }
             }
 
             updateFinger(touch) {
