@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Crypto Simulation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 20px; }
+    h1 { color: #0f0; }
+    button { padding: 10px 20px; font-size: 16px; margin: 10px 0; cursor: pointer; }
+    pre { background: #222; padding: 10px; border-radius: 8px; overflow-x: auto; }
+    .block { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 8px; background: #1a1a1a; }
+    .hash { color: #0f0; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🪙 MyCrypto Simulation (SHA-256)</h1>
+  <button id="mineBtn">Mine New Block</button>
+  <div id="chain"></div>
+
+  <script>
+    // --- Utility: SHA-256 ---
+    async function sha256(message) {
+      const buffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // --- Block and Blockchain logic ---
+    class Block {
+      constructor(index, timestamp, transactions, previousHash = '') {
+        this.index = index;
+        this.timestamp = timestamp;
+        this.transactions = transactions;
+        this.previousHash = previousHash;
+        this.nonce = 0;
+        this.hash = '';
+      }
+
+      async calculateHash() {
+        return await sha256(
+          this.index + this.timestamp + JSON.stringify(this.transactions) + this.previousHash + this.nonce
+        );
+      }
+
+      async mineBlock(difficulty) {
+        do {
+          this.nonce++;
+          this.hash = await this.calculateHash();
+        } while (!this.hash.startsWith('0'.repeat(difficulty)));
+        return this.hash;
+      }
+    }
+
+    class Blockchain {
+      constructor() {
+        this.chain = [];
+        this.difficulty = 3; // adjust for slower/faster mining
+        this.pendingTransactions = [{ from: "genesis", to: "network", amount: 100 }];
+        this.createGenesisBlock();
+      }
+
+      async createGenesisBlock() {
+        const genesis = new Block(0, new Date().toISOString(), "Genesis Block", "0");
+        genesis.hash = await genesis.calculateHash();
+        this.chain.push(genesis);
+        this.displayChain();
+      }
+
+      async addBlock(newBlock) {
+        newBlock.previousHash = this.getLatestBlock().hash;
+        await newBlock.mineBlock(this.difficulty);
+        this.chain.push(newBlock);
+        this.displayChain();
+      }
+
+      getLatestBlock() {
+        return this.chain[this.chain.length - 1];
+      }
+
+      displayChain() {
+        const container = document.getElementById('chain');
+        container.innerHTML = '';
+        this.chain.forEach(block => {
+          const div = document.createElement('div');
+          div.className = 'block';
+          div.innerHTML = `
+            <b>Block #${block.index}</b><br>
+            Timestamp: ${block.timestamp}<br>
+            Previous Hash: <span class="hash">${block.previousHash}</span><br>
+            Hash: <span class="hash">${block.hash}</span><br>
+            Nonce: ${block.nonce}<br>
+            Transactions: <pre>${JSON.stringify(block.transactions, null, 2)}</pre>
+          `;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    // --- Instantiate blockchain and hook up button ---
+    const myCoin = new Blockchain();
+
+    document.getElementById('mineBtn').addEventListener('click', async () => {
+      const newBlock = new Block(
+        myCoin.chain.length,
+        new Date().toISOString(),
+        [{ from: "Alice", to: "Bob", amount: Math.floor(Math.random() * 100) }]
+      );
+      document.getElementById('mineBtn').disabled = true;
+      document.getElementById('mineBtn').textContent = "Mining...";
+      await myCoin.addBlock(newBlock);
+      document.getElementById('mineBtn').disabled = false;
+      document.getElementById('mineBtn').textContent = "Mine New Block";
+    });
+  </script>
+</body>
+</html>
