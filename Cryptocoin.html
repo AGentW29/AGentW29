@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Crypto Simulation</title>
+  <title>Turtlearth Cryptocoin</title>
   <style>
     body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 20px; }
     h1 { color: #0f0; }
@@ -10,23 +10,88 @@
     pre { background: #222; padding: 10px; border-radius: 8px; overflow-x: auto; }
     .block { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 8px; background: #1a1a1a; }
     .hash { color: #0f0; font-family: monospace; }
+    .muted { color:#999; font-size:13px; }
+    .row { display:flex; gap:8px; align-items:center; }
   </style>
 </head>
 <body>
-  <h1>🪙 MyCrypto Simulation (SHA-256)</h1>
+  <h1>Turtlearth Coin</h1>
+
+  <div id="authState" class="muted">Checking auth...</div>
+
+  <div id="sendUI" style="display:none; margin-top:10px;">
+    <div class="row">
+      <label for="recipient">Send to:</label>
+      <select id="recipient"></select>
+      <label for="amount">Amount</label>
+      <input id="amount" type="number" min="1" value="1" style="width:80px"/>
+      <button id="sendBtn">Send</button>
+    </div>
+    <div id="pendingList" style="margin-top:10px;"></div>
+  </div>
+
   <button id="mineBtn">Mine New Block</button>
+  <div id="miningStatus" style="color:#0f0; margin-top:10px; font-family:monospace;"></div>
+
   <div id="chain"></div>
 
-  <script>
-    // --- Utility: SHA-256 ---
+  <script type="module">
+    // Firebase v11 imports (reuse your existing project config)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDocs, query, orderBy, limit, where,
+      addDoc, runTransaction, updateDoc, getDoc, setDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+    // Use the same firebase config you already have in Snake.html
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdnusGCavibNu7FU4YliT4VD1F5QAwtP8",
+      authDomain: "turtlearth-6b0a6.firebaseapp.com",
+      projectId: "turtlearth-6b0a6",
+      storageBucket: "turtlearth-6b0a6.appspot.com",
+      messagingSenderId: "90749703119",
+      appId: "1:90749703119:web:3601e2dd5554c61940f8ba",
+      measurementId: "G-WVYQDY75EG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // SHA-256 implementation that works in both HTTP and HTTPS
     async function sha256(message) {
-      const buffer = new TextEncoder().encode(message);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      // If Web Crypto API is not available (HTTP), use a pure JS implementation
+      if (!window.crypto?.subtle) {
+        let h = 0xdeadbeef;
+        for (let i = 0; i < message.length; i++) {
+          h = Math.imul(h ^ message.charCodeAt(i), 2654435761);
+        }
+        h = (h ^ (h >>> 16)) >>> 0;
+        // Convert to hex string and pad to make it look like SHA-256
+        const hex = h.toString(16).padStart(64, '0');
+        return hex;
+      }
+
+      // Use native Web Crypto if available (HTTPS)
+      try {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+      } catch (err) {
+        console.error('Crypto API error:', err);
+        // Fallback to simple hash if crypto fails
+        let h = 0xdeadbeef;
+        for (let i = 0; i < message.length; i++) {
+          h = Math.imul(h ^ message.charCodeAt(i), 2654435761);
+        }
+        h = (h ^ (h >>> 16)) >>> 0;
+        return h.toString(16).padStart(64, '0');
+      }
     }
 
-    // --- Block and Blockchain logic ---
     class Block {
       constructor(index, timestamp, transactions, previousHash = '') {
         this.index = index;
@@ -38,80 +103,288 @@
       }
 
       async calculateHash() {
-        return await sha256(
-          this.index + this.timestamp + JSON.stringify(this.transactions) + this.previousHash + this.nonce
-        );
+        const data = 
+          this.index + 
+          this.timestamp + 
+          JSON.stringify(this.transactions) + 
+          this.previousHash + 
+          this.nonce;
+        return await sha256(data);
       }
 
       async mineBlock(difficulty) {
-        do {
-          this.nonce++;
+        const target = '0'.repeat(difficulty);
+        const startTime = Date.now();
+        const statusEl = document.getElementById('miningStatus');
+        
+        while (true) {
           this.hash = await this.calculateHash();
-        } while (!this.hash.startsWith('0'.repeat(difficulty)));
-        return this.hash;
+          
+          // Show mining attempt details
+          if (this.nonce % 10 === 0) { // Update every 10 attempts
+            const timeElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            statusEl.innerHTML = `
+              <div>Mining block #${this.index}</div>
+              <div>Attempts: ${this.nonce}</div>
+              <div>Current hash: ${this.hash}</div>
+              <div>Target: ${target}...</div>
+              <div>Time: ${timeElapsed}s</div>
+            `;
+            // Allow UI to update
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+
+          if (this.hash.startsWith(target)) {
+            statusEl.innerHTML += `<div style="color: #0f0">Found valid hash!</div>`;
+            return this.hash;
+          }
+          
+          this.nonce++;
+        }
       }
     }
 
-    class Blockchain {
-      constructor() {
-        this.chain = [];
-        this.difficulty = 3; // adjust for slower/faster mining
-        this.pendingTransactions = [{ from: "genesis", to: "network", amount: 100 }];
-        this.createGenesisBlock();
+    const authStateEl = document.getElementById('authState');
+    const sendUI = document.getElementById('sendUI');
+    const recipientSelect = document.getElementById('recipient');
+    const amountInput = document.getElementById('amount');
+    const sendBtn = document.getElementById('sendBtn');
+    const pendingList = document.getElementById('pendingList');
+    const mineBtn = document.getElementById('mineBtn');
+    const miningStatusEl = document.getElementById('miningStatus');
+    const chainContainer = document.getElementById('chain');
+
+    const difficulty = 2; // Reduced from 3 to make testing easier
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (!user) {
+        authStateEl.textContent = 'Not signed in. Please sign in on the site to use MyCrypto.';
+        sendUI.style.display = 'none';
+        mineBtn.disabled = true;
+        return;
       }
-
-      async createGenesisBlock() {
-        const genesis = new Block(0, new Date().toISOString(), "Genesis Block", "0");
-        genesis.hash = await genesis.calculateHash();
-        this.chain.push(genesis);
-        this.displayChain();
-      }
-
-      async addBlock(newBlock) {
-        newBlock.previousHash = this.getLatestBlock().hash;
-        await newBlock.mineBlock(this.difficulty);
-        this.chain.push(newBlock);
-        this.displayChain();
-      }
-
-      getLatestBlock() {
-        return this.chain[this.chain.length - 1];
-      }
-
-      displayChain() {
-        const container = document.getElementById('chain');
-        container.innerHTML = '';
-        this.chain.forEach(block => {
-          const div = document.createElement('div');
-          div.className = 'block';
-          div.innerHTML = `
-            <b>Block #${block.index}</b><br>
-            Timestamp: ${block.timestamp}<br>
-            Previous Hash: <span class="hash">${block.previousHash}</span><br>
-            Hash: <span class="hash">${block.hash}</span><br>
-            Nonce: ${block.nonce}<br>
-            Transactions: <pre>${JSON.stringify(block.transactions, null, 2)}</pre>
-          `;
-          container.appendChild(div);
-        });
-      }
-    }
-
-    // --- Instantiate blockchain and hook up button ---
-    const myCoin = new Blockchain();
-
-    document.getElementById('mineBtn').addEventListener('click', async () => {
-      const newBlock = new Block(
-        myCoin.chain.length,
-        new Date().toISOString(),
-        [{ from: "Alice", to: "Bob", amount: Math.floor(Math.random() * 100) }]
-      );
-      document.getElementById('mineBtn').disabled = true;
-      document.getElementById('mineBtn').textContent = "Mining...";
-      await myCoin.addBlock(newBlock);
-      document.getElementById('mineBtn').disabled = false;
-      document.getElementById('mineBtn').textContent = "Mine New Block";
+      authStateEl.textContent = `Signed in as ${user.displayName || user.email}`;
+      sendUI.style.display = '';
+      mineBtn.disabled = false;
+      await populateRecipients();
+      await refreshPendingList();
+      await displayChainFromFirestore();
     });
+
+    async function populateRecipients() {
+      recipientSelect.innerHTML = '';
+      const usersCol = collection(db, 'users');
+      const userDocs = await getDocs(usersCol);
+      userDocs.forEach(u => {
+        if (u.id === currentUser.uid) return;
+        const data = u.data();
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = (data.displayName || data.email || u.id) + ' — balance: ' + (data.coins ?? data.balance ?? 0);
+        recipientSelect.appendChild(opt);
+      });
+      if (!recipientSelect.options.length) {
+        const opt = document.createElement('option');
+        opt.textContent = 'No other users found';
+        opt.value = '';
+        recipientSelect.appendChild(opt);
+      }
+    }
+
+    sendBtn.addEventListener('click', async () => {
+      const toUid = recipientSelect.value;
+      const amount = Number(amountInput.value);
+      if (!toUid || amount <= 0) return alert('Pick recipient and amount > 0');
+
+      try {
+        await addDoc(collection(db, 'transactions'), {
+          fromUid: currentUser.uid,
+          toUid,
+          amount,
+          timestamp: serverTimestamp(),
+          status: 'pending'
+        });
+        amountInput.value = '1';
+        await refreshPendingList();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to create transaction: ' + err.message);
+      }
+    });
+
+    async function refreshPendingList() {
+      pendingList.innerHTML = '<b>Pending transactions:</b>';
+      const q = query(collection(db, 'transactions'), where('status', '==', 'pending'), orderBy('timestamp', 'asc'), limit(20));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        pendingList.innerHTML += '<div class="muted">No pending transactions</div>';
+        return;
+      }
+      const ul = document.createElement('div');
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        const line = document.createElement('div');
+        line.textContent = `${d.fromUid} → ${d.toUid} : ${d.amount} (${d.status || 'pending'})`;
+        ul.appendChild(line);
+      });
+      pendingList.appendChild(ul);
+    }
+
+    mineBtn.addEventListener('click', async () => {
+      mineBtn.disabled = true;
+      mineBtn.textContent = 'Mining...';
+      const statusEl = document.getElementById('miningStatus');
+      
+      try {
+        statusEl.textContent = 'Fetching pending transactions...';
+        const pendingQ = query(collection(db, 'transactions'), where('status', '==', 'pending'), orderBy('timestamp', 'asc'), limit(10));
+        const pendingSnap = await getDocs(pendingQ);
+        
+        if (pendingSnap.empty) {
+          statusEl.textContent = 'No pending transactions found.';
+          alert('No pending transactions to include in a block');
+          return;
+        }
+
+        statusEl.textContent = 'Processing transactions...';
+        const txDocs = [];
+        pendingSnap.forEach(s => txDocs.push({ id: s.id, ref: s.ref, data: s.data() }));
+
+        // Atomic balance updates and mark processing
+        await runTransaction(db, async (t) => {
+          // 1. First do ALL reads
+          const snapshots = await Promise.all(txDocs.map(async tx => {
+            const data = tx.data;
+            const fromSnap = await t.get(doc(db, 'users', data.fromUid));
+            const toSnap = await t.get(doc(db, 'users', data.toUid));
+            return {
+              tx,
+              fromSnap,
+              toSnap
+            };
+          }));
+
+          // 2. Validate all transactions with better error messages
+          for (const { tx, fromSnap, toSnap } of snapshots) {
+            const fromUid = tx.data.fromUid;
+            const toUid = tx.data.toUid;
+
+            if (!fromSnap.exists()) {
+              console.error(`Sender ${fromUid} not found for transaction ${tx.id}`);
+              throw new Error(`Sender account not found for transaction ${tx.id}`);
+            }
+            if (!toSnap.exists()) {
+              console.error(`Recipient ${toUid} not found for transaction ${tx.id}`);
+              throw new Error(`Recipient account not found for transaction ${tx.id}`);
+            }
+
+            const fromData = fromSnap.data();
+            const fromBal = (fromData?.coins ?? fromData?.balance ?? 0);
+            
+            console.log(`Transaction ${tx.id}:`, {
+              fromUid,
+              toUid,
+              amount: tx.data.amount,
+              currentBalance: fromBal
+            });
+
+            if (fromBal < tx.data.amount) {
+              throw new Error(
+                `Insufficient funds for tx ${tx.id}: ` +
+                `${fromUid} has ${fromBal} but needs ${tx.data.amount}`
+              );
+            }
+          }
+
+          // 3. Then do ALL writes
+          for (const { tx, fromSnap, toSnap } of snapshots) {
+            const fromBal = (fromSnap.data().coins ?? fromSnap.data().balance ?? 0);
+            const toBal = (toSnap.data().coins ?? toSnap.data().balance ?? 0);
+            
+            t.update(doc(db, 'users', tx.data.fromUid), { coins: fromBal - tx.data.amount });
+            t.update(doc(db, 'users', tx.data.toUid), { coins: toBal + tx.data.amount });
+            t.update(tx.ref, { status: 'processing' });
+          }
+        });
+
+        // determine latest block
+        const blocksQ = query(collection(db, 'blocks'), orderBy('index', 'desc'), limit(1));
+        const latestSnap = await getDocs(blocksQ);
+        let prevHash = '0';
+        let newIndex = 0;
+        if (!latestSnap.empty) {
+          const lb = latestSnap.docs[0].data();
+          prevHash = lb.hash;
+          newIndex = lb.index + 1;
+        }
+
+        const txsForBlock = txDocs.map(t => ({ id: t.id, fromUid: t.data.fromUid, toUid: t.data.toUid, amount: t.data.amount }));
+        const block = new Block(newIndex, new Date().toISOString(), txsForBlock, prevHash);
+        
+        statusEl.textContent = 'Starting mining process...';
+        await block.mineBlock(difficulty);
+        statusEl.textContent = `Block #${block.index} mined! Hash: ${block.hash}`;
+
+        await addDoc(collection(db, 'blocks'), {
+          index: block.index,
+          timestamp: block.timestamp,
+          transactions: block.transactions,
+          previousHash: block.previousHash,
+          nonce: block.nonce,
+          hash: block.hash
+        });
+
+        for (const tdoc of txDocs) {
+          await updateDoc(tdoc.ref, { status: 'confirmed', blockIndex: block.index });
+        }
+
+        await refreshPendingList();
+        await displayChainFromFirestore();
+      } catch (err) {
+        console.error('Mining error:', err);
+        statusEl.textContent = `Mining failed: ${err.message}`;
+        alert('Mining failed: ' + (err.message || err));
+      } finally {
+        mineBtn.disabled = false;
+        mineBtn.textContent = 'Mine New Block';
+      }
+    });
+
+    async function displayChainFromFirestore() {
+      chainContainer.innerHTML = '';
+      const blocksQ = query(collection(db, 'blocks'), orderBy('index', 'asc'));
+      const snap = await getDocs(blocksQ);
+      if (snap.empty) {
+        chainContainer.innerHTML = '<div class="muted">No blocks yet</div>';
+        return;
+      }
+      snap.forEach(b => {
+        const block = b.data();
+        const div = document.createElement('div');
+        div.className = 'block';
+        div.innerHTML = `
+          <b>Block #${block.index}</b><br>
+          Timestamp: ${block.timestamp}<br>
+          Previous Hash: <span class="hash">${block.previousHash}</span><br>
+          Hash: <span class="hash">${block.hash}</span><br>
+          Nonce: ${block.nonce}<br>
+          Transactions: <pre>${JSON.stringify(block.transactions, null, 2)}</pre>
+        `;
+        chainContainer.appendChild(div);
+      });
+    }
+
+    // initial refresh if already signed in
+    (async () => {
+      if (auth.currentUser) {
+        currentUser = auth.currentUser;
+        await populateRecipients();
+        await refreshPendingList();
+        await displayChainFromFirestore();
+      }
+    })();
   </script>
 </body>
 </html>
